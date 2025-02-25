@@ -1,0 +1,39 @@
+/* Aplica a todo el contenedor raíz */
+.root {
+    -fx-font-family: "Arial";
+    -fx-background-color: #ffffff; /* Fondo blanco */
+}
+
+/* Barra de progreso */
+.progress-bar .bar {
+    -fx-background-color: #48c9b0; /* verde suave */
+}
+
+/* Todas las etiquetas por defecto */
+.label {
+    -fx-text-fill: #2c3e50; /* gris oscuro */
+    -fx-font-size: 14; /* tamaño de letra general */
+}
+
+/* Etiqueta específica para los corazones */
+.label.hearts {
+    -fx-text-fill: #e74c3c; /* rojo */
+    -fx-font-size: 18;
+    -fx-font-weight: bold;
+}
+
+/* Botones */
+.button {
+    -fx-background-color: #bdc3c7; /* gris clarito */
+    -fx-text-fill: white;
+    -fx-font-size: 16;
+    -fx-font-weight: bold;
+    -fx-padding: 10 20;
+    -fx-cursor: hand; /* cursor tipo 'mano' */
+}
+
+/* RadioButtons */
+.radio-button {
+    -fx-font-size: 16;
+    -fx-text-fill: #2c3e50;
+}
