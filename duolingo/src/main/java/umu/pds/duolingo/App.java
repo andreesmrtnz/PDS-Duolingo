@@ -1,7 +1,7 @@
 package umu.pds.duolingo;
 
 /**
- * Hello world!
+ * Hello!
  *
  */
 public class App 
