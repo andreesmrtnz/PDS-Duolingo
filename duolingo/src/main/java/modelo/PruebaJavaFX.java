@@ -13,6 +13,7 @@ public class PruebaJavaFX extends Application {
         // Crear un botón
         Button btn = new Button("¡Haz clic!");
         btn.setOnAction(e -> System.out.println("¡JavaFX funciona!"));
+        
 
         // Usar un StackPane para centrar el botón
         StackPane root = new StackPane();
