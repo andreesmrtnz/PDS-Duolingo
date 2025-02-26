@@ -37,3 +37,82 @@
     -fx-font-size: 16;
     -fx-text-fill: #2c3e50;
 }
+
+.root {
+    -fx-font-family: "Arial", sans-serif;
+    -fx-font-size: 14px;
+    -fx-background-color: #f0f0f0;
+}
+
+/* Panel Izquierdo Blanco (cuando actúa como registroLeft o loginRight) */
+#registerLeft, #loginRight {
+    -fx-background-color: #ffffff;
+}
+
+/* Panel Derecho Verde/Azul (cuando actúa como registerRight o loginLeft) */
+#registerRight, #loginLeft {
+    /* Cambia el gradiente o color sólido a tu preferencia */
+    -fx-background-color: linear-gradient(to bottom right, #2ECC71, #27AE60);
+    /* Ajuste de color del texto interno */
+    -fx-text-fill: #ffffff;
+}
+
+/* Texto en panel verde => #registerRight .label, #loginLeft .label */
+#registerRight .label, #loginLeft .label {
+    -fx-text-fill: #ffffff;
+}
+
+/* Encabezados */
+.header-label {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2c3e50;
+}
+
+/* Cambia el color de la cabecera cuando está en un panel verde */
+#registerRight .header-label, #loginLeft .header-label {
+    -fx-text-fill: #ffffff;
+}
+
+/* Botón principal (SIGN UP / SIGN IN en panel blanco) */
+.action-button {
+    -fx-background-color: #27AE60;
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-padding: 10 20;
+    -fx-background-radius: 25;
+    -fx-border: none;
+}
+
+.action-button:hover {
+    -fx-background-color: #219150;
+}
+
+/* Botón para cambiar vista (SIGN IN en panel verde, SIGN UP en panel verde) */
+.switch-button {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #27AE60;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-padding: 10 20;
+    -fx-background-radius: 25;
+    -fx-border: none;
+}
+
+.switch-button:hover {
+    -fx-background-color: #e0e0e0;
+}
+
+/* Campos de texto en panel blanco */
+#registerLeft .text-field, #registerLeft .password-field,
+#loginRight .text-field, #loginRight .password-field {
+    -fx-background-color: #f9f9f9;
+    -fx-border-color: #dddddd;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-padding: 8px;
+    -fx-prompt-text-fill: #aaaaaa;
+}

@@ -5,18 +5,13 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 public class Main extends Application {
-
     @Override
     public void start(Stage primaryStage) throws Exception {
-    	Parent root = FXMLLoader.load(getClass().getResource("/MiVista.fxml"));
-    	Scene scene = new Scene(root, 600, 400);
-
-    	// Añadimos la hoja de estilos
-    	scene.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
-
-    	primaryStage.setScene(scene);
-    	primaryStage.show();
-
+        Parent root = FXMLLoader.load(getClass().getResource("/LoginRegisterView.fxml"));
+        Scene scene = new Scene(root, 800, 450);
+        scene.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
+        primaryStage.setScene(scene);
+        primaryStage.show();
     }
 
     public static void main(String[] args) {
