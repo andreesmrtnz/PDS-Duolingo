@@ -44,8 +44,12 @@ public class VentanaLoginRegister extends Application {
     // Servicio de usuario (Controlador) implementado como singleton
     private Controlador usuarioService;
     
+    // Stage principal para cambiar escenas
+    private Stage primaryStage;
+    
     @Override
     public void start(Stage primaryStage) {
+        this.primaryStage = primaryStage;
         usuarioService = Controlador.getInstancia();
         
         // Crear el contenedor principal
@@ -276,9 +280,33 @@ public class VentanaLoginRegister extends Application {
         Usuario u = usuarioService.login(email, pass);
         if (u != null) {
             showAlert(Alert.AlertType.INFORMATION, "Login", "Login correcto. Bienvenido " + u.getNombre() + ".");
-            // Aquí podrías cambiar de escena o proceder según tu flujo de la aplicación.
+            // Abrir la ventana principal
+            abrirVentanaPrincipal(u);
         } else {
             showAlert(Alert.AlertType.ERROR, "Login", "Login fallido. Revisa tus credenciales.");
+        }
+    }
+    
+    /**
+     * Abre la ventana principal con los datos del usuario logueado.
+     * @param usuario El usuario que ha iniciado sesión.
+     */
+    private void abrirVentanaPrincipal(Usuario usuario) {
+        try {
+            // Crear la instancia de VentanaPrincipal con el usuario y el stage
+            VentanaPrincipal ventanaPrincipal = new VentanaPrincipal();
+            
+            // Configurar el usuario en la ventana principal
+            ventanaPrincipal.setUsuario(usuario);
+            
+            // Iniciar la ventana principal
+            ventanaPrincipal.start(new Stage());
+            
+            // Cerrar la ventana de login
+            primaryStage.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Error", "No se pudo abrir la ventana principal: " + e.getMessage());
         }
     }
 
