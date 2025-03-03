@@ -23,10 +23,10 @@
             </padding>
             <children>
                 <Label text="Create Account" styleClass="header-label" />
-                <TextField promptText="Name" />
-                <TextField promptText="Email" />
-                <PasswordField promptText="Password" />
-                <Button text="SIGN UP" styleClass="action-button" />
+                <TextField promptText="Name" fx:id="regNameField"/>
+                <TextField promptText="Email" fx:id="regEmailField"/>
+                <PasswordField promptText="Password" fx:id="regPassField"/>
+                <Button text="SIGN UP" styleClass="action-button" onAction="#handleRegister"/>
             </children>
         </VBox>
 
@@ -64,9 +64,9 @@
             </padding>
             <children>
                 <Label text="Sign In" styleClass="header-label" />
-                <TextField promptText="Email" />
-                <PasswordField promptText="Password" />
-                <Button text="SIGN IN" styleClass="action-button" />
+                <TextField promptText="Email" fx:id="loginEmailField"/>
+                <PasswordField promptText="Password" fx:id="loginPassField"/>
+                <Button text="SIGN IN" styleClass="action-button" onAction="#handleLogin"/>
             </children>
         </VBox>
     </HBox>
