@@ -7,7 +7,7 @@ public class Controlador {
     
     // Constructor privado para evitar instanciación directa
     private Controlador() {
-        // Suponemos que RepositorioUsuarios también es singleton
+        // Obtenemos la instancia del repositorio
         this.repoUsuarios = RepositorioUsuarios.getUnicaInstancia();
     }
     
@@ -19,7 +19,7 @@ public class Controlador {
         return instancia;
     }
     
-    // Método para realizar login (agregamos validación de password)
+    // Método para realizar login (con validación de password)
     public Usuario login(String email, String password) {
         Usuario usuario = repoUsuarios.buscarPorEmail(email);
         if (usuario != null && usuario.getPassword().equals(password)) {
@@ -34,6 +34,7 @@ public class Controlador {
             // El usuario ya existe
             return false;
         }
+        // Guardamos el usuario en la base de datos a través del repositorio
         repoUsuarios.save(usuario);
         return true;
     }
@@ -47,5 +48,10 @@ public class Controlador {
     // Acceso al repositorio (si se requiere)
     public RepositorioUsuarios getRepoUsuarios() {
         return repoUsuarios;
+    }
+    
+    // Método para liberar recursos cuando la aplicación se cierre
+    public void cerrarRecursos() {
+        repoUsuarios.cerrarRecursos();
     }
 }

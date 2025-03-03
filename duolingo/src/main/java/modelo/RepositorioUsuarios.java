@@ -1,18 +1,19 @@
 package modelo;
 
-import java.util.ArrayList;
 import java.util.List;
+import persistencia.UsuarioDAO;
 
 public class RepositorioUsuarios {
     // Instancia única del repositorio (Singleton)
     private static RepositorioUsuarios unicaInstancia;
     
-    // Lista interna de usuarios
-    private List<Usuario> usuarios;
+    // DAO para la persistencia con JPA
+    private UsuarioDAO usuarioDAO;
 
-    // Constructor privado que inicializa la lista
+    // Constructor privado que inicializa el DAO
     private RepositorioUsuarios() {
-        usuarios = new ArrayList<>();
+        usuarioDAO = new UsuarioDAO();
+        // Inicializar otras dependencias si es necesario
     }
     
     // Método estático para obtener la única instancia del repositorio
@@ -23,32 +24,28 @@ public class RepositorioUsuarios {
         return unicaInstancia;
     }
     
-    // Busca un usuario por su identificador
+    // Busca un usuario por su identificador, delegando al DAO
     public Usuario findById(Long id) {
-        return usuarios.stream()
-                .filter(u -> u.getId().equals(id))
-                .findFirst()
-                .orElse(null);
+        return usuarioDAO.buscarPorId(id);
     }
     
-    // Busca un usuario por su email (caso-insensible)
+    // Busca un usuario por su email, delegando al DAO
     public Usuario buscarPorEmail(String email) {
-        return usuarios.stream()
-                .filter(u -> u.getEmail().equalsIgnoreCase(email))
-                .findFirst()
-                .orElse(null);
+        return usuarioDAO.buscarPorEmail(email);
     }
     
-    // Guarda un nuevo usuario en el repositorio
+    // Guarda un nuevo usuario en la base de datos
     public void save(Usuario usuario) {
-        // Opcional: comprobar si el usuario ya existe
-        if (buscarPorEmail(usuario.getEmail()) == null) {
-            usuarios.add(usuario);
-        }
+        usuarioDAO.registrar(usuario);
     }
     
-    // Devuelve la lista completa de usuarios
+    // Devuelve la lista completa de usuarios desde la base de datos
     public List<Usuario> getUsuarios() {
-        return usuarios;
+        return usuarioDAO.listarTodos();
+    }
+    
+    // Método para cerrar recursos cuando la aplicación se cierre
+    public void cerrarRecursos() {
+        usuarioDAO.cerrar();
     }
 }
