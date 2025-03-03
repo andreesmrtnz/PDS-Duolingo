@@ -18,12 +18,14 @@ import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import modelo.Controlador;
 import modelo.Curso;
 import modelo.Usuario;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
@@ -840,15 +842,23 @@ public class VentanaPrincipal {
     }
     
     private void startLesson(int lessonNumber, String courseTitle) {
-        // Esta función sería para mostrar la interfaz de la lección
-        // Por ahora, solo mostramos una alerta
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Iniciar Lección");
-        alert.setHeaderText(null);
-        alert.setContentText(String.format("Iniciando Lección %d: %s de %s", 
-                lessonNumber, getLessonTitle(courseTitle, lessonNumber), courseTitle));
-        alert.show();
+    try {
+        // Crear la instancia de VentanaPreguntas
+        VentanaPreguntas ventanaPreguntas = new VentanaPreguntas(courseTitle, lessonNumber);
+        
+        // Configurar el usuario
+        ventanaPreguntas.setUsuario(usuarioActual);
+        
+        // Iniciar la ventana de preguntas
+        ventanaPreguntas.start(new Stage());
+        
+        // Cerrar la ventana actual (opcional, puedes mantenerla abierta)
+        // primaryStage.close();
+    } catch (Exception e) {
+        e.printStackTrace();
+        mostrarAlerta("Error", "No se pudo abrir la lección: " + e.getMessage(), Alert.AlertType.ERROR);
     }
+}
     
     private void resetSidebarButtonStyles() {
         // Quitar la clase de activo de todos los botones
@@ -912,5 +922,46 @@ public class VentanaPrincipal {
         public int getLeccionesCurso() {
             return leccionesCurso;
         }
+    }
+    
+    private void setupImportButton() {
+        Button importButton = new Button("Importar Curso");
+        importButton.getStyleClass().add("action-button");
+        importButton.setOnAction(e -> handleImportCurso());
+        
+        HBox topBar = (HBox) mainLayout.getTop();
+        topBar.getChildren().add(0, importButton);
+    }
+
+    private void handleImportCurso() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Seleccionar archivo de curso");
+        fileChooser.getExtensionFilters().addAll(
+            new FileChooser.ExtensionFilter("Archivos JSON", "*.json"),
+            new FileChooser.ExtensionFilter("Todos los archivos", "*.*")
+        );
+        
+        File archivo = fileChooser.showOpenDialog(mainLayout.getScene().getWindow());
+        if (archivo != null) {
+            boolean exito = controlador.cargarCursoDesdeArchivo(
+                archivo.getAbsolutePath(),
+                usuarioActual
+            );
+            
+            if (exito) {
+                mostrarAlerta("Exito","Curso importado con éxito", Alert.AlertType.INFORMATION);
+                showCoursesPage(); // Actualizar la vista
+            } else {
+                mostrarAlerta("Error","Error al importar el curso", Alert.AlertType.ERROR);
+            }
+        }
+    }
+
+    private void mostrarAlerta(String titulo, String mensaje, Alert.AlertType tipo) {
+        Alert alert = new Alert(tipo);
+        alert.setTitle(titulo);
+        alert.setHeaderText(null);
+        alert.setContentText(mensaje);
+        alert.showAndWait();
     }
 }
