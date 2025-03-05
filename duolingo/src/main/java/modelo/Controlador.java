@@ -5,18 +5,19 @@ import java.util.List;
 import java.io.File;
 
 public class Controlador {
-    // Instancia única (singleton)
+	// Instancia única (singleton)
     private static Controlador instancia;
     private RepositorioUsuarios repoUsuarios;
     private RepositorioCursos repoCursos;
     
-    // Constructor privado para evitar instanciación directa
+    // Usuario actual, que se establece durante el login
+    private Usuario usuarioActual;
+    
     private Controlador() {
         this.repoUsuarios = RepositorioUsuarios.getUnicaInstancia();
         this.repoCursos = RepositorioCursos.getInstancia();
     }
     
-    // Método estático para obtener la única instancia (singleton)
     public static synchronized Controlador getInstancia() {
         if (instancia == null) {
             instancia = new Controlador();
@@ -24,13 +25,44 @@ public class Controlador {
         return instancia;
     }
     
-    // Método para realizar login (con validación de password)
+    // Modificación en login para asignar el usuario actual
     public Usuario login(String email, String password) {
         Usuario usuario = repoUsuarios.buscarPorEmail(email);
         if (usuario != null && usuario.getPassword().equals(password)) {
+            setUsuarioActual(usuario);
             return usuario;
         }
         return null;
+    }
+    
+    public void setUsuarioActual(Usuario usuario) {
+        this.usuarioActual = usuario;
+    }
+    
+    // Métodos que exponen datos necesarios sin devolver el modelo completo
+    public String getNombreUsuario() {
+        return usuarioActual != null ? usuarioActual.getNombre() : "";
+    }
+    
+    public String getEmailUsuario() {
+        return usuarioActual != null ? usuarioActual.getEmail() : "";
+    }
+    
+    public Usuario getUsuarioActual() {
+        return usuarioActual;
+    }
+    
+    // Modificación: ya no se recibe el usuario, se utiliza el usuario actual del controlador
+    public boolean cargarCursoDesdeArchivo(String rutaArchivo) {
+        try {
+            Curso curso = CursoParser.cargarCurso(rutaArchivo, this.usuarioActual);
+            repoCursos.agregarCurso(curso);
+            return true;
+        } catch (Exception e) {
+            System.err.println("Error al cargar curso: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
     }
     
     // Método para registrar un usuario; retorna true si se registró correctamente
@@ -58,24 +90,6 @@ public class Controlador {
     // Método para liberar recursos cuando la aplicación se cierre
     public void cerrarRecursos() {
         repoUsuarios.cerrarRecursos();
-    }
-    
-    /**
-     * Carga un curso desde un archivo y lo agrega al repositorio
-     * @param rutaArchivo Ruta al archivo JSON o YAML
-     * @param creador Usuario que carga el curso
-     * @return true si se cargó correctamente, false en caso contrario
-     */
-    public boolean cargarCursoDesdeArchivo(String rutaArchivo, Usuario creador) {
-        try {
-            Curso curso = CursoParser.cargarCurso(rutaArchivo, creador);
-            repoCursos.agregarCurso(curso);
-            return true;
-        } catch (Exception e) {
-            System.err.println("Error al cargar curso: " + e.getMessage());
-            e.printStackTrace();
-            return false;
-        }
     }
 
     /**
@@ -175,4 +189,8 @@ public class Controlador {
         // Implementación simple: usar timestamp
         return System.currentTimeMillis();
     }
+    
+    
+    
+    
 }

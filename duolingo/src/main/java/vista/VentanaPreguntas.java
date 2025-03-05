@@ -903,8 +903,7 @@ public class VentanaPreguntas {
             // Crear la instancia de VentanaPrincipal
             VentanaPrincipal ventanaPrincipal = new VentanaPrincipal();
             
-            // Configurar el usuario
-            ventanaPrincipal.setUsuario(usuarioActual);
+            
             
             // Iniciar la ventana principal
             ventanaPrincipal.start(new Stage());

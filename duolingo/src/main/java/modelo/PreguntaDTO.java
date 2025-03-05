@@ -1,82 +1,96 @@
 package modelo;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 
-/**
- * DTO base para las preguntas
- */
-@JsonTypeInfo(
-    use = JsonTypeInfo.Id.NAME,
-    include = JsonTypeInfo.As.PROPERTY,
-    property = "tipo")
-@JsonSubTypes({
-    @Type(value = PreguntaMultipleChoiceDTO.class, name = "MultipleChoice"),
-    @Type(value = PreguntaFillinBlankDTO.class, name = "FillInBlank"),
-    @Type(value = PreguntaFlashCardDTO.class, name = "Flashcard")
-})
-public abstract class PreguntaDTO {
-    protected Long id;
-    protected String enunciado;
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class PreguntaDTO {
+    private String enunciado;
+    private String[] opciones;
+    private int respuestaCorrecta;
+    private String tipo;
+    private int[] seleccionUsuario;
+    private int[] seleccionesEmparejamiento;
+    private List<String> ordenSeleccionado;
     
-    // Constructor vacío para Jackson
+    // Constructor vacío
     public PreguntaDTO() {
     }
     
-    public PreguntaDTO(Long id, String enunciado) {
-        this.id = id;
-        this.enunciado = enunciado;
+    // Constructor que copia los datos de una instancia de Pregunta
+    public PreguntaDTO(Pregunta pregunta) {
+        this.enunciado = pregunta.getEnunciado();
+        this.opciones = pregunta.getOpciones();
+        this.respuestaCorrecta = pregunta.getRespuestaCorrecta();
+        this.tipo = pregunta.getTipo().toString();
+        this.seleccionUsuario = pregunta.getSeleccionUsuario();
+        this.seleccionesEmparejamiento = pregunta.getSeleccionesEmparejamiento();
+        this.ordenSeleccionado = pregunta.getOrdenSeleccionado();
     }
     
-    // Getters y setters
-    public Long getId() {
-        return id;
-    }
-    
-    public void setId(Long id) {
-        this.id = id;
-    }
-    
+    // Getters y setters...
     public String getEnunciado() {
         return enunciado;
     }
-    
     public void setEnunciado(String enunciado) {
         this.enunciado = enunciado;
     }
+    public String[] getOpciones() {
+        return opciones;
+    }
+    public void setOpciones(String[] opciones) {
+        this.opciones = opciones;
+    }
+    public int getRespuestaCorrecta() {
+        return respuestaCorrecta;
+    }
+    public void setRespuestaCorrecta(int respuestaCorrecta) {
+        this.respuestaCorrecta = respuestaCorrecta;
+    }
+    public String getTipo() {
+        return tipo;
+    }
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
+    }
+    public int[] getSeleccionUsuario() {
+        return seleccionUsuario;
+    }
+    public void setSeleccionUsuario(int[] seleccionUsuario) {
+        this.seleccionUsuario = seleccionUsuario;
+    }
+    public int[] getSeleccionesEmparejamiento() {
+        return seleccionesEmparejamiento;
+    }
+    public void setSeleccionesEmparejamiento(int[] seleccionesEmparejamiento) {
+        this.seleccionesEmparejamiento = seleccionesEmparejamiento;
+    }
+    public List<String> getOrdenSeleccionado() {
+        return ordenSeleccionado;
+    }
+    public void setOrdenSeleccionado(List<String> ordenSeleccionado) {
+        this.ordenSeleccionado = ordenSeleccionado;
+    }
     
-    // Método para convertir a objeto de dominio
-    public abstract Pregunta toPreguntaObjeto();
-    
-    // Método de fábrica para crear el DTO adecuado
-    public static PreguntaDTO crearDesdeObjeto(Pregunta pregunta) {
-        if (pregunta instanceof PreguntaMultipleChoice) {
-            PreguntaMultipleChoice pmc = (PreguntaMultipleChoice) pregunta;
-            return new PreguntaMultipleChoiceDTO(
-                pmc.getId(), 
-                pmc.getEnunciado(), 
-                pmc.getOpciones(), 
-                pmc.getRespuestaCorrecta()
-            );
-        } else if (pregunta instanceof PreguntaFillinBlank) {
-            PreguntaFillinBlank pfb = (PreguntaFillinBlank) pregunta;
-            return new PreguntaFillinBlankDTO(
-                pfb.getId(), 
-                pfb.getEnunciado(), 
-                pfb.getTextoConHuecos(), 
-                pfb.getRespuestas()
-            );
-        } else if (pregunta instanceof PreguntaFlashCard) {
-            PreguntaFlashCard pfc = (PreguntaFlashCard) pregunta;
-            return new PreguntaFlashCardDTO(
-                pfc.getId(), 
-                pfc.getEnunciado(), 
-                pfc.getContenido()
-            );
+    /**
+     * Convierte este DTO en una instancia de Pregunta (o alguna de sus subclases)
+     * según el valor del campo "tipo".
+     */
+    public Pregunta toPreguntaObjeto() {
+        // Se asume que el campo "tipo" en el JSON puede ser, por ejemplo, "MultipleChoice", "FlashCard" o "FillinBlank"
+        if ("MultipleChoice".equalsIgnoreCase(tipo)) {
+            return new PreguntaMultipleChoice(enunciado, opciones, respuestaCorrecta);
+        } else if ("FlashCard".equalsIgnoreCase(tipo)) {
+            // En este ejemplo se asume que para flashcards la respuesta está en el primer elemento de "opciones"
+            String respuesta = (opciones != null && opciones.length > 0) ? opciones[0] : "";
+            return new PreguntaFlashCard(enunciado, respuesta);
+        } else if ("FillinBlank".equalsIgnoreCase(tipo)) {
+            // Para preguntas fill in the blank podrías usar una implementación específica.
+            // Aquí, como ejemplo, se reutiliza la estructura base usando el tipo COMPLETAR.
+            return new Pregunta(enunciado, opciones, respuestaCorrecta, Pregunta.TipoPregunta.COMPLETAR);
+        } else {
+            // Valor por defecto: se crea una pregunta de selección múltiple
+            return new Pregunta(enunciado, opciones, respuestaCorrecta, Pregunta.TipoPregunta.SELECCION_MULTIPLE);
         }
-        
-        throw new IllegalArgumentException("Tipo de pregunta desconocido: " + pregunta.getClass().getName());
     }
 }

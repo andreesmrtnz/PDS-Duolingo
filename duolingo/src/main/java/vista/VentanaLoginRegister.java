@@ -296,9 +296,6 @@ public class VentanaLoginRegister extends Application {
             // Crear la instancia de VentanaPrincipal con el usuario y el stage
             VentanaPrincipal ventanaPrincipal = new VentanaPrincipal();
             
-            // Configurar el usuario en la ventana principal
-            ventanaPrincipal.setUsuario(usuario);
-            
             // Iniciar la ventana principal
             ventanaPrincipal.start(new Stage());
             
