@@ -55,3 +55,4 @@ Extensibilidad: Gracias al uso de clases abstractas (como en Pregunta), es posib
 Resumen del Modelo
 
 Este modelo aborda la creación, gestión y utilización de cursos, incorpora un seguimiento del progreso y las estadísticas de uso, y permite la configuración flexible de estrategias de aprendizaje, alineándose con los objetivos y requerimientos descritos en el enunciado.
+![modelo](https://github.com/user-attachments/assets/d84d53a4-859a-4119-8dc0-1af989faad00)
