@@ -1,26 +1,27 @@
 package persistencia;
 
 import jakarta.persistence.*;
+import modelo.Curso;
 import modelo.Usuario;
 import java.util.List;
 
-public class UsuarioDAO {
+public class CursoDAO {
     private EntityManagerFactory emf = Persistence.createEntityManagerFactory("miUnidadPersistencia");
     
     public EntityManager getEntityManager() {
         return emf.createEntityManager();
     }
 
-    public void registrar(Usuario usuario) {
+    public void guardar(Curso curso) {
         EntityManager em = emf.createEntityManager();
         try {
             em.getTransaction().begin();
             
-            // Si el usuario ya existe, lo actualizamos en lugar de crear uno nuevo
-            if (usuario.getId() != null) {
-                em.merge(usuario);
+            // Si el curso ya existe, lo actualizamos en lugar de crear uno nuevo
+            if (curso.getId() != null) {
+                em.merge(curso);
             } else {
-                em.persist(usuario);
+                em.persist(curso);
             }
             
             em.getTransaction().commit();
@@ -34,49 +35,59 @@ public class UsuarioDAO {
         }
     }
 
-    public Usuario buscarPorId(Long id) {
+    public Curso buscarPorId(Long id) {
         EntityManager em = emf.createEntityManager();
-        Usuario usuario = null;
+        Curso curso = null;
         try {
-            usuario = em.find(Usuario.class, id);
+            curso = em.find(Curso.class, id);
         } finally {
             em.close();
         }
-        return usuario;
+        return curso;
     }
 
-    public Usuario buscarPorEmail(String email) {
+    public List<Curso> listarTodos() {
         EntityManager em = emf.createEntityManager();
-        Usuario usuario = null;
+        List<Curso> cursos = null;
         try {
-            usuario = em.createQuery("SELECT u FROM Usuario u WHERE u.email = :mail", Usuario.class)
-                     .setParameter("mail", email)
-                     .getSingleResult();
-        } catch (NoResultException e) {
-            // No se encontró usuario con ese email, retornará null
+            cursos = em.createQuery("SELECT c FROM Curso c", Curso.class).getResultList();
         } finally {
             em.close();
         }
-        return usuario;
+        return cursos;
     }
-
-    public List<Usuario> listarTodos() {
+    
+    public List<Curso> buscarPorDominio(String dominio) {
         EntityManager em = emf.createEntityManager();
-        List<Usuario> usuarios = null;
+        List<Curso> cursos = null;
         try {
-            usuarios = em.createQuery("SELECT u FROM Usuario u", Usuario.class).getResultList();
+            cursos = em.createQuery("SELECT c FROM Curso c WHERE c.dominio = :dominio", Curso.class)
+                     .setParameter("dominio", dominio)
+                     .getResultList();
         } finally {
             em.close();
         }
-        return usuarios;
+        return cursos;
+    }
+    
+    public List<Curso> buscarPorCreador(Usuario creador) {
+        EntityManager em = emf.createEntityManager();
+        List<Curso> cursos = null;
+        try {
+            cursos = em.createQuery("SELECT c FROM Curso c WHERE c.creador.id = :creadorId", Curso.class)
+                     .setParameter("creadorId", creador.getId())
+                     .getResultList();
+        } finally {
+            em.close();
+        }
+        return cursos;
     }
 
-    // Método para actualizar un usuario existente
-    public void actualizar(Usuario usuario) {
+    public void actualizar(Curso curso) {
         EntityManager em = emf.createEntityManager();
         try {
             em.getTransaction().begin();
-            em.merge(usuario);
+            em.merge(curso);
             em.getTransaction().commit();
         } catch (Exception e) {
             if (em.getTransaction().isActive()) {
@@ -88,15 +99,14 @@ public class UsuarioDAO {
         }
     }
 
-    // Método para eliminar un usuario
-    public void eliminar(Usuario usuario) {
+    public void eliminar(Curso curso) {
         EntityManager em = emf.createEntityManager();
         try {
             em.getTransaction().begin();
-            if (!em.contains(usuario)) {
-                usuario = em.merge(usuario);
+            if (!em.contains(curso)) {
+                curso = em.merge(curso);
             }
-            em.remove(usuario);
+            em.remove(curso);
             em.getTransaction().commit();
         } catch (Exception e) {
             if (em.getTransaction().isActive()) {

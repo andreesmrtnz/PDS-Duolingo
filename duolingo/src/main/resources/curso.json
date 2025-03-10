@@ -1,0 +1,30 @@
+{
+  "id": 1,
+  "titulo": "Programación Java Básico",
+  "dominio": "Programación",
+  "idCreador": 101,
+  "posicionActual": 0,
+  "bloques": [
+    {
+      "id": 1,
+      "titulo": "Introducción a Java",
+      "descripcion": "Conceptos básicos",
+      "preguntas": [
+        {
+          "tipo": "MultipleChoice",
+          "id": 1,
+          "enunciado": "¿Qué compila archivos .java?",
+          "opciones": ["JVM", "JDK", "JRE", "javac"],
+          "respuestaCorrecta": 3
+        },
+        {
+          "tipo": "MultipleChoice",
+          "id": 1,
+          "enunciado": "¿Qué compila archivos .java?",
+          "opciones": ["JVM", "JDK", "JRE", "javac"],
+          "respuestaCorrecta": 3
+        }
+      ]
+    }
+  ]
+}

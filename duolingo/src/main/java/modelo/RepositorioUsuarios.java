@@ -34,11 +34,6 @@ public class RepositorioUsuarios {
         return usuarioDAO.buscarPorEmail(email);
     }
     
-    // Guarda un nuevo usuario en la base de datos
-    public void save(Usuario usuario) {
-        usuarioDAO.registrar(usuario);
-    }
-    
     // Devuelve la lista completa de usuarios desde la base de datos
     public List<Usuario> getUsuarios() {
         return usuarioDAO.listarTodos();

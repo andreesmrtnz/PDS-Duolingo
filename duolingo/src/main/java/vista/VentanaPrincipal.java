@@ -570,62 +570,6 @@ public class VentanaPrincipal {
         }
     }
 
-    private void mostrarDetallesCursoImportado(Curso curso) {
-        // Crear un diálogo personalizado para mostrar los detalles del curso
-        Dialog<Void> dialog = new Dialog<>();
-        dialog.setTitle("Detalles del Curso Importado");
-        dialog.setHeaderText("Información del Curso");
-
-        // Contenido del diálogo
-        VBox content = new VBox(10);
-        content.setPadding(new Insets(20));
-
-        Text titleText = new Text("Título: " + curso.getTitulo());
-        Text domainText = new Text("Dominio: " + curso.getDominio());
-        Text creatorText = new Text("Creador: " + curso.getCreador().getNombre());
-        Text blockCountText = new Text("Número de Bloques: " + curso.getBloques().size());
-
-        // Lista expandible de bloques
-        Accordion blocksAccordion = new Accordion();
-        for (Bloque bloque : curso.getBloques()) {
-            TitledPane bloquePane = new TitledPane();
-            bloquePane.setText(bloque.getTitulo());
-
-            VBox bloqueContent = new VBox(5);
-            Text bloqueDescText = new Text("Descripción: " + bloque.getDescripcion());
-            Text preguntasCountText = new Text("Número de Preguntas: " + bloque.getPreguntas().size());
-
-            // Detalles de las preguntas
-            ListView<String> preguntasList = new ListView<>();
-            for (Pregunta pregunta : bloque.getPreguntas()) {
-                preguntasList.getItems().add("Pregunta: " + pregunta.getEnunciado());
-                preguntasList.getItems().add("Opciones: " + pregunta.getOpciones());
-                preguntasList.getItems().add("---");
-            }
-
-            bloqueContent.getChildren().addAll(bloqueDescText, preguntasCountText, preguntasList);
-            bloquePane.setContent(bloqueContent);
-            blocksAccordion.getPanes().add(bloquePane);
-        }
-
-        content.getChildren().addAll(
-            titleText, domainText, creatorText, blockCountText, 
-            new Text("Detalles de Bloques:"), blocksAccordion
-        );
-
-        // Scroll pane para manejar contenido largo
-        ScrollPane scrollPane = new ScrollPane(content);
-        scrollPane.setFitToWidth(true);
-        scrollPane.setPrefHeight(400);
-
-        // Configurar el diálogo
-        DialogPane dialogPane = dialog.getDialogPane();
-        dialogPane.setContent(scrollPane);
-        dialogPane.getButtonTypes().add(ButtonType.CLOSE);
-
-        dialog.show();
-    }
-    
     private void mostrarAlerta(String titulo, String mensaje, Alert.AlertType tipo) {
         Alert alert = new Alert(tipo);
         alert.setTitle(titulo);

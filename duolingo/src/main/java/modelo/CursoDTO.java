@@ -14,7 +14,6 @@ public class CursoDTO {
     private Long idCreador; // Solo guardamos el ID del creador
     private List<BloqueDTO> bloques;
     private int posicionActual;
-    private String tipoEstrategia; // String que identifica el tipo de estrategia
     
     // Constructor vacío necesario para Jackson
     public CursoDTO() {
@@ -28,8 +27,7 @@ public class CursoDTO {
         this.idCreador = curso.getCreador().getId();
         this.posicionActual = curso.getPosicionActual();
         
-        // Convertir estrategia a su nombre
-        this.tipoEstrategia = curso.getEstrategia().getClass().getSimpleName();
+        
         
         // Convertir bloques a DTOs
         this.bloques = convertirBloquesADTO(curso.getBloques());
@@ -92,13 +90,6 @@ public class CursoDTO {
         this.posicionActual = posicionActual;
     }
     
-    public String getTipoEstrategia() {
-        return tipoEstrategia;
-    }
-    
-    public void setTipoEstrategia(String tipoEstrategia) {
-        this.tipoEstrategia = tipoEstrategia;
-    }
     
     // Método para obtener los bloques en formato de objetos de dominio
     public List<Bloque> getBloquesDominio() {

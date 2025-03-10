@@ -61,8 +61,6 @@ public class CursoParser {
             }
         }
         
-        // Crear estrategia según el tipo
-        Estrategia estrategia = crearEstrategia(dto.getTipoEstrategia());
         
         return new Curso(
             dto.getId(),
@@ -70,8 +68,7 @@ public class CursoParser {
             dto.getDominio(),
             creador,  // Usamos el creador proporcionado
             bloques,
-            dto.getPosicionActual(),
-            estrategia
+            dto.getPosicionActual()
         );
     }
     

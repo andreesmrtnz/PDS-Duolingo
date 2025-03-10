@@ -1,14 +1,22 @@
 package modelo;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+
+import jakarta.persistence.EntityManager;
+import persistencia.UsuarioDAO;
+import persistencia.CursoDAO;
+
 import java.io.File;
 
 public class Controlador {
-	// Instancia única (singleton)
+    // Instancia única (singleton)
     private static Controlador instancia;
     private RepositorioUsuarios repoUsuarios;
     private RepositorioCursos repoCursos;
+    private UsuarioDAO usuarioDAO;
+    private CursoDAO cursoDAO;
     
     // Usuario actual, que se establece durante el login
     private Usuario usuarioActual;
@@ -16,6 +24,8 @@ public class Controlador {
     private Controlador() {
         this.repoUsuarios = RepositorioUsuarios.getUnicaInstancia();
         this.repoCursos = RepositorioCursos.getInstancia();
+        this.usuarioDAO = new UsuarioDAO();
+        this.cursoDAO = new CursoDAO();
     }
     
     public static synchronized Controlador getInstancia() {
@@ -53,15 +63,35 @@ public class Controlador {
     }
     
     // Modificación: ya no se recibe el usuario, se utiliza el usuario actual del controlador
+    // Ahora usa CursoDAO para persistir el curso
     public boolean cargarCursoDesdeArchivo(String rutaArchivo) {
+        EntityManager em = usuarioDAO.getEntityManager();
         try {
+            em.getTransaction().begin();
+            
             Curso curso = CursoParser.cargarCurso(rutaArchivo, this.usuarioActual);
+            // Eliminar duplicados en la lista de bloques del curso antes de guardarlo
+            curso.setBloques(new ArrayList<>(new HashSet<>(curso.getBloques())));
+
             repoCursos.agregarCurso(curso);
+            this.usuarioActual.addCurso(curso);
+            
+            // Utilizar el DAO para persistir los cambios
+            cursoDAO.guardar(curso);
+            usuarioDAO.actualizar(usuarioActual);
+            
+            em.getTransaction().commit();
+            
             return true;
         } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
             System.err.println("Error al cargar curso: " + e.getMessage());
             e.printStackTrace();
             return false;
+        } finally {
+            em.close();
         }
     }
     
@@ -71,8 +101,7 @@ public class Controlador {
             // El usuario ya existe
             return false;
         }
-        // Guardamos el usuario en la base de datos a través del repositorio
-        repoUsuarios.save(usuario);
+        usuarioDAO.registrar(usuario);
         return true;
     }
     
@@ -90,6 +119,8 @@ public class Controlador {
     // Método para liberar recursos cuando la aplicación se cierre
     public void cerrarRecursos() {
         repoUsuarios.cerrarRecursos();
+        usuarioDAO.cerrar();
+        cursoDAO.cerrar();
     }
 
     /**
@@ -97,7 +128,7 @@ public class Controlador {
      * @return Lista de cursos
      */
     public List<Curso> getCursosDisponibles() {
-        return repoCursos.getTodosCursos();
+        return cursoDAO.listarTodos();
     }
     
     /**
@@ -109,17 +140,21 @@ public class Controlador {
      * @param rutaArchivo Ruta donde guardar el archivo (opcional)
      * @return El curso creado o null si hubo un error
      */
-    public Curso crearCurso(String titulo, String dominio, Usuario creador, 
-                            List<Bloque> bloques, String rutaArchivo) {
+    public Curso crearCurso(String titulo, String dominio, List<Bloque> bloques, String rutaArchivo) {
         try {
-            // Generar ID único para el curso
-            Long id = generarIdUnico();
+            // Usar el usuario actual como creador
+            Usuario creador = this.usuarioActual;
             
             // Crear objeto curso con estrategia básica
-            Curso curso = new Curso(id, titulo, dominio, creador, bloques, 0, new EstrategiaBasica());
+            Curso curso = new Curso(null, titulo, dominio, creador, bloques, 0);
             
-            // Guardar en repositorio
+            // Guardar en repositorio y base de datos
             repoCursos.agregarCurso(curso);
+            creador.addCurso(curso);
+            
+            // Persistir el curso y actualizar el usuario
+            cursoDAO.guardar(curso);
+            usuarioDAO.actualizar(creador);
             
             // Si se proporcionó una ruta, guardamos el curso en archivo
             if (rutaArchivo != null && !rutaArchivo.isEmpty()) {
@@ -143,6 +178,7 @@ public class Controlador {
     public boolean compartirCurso(Curso curso, String rutaArchivo) {
         try {
             CursoParser.guardarCurso(curso, rutaArchivo);
+            
             return true;
         } catch (Exception e) {
             System.err.println("Error al compartir curso: " + e.getMessage());
@@ -157,13 +193,7 @@ public class Controlador {
      * @return Lista de cursos que coinciden con el dominio
      */
     public List<Curso> buscarCursosPorDominio(String dominio) {
-        List<Curso> resultado = new ArrayList<>();
-        for (Curso curso : repoCursos.getTodosCursos()) {
-            if (curso.getDominio().equalsIgnoreCase(dominio)) {
-                resultado.add(curso);
-            }
-        }
-        return resultado;
+        return cursoDAO.buscarPorDominio(dominio);
     }
     
     /**
@@ -172,25 +202,6 @@ public class Controlador {
      * @return Lista de cursos creados por el usuario
      */
     public List<Curso> buscarCursosPorCreador(Usuario creador) {
-        List<Curso> resultado = new ArrayList<>();
-        for (Curso curso : repoCursos.getTodosCursos()) {
-            if (curso.getCreador().getId().equals(creador.getId())) {
-                resultado.add(curso);
-            }
-        }
-        return resultado;
+        return cursoDAO.buscarPorCreador(creador);
     }
-    
-    /**
-     * Genera un ID único para nuevos cursos
-     * @return ID único
-     */
-    private Long generarIdUnico() {
-        // Implementación simple: usar timestamp
-        return System.currentTimeMillis();
-    }
-    
-    
-    
-    
 }
