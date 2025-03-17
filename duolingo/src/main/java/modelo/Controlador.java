@@ -21,6 +21,7 @@ public class Controlador {
     
     // Usuario actual, que se establece durante el login
     private Usuario usuarioActual;
+    private Curso cursoActual;
     
     private Controlador() {
         this.repoUsuarios = RepositorioUsuarios.getUnicaInstancia();
@@ -71,6 +72,16 @@ public class Controlador {
             em.getTransaction().begin();
             
             Curso curso = CursoParser.cargarCurso(rutaArchivo, this.usuarioActual);
+            
+            // Establecer correctamente las relaciones bidireccionales
+            for (Bloque bloque : curso.getBloques()) {
+                bloque.setCurso(curso);
+                
+                for (Pregunta pregunta : bloque.getPreguntas()) {
+                    pregunta.setBloque(bloque);
+                }
+            }
+            
             // Eliminar duplicados en la lista de bloques del curso antes de guardarlo
             curso.setBloques(new ArrayList<>(new HashSet<>(curso.getBloques())));
 
@@ -109,7 +120,7 @@ public class Controlador {
     // Método para iniciar un curso
     public void iniciarCurso(Curso curso) {
         // Aquí se podría invocar lógica adicional
-        System.out.println("Iniciando curso: " + curso.getTitulo());
+        this.cursoActual = curso;
     }
     
     // Acceso al repositorio (si se requiere)
@@ -205,4 +216,9 @@ public class Controlador {
     public List<Curso> buscarCursosPorCreador(Usuario creador) {
         return cursoDAO.buscarPorCreador(creador);
     }
+
+	public Curso getCursoActual() {
+		// TODO Auto-generated method stub
+		return this.cursoActual;
+	}
 }

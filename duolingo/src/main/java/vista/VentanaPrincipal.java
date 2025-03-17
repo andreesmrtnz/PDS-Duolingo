@@ -325,54 +325,44 @@ public class VentanaPrincipal {
         }
     }
     
-    // Inicia el curso seleccionado; aquí se puede ampliar la funcionalidad según las lecciones del curso
+    
+ // Inicia el curso seleccionado y abre la VentanaPreguntas
     private void startCourse(Curso curso) {
-        contentArea.getChildren().clear();
-        
-        VBox courseLayout = new VBox(20);
-        courseLayout.setPadding(new Insets(25));
-        
-        HBox courseHeader = new HBox(15);
-        courseHeader.setAlignment(Pos.CENTER_LEFT);
-        courseHeader.setPadding(new Insets(15));
-        courseHeader.setStyle("-fx-background-color: white; -fx-background-radius: 10;");
-        
-        Circle courseIcon = new Circle(40);
-        courseIcon.setFill(getColorForCourse(curso.getTitulo()));
-        
-        VBox courseInfo = new VBox(5);
-        Text courseTitle = new Text(curso.getTitulo());
-        courseTitle.setFont(Font.font("System", FontWeight.BOLD, 24));
-        
-        Text courseDesc = new Text(curso.getDominio());
-        
-        // Suponiendo que Curso tiene métodos getLeccionesCompletadas() y getLeccionesCurso()
-        int completed = 3;
-        int total = 3;
-        double progressValue = total > 0 ? (double) completed / total : 0;
-        HBox progressInfo = new HBox(10);
-        ProgressBar courseProgress = new ProgressBar(progressValue);
-        courseProgress.setPrefWidth(200);
-        Text progressText = new Text(String.format("%d/%d lecciones completadas", completed, total));
-        progressInfo.getChildren().addAll(courseProgress, progressText);
-        
-        courseInfo.getChildren().addAll(courseTitle, courseDesc, progressInfo);
-        
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-        
-        Button backButton = new Button("Volver a cursos");
-        backButton.setOnAction(e -> showCoursesPage());
-        
-        courseHeader.getChildren().addAll(courseIcon, courseInfo, spacer, backButton);
-        courseLayout.getChildren().addAll(courseHeader);
-        
-        ScrollPane scrollPane = new ScrollPane(courseLayout);
-        scrollPane.setFitToWidth(true);
-        scrollPane.setStyle("-fx-background-color: transparent; -fx-background: transparent;");
-        
-        contentArea.getChildren().add(scrollPane);
-        animateContentEntry(scrollPane);
+        try {
+            // Establecer el curso actual en el controlador
+            controlador.iniciarCurso(curso);
+            
+            // Crear una nueva instancia de VentanaPreguntas
+            VentanaPreguntas ventanaPreguntas = new VentanaPreguntas();
+            
+            // Obtener el Stage actual
+            Stage currentStage = (Stage) mainLayout.getScene().getWindow();
+            
+            // Crear un nuevo Stage para la ventana de preguntas
+            Stage questionStage = new Stage();
+            
+            // Iniciar la ventana de preguntas
+            ventanaPreguntas.start(questionStage);
+            
+            // Opcional: cerrar la ventana principal o mantenerla abierta
+            // currentStage.close(); // Descomentar si quieres cerrar la ventana principal
+            
+            // Manejar el cierre de la ventana de preguntas para volver a la pantalla de cursos
+            questionStage.setOnCloseRequest(e -> {
+                showCoursesPage();
+                currentStage.show(); // Solo es necesario si cerraste la ventana principal
+            });
+        } catch (Exception e) {
+            System.err.println("Error al iniciar el curso: " + e.getMessage());
+            e.printStackTrace();
+            
+            // Mostrar una alerta al usuario
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText("Error al iniciar el curso");
+            alert.setContentText("No se pudo iniciar el curso. " + e.getMessage());
+            alert.showAndWait();
+        }
     }
     
     private void showProfilePage() {

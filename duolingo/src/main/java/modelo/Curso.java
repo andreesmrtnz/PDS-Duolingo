@@ -1,11 +1,12 @@
 package modelo;
 
+import java.util.ArrayList;
 import java.util.List;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -20,19 +21,19 @@ public class Curso {
     private String titulo;
     private String dominio;
     
-    // This is the creator relationship
+    // Creador del curso
     @ManyToOne
     @JoinColumn(name = "creador_id")
     private Usuario creador;
     
-    // This is the bidirectional relationship with Usuario
+    // Usuario que está realizando el curso
     @ManyToOne
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;
     
-    @OneToMany(mappedBy = "curso", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Bloque> bloques;
-
+    // Relación con Bloques (bidireccional)
+    @OneToMany(mappedBy = "curso", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    private List<Bloque> bloques = new ArrayList<>();
     
     private int posicionActual;
        
@@ -46,8 +47,10 @@ public class Curso {
         this.dominio = dominio;
         this.creador = creador;
         this.usuario = creador; // Initialize the user with the creator by default
-        this.bloques = bloques;
         this.posicionActual = posicionActual;
+        
+        // Establecer la relación bidireccional
+        setBloques(bloques);
     }
     
     public Long getId() {
@@ -91,7 +94,24 @@ public class Curso {
     }
     
     public void setBloques(List<Bloque> bloques) {
-        this.bloques = bloques;
+        this.bloques.clear();
+        if (bloques != null) {
+            for (Bloque bloque : bloques) {
+                addBloque(bloque);
+            }
+        }
+    }
+    
+    // Método helper para agregar un bloque manteniendo la relación bidireccional
+    public void addBloque(Bloque bloque) {
+        this.bloques.add(bloque);
+        bloque.setCurso(this);
+    }
+    
+    // Método helper para quitar un bloque manteniendo la relación bidireccional
+    public void removeBloque(Bloque bloque) {
+        this.bloques.remove(bloque);
+        bloque.setCurso(null);
     }
     
     public void setPosicionActual(int posicionActual) {
