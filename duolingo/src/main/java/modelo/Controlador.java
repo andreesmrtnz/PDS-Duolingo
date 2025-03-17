@@ -107,6 +107,13 @@ public class Controlador {
         }
     }
     
+    public void finalizarCurso() {
+        if (cursoActual != null) {
+            System.out.println("Curso finalizado: " + cursoActual.getTitulo());
+            cursoActual = null;
+        }
+    }
+    
     // Método para registrar un usuario; retorna true si se registró correctamente
     public boolean registrar(Usuario usuario) {
         if (repoUsuarios.buscarPorEmail(usuario.getEmail()) != null) {

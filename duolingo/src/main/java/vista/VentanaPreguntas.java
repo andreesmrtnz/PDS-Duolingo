@@ -406,39 +406,54 @@ public class VentanaPreguntas extends Application {
             mostrarAlerta("No hay bloques o preguntas disponibles.");
             return;
         }
-        
+
         Bloque bloque = bloques.get(bloqueActual.get());
         List<Pregunta> preguntas = bloque.getPreguntas();
-        
+
         if (preguntas == null || preguntas.isEmpty() || preguntaActual.get() >= preguntas.size()) {
             mostrarAlerta("No hay preguntas en este bloque.");
             return;
         }
-        
+
         Pregunta pregunta = preguntas.get(preguntaActual.get());
-        
+
         // Ocultar todos los paneles primero
         panelMultipleChoice.setVisible(false);
         panelFlashCard.setVisible(false);
         panelFillInBlank.setVisible(false);
-        if (panelEmparejamiento != null) panelEmparejamiento.setVisible(false);
-        if (panelOrdenarPalabras != null) panelOrdenarPalabras.setVisible(false);
-        if (panelCompletarTexto != null) panelCompletarTexto.setVisible(false);
-        
-        // Primero comprobamos si es alguno de los tipos específicos
+
         if (pregunta instanceof PreguntaMultipleChoice) {
             mostrarPreguntaMultipleChoice((PreguntaMultipleChoice) pregunta);
         } else if (pregunta instanceof PreguntaFlashCard) {
             mostrarPreguntaFlashCard((PreguntaFlashCard) pregunta);
         } else if (pregunta instanceof PreguntaFillinBlank) {
             mostrarPreguntaFillInBlank((PreguntaFillinBlank) pregunta);
-        } else {
-            // Si no es ninguno de los tipos específicos, tratamos la pregunta normal
-            mostrarPreguntaNormal(pregunta);
         }
-        
+        else {
+        	mostrarPreguntaNormal(pregunta);
+        }
+
         actualizarProgreso();
+        actualizarBotonSiguiente();
     }
+    
+    private void actualizarBotonSiguiente() {
+        int totalBloques = bloques.size();
+        int totalPreguntas = bloques.get(bloqueActual.get()).getPreguntas().size();
+        
+        boolean esUltimaPregunta = (bloqueActual.get() == totalBloques - 1) &&
+                                   (preguntaActual.get() == totalPreguntas - 1);
+
+        if (esUltimaPregunta) {
+            btnSiguiente.setText("Finalizar");
+            btnSiguiente.setOnAction(e -> finalizarCurso());
+        } else {
+            btnSiguiente.setText("Siguiente");
+            btnSiguiente.setOnAction(e -> mostrarPreguntaSiguiente());
+        }
+    }
+
+
     
     private void mostrarPreguntaNormal(Pregunta pregunta) {
         Pregunta.TipoPregunta tipo = pregunta.getTipo();
@@ -877,61 +892,77 @@ public class VentanaPreguntas extends Application {
     }
     
     private void mostrarPreguntaSiguiente() {
-        if (bloques == null || bloques.isEmpty()) return;
-        
         int actual = preguntaActual.get() + 1;
         Bloque bloqueActualObj = bloques.get(bloqueActual.get());
-        
+
         if (actual >= bloqueActualObj.getPreguntas().size()) {
             int bloqueSig = bloqueActual.get() + 1;
-            if (bloqueSig >= bloques.size()) return;
+            if (bloqueSig >= bloques.size()) {
+                return;
+            }
             bloqueActual.set(bloqueSig);
             preguntaActual.set(0);
         } else {
             preguntaActual.set(actual);
         }
-        
+
         mostrarPreguntaActual();
     }
     
+    private void finalizarCurso() {
+        controlador.finalizarCurso();
+        mostrarAlerta("¡Curso finalizado!");
+        
+        // Obtener la ventana actual y cerrarla
+        Stage stage = (Stage) panelPrincipal.getScene().getWindow();
+        stage.close();
+    }
+
+   
     private void verificarRespuesta() {
         Pregunta pregunta = bloques.get(bloqueActual.get()).getPreguntas().get(preguntaActual.get());
-        
+        boolean respuestaCorrecta = false;
+
         if (pregunta instanceof PreguntaMultipleChoice) {
-            verificarRespuestaMultipleChoice((PreguntaMultipleChoice) pregunta);
+            respuestaCorrecta = verificarRespuestaMultipleChoice((PreguntaMultipleChoice) pregunta);
         } else if (pregunta instanceof PreguntaFillinBlank) {
-            verificarRespuestaFillInBlank((PreguntaFillinBlank) pregunta);
+            respuestaCorrecta = verificarRespuestaFillInBlank((PreguntaFillinBlank) pregunta);
         } else if (pregunta instanceof PreguntaFlashCard) {
-            // Para FlashCard, solo voltear la tarjeta
             voltearTarjeta();
+            return;
         } else {
-            // Verificar según el tipo de pregunta normal
-            verificarRespuestaNormal(pregunta);
+            respuestaCorrecta = verificarRespuestaNormal(pregunta);
+        }
+
+        if (respuestaCorrecta) {
+            actualizarProgreso();
         }
     }
 
-    private void verificarRespuestaNormal(Pregunta pregunta) {
+
+    private boolean verificarRespuestaNormal(Pregunta pregunta) {
         Pregunta.TipoPregunta tipo = pregunta.getTipo();
         
         switch (tipo) {
             case SELECCION_MULTIPLE:
-                verificarRespuestaSeleccionMultiple(pregunta);
-                break;
+                return verificarRespuestaSeleccionMultiple(pregunta);
+
             case EMPAREJAMIENTO:
-                verificarRespuestaEmparejamiento(pregunta);
-                break;
+                return verificarRespuestaEmparejamiento(pregunta);
+
             case ORDENAR_PALABRAS:
-                verificarRespuestaOrdenarPalabras(pregunta);
-                break;
+                return verificarRespuestaOrdenarPalabras(pregunta);
+
             case COMPLETAR:
-                verificarRespuestaCompletar(pregunta);
-                break;
+                return verificarRespuestaCompletar(pregunta);
+
             default:
                 mostrarAlerta("Verificación para este tipo no implementada: " + tipo);
+                return false;
         }
     }
 
-    private void verificarRespuestaSeleccionMultiple(Pregunta pregunta) {
+    private boolean verificarRespuestaSeleccionMultiple(Pregunta pregunta) {
         // Reutilizamos la lógica de verificación existente
         VBox vbox = (VBox) panelMultipleChoice;
         VBox opcionesBox = (VBox) vbox.getChildren().get(1);
@@ -950,7 +981,7 @@ public class VentanaPreguntas extends Application {
         
         if (seleccionUsuario == -1) {
             mostrarAlerta("Por favor, selecciona una opción.");
-            return;
+            return false;
         }
         
         // Actualizar la selección en la pregunta
@@ -967,6 +998,7 @@ public class VentanaPreguntas extends Application {
                 "-fx-padding: 15;"
             );
             mostrarResultado(true);
+            return true;
         } else {
             // Respuesta incorrecta
             seleccionado.setStyle(
@@ -990,10 +1022,11 @@ public class VentanaPreguntas extends Application {
             );
             
             mostrarResultado(false);
+            return true;
         }
     }
 
-    private void verificarRespuestaEmparejamiento(Pregunta pregunta) {
+    private boolean verificarRespuestaEmparejamiento(Pregunta pregunta) {
         // Implementar lógica para verificar las respuestas de emparejamiento
         // usando pregunta.getSeleccionesEmparejamiento() y comparando con
         // los valores esperados
@@ -1007,9 +1040,10 @@ public class VentanaPreguntas extends Application {
         // Verificar con la lógica específica para emparejamiento
         
         mostrarResultado(todasCorrectas);
+        return true;
     }
 
-    private void verificarRespuestaOrdenarPalabras(Pregunta pregunta) {
+    private boolean verificarRespuestaOrdenarPalabras(Pregunta pregunta) {
         // Obtener el orden actual de las palabras seleccionadas
         FlowPane contenedorSeleccionadas = (FlowPane) panelOrdenarPalabras.getChildren().get(2);
         
@@ -1028,6 +1062,7 @@ public class VentanaPreguntas extends Application {
         boolean ordenCorrecto = verificarOrdenPalabras(ordenActual, pregunta);
         
         mostrarResultado(ordenCorrecto);
+        return true;
     }
 
     private boolean verificarOrdenPalabras(List<String> ordenActual, Pregunta pregunta) {
@@ -1047,7 +1082,7 @@ public class VentanaPreguntas extends Application {
         return true; // Simplificado para este ejemplo
     }
 
-    private void verificarRespuestaCompletar(Pregunta pregunta) {
+    private boolean verificarRespuestaCompletar(Pregunta pregunta) {
         VBox camposTexto = (VBox) panelCompletarTexto.getChildren().get(1);
         
         // Obtener texto de los campos
@@ -1085,21 +1120,24 @@ public class VentanaPreguntas extends Application {
                     "-fx-background-radius: 10;" +
                     "-fx-padding: 10;"
                 );
+                return false;
             }
             
             mostrarResultado(esCorrecta);
+            return true;
         } else {
             mostrarAlerta("Por favor, completa todos los campos.");
+            return false;
         }
     }
     
-    private void verificarRespuestaMultipleChoice(PreguntaMultipleChoice pregunta) {
+    private boolean verificarRespuestaMultipleChoice(PreguntaMultipleChoice pregunta) {
         VBox vbox = (VBox) panelMultipleChoice;
         VBox opcionesBox = (VBox) vbox.getChildren().get(1);
-        
+
         int seleccionUsuario = -1;
         RadioButton seleccionado = null;
-        
+
         for (int i = 0; i < opcionesBox.getChildren().size(); i++) {
             RadioButton radio = (RadioButton) opcionesBox.getChildren().get(i);
             if (radio.isSelected()) {
@@ -1108,50 +1146,28 @@ public class VentanaPreguntas extends Application {
                 break;
             }
         }
-        
+
         if (seleccionUsuario == -1) {
             mostrarAlerta("Por favor, selecciona una opción.");
-            return;
+            return false;
         }
+
+        boolean esCorrecto = seleccionUsuario == pregunta.getRespuestaCorrecta();
         
-        if (seleccionUsuario == pregunta.getRespuestaCorrecta()) {
-            // Respuesta correcta
-            seleccionado.setStyle(
-                "-fx-background-color: " + toRGBCode(COLOR_CORRECTO.deriveColor(0, 1, 1, 0.3)) + ";" +
-                "-fx-border-color: " + toRGBCode(COLOR_CORRECTO) + ";" +
-                "-fx-border-width: 2;" +
-                "-fx-border-radius: 10;" +
-                "-fx-background-radius: 10;" +
-                "-fx-padding: 15;"
-            );
-            mostrarResultado(true);
+        if (esCorrecto) {
+            seleccionado.setStyle("-fx-background-color: " + toRGBCode(COLOR_CORRECTO) + ";");
         } else {
-            // Respuesta incorrecta
-            seleccionado.setStyle(
-                "-fx-background-color: " + toRGBCode(COLOR_INCORRECTO.deriveColor(0, 1, 1, 0.3)) + ";" +
-                "-fx-border-color: " + toRGBCode(COLOR_INCORRECTO) + ";" +
-                "-fx-border-width: 2;" +
-                "-fx-border-radius: 10;" +
-                "-fx-background-radius: 10;" +
-                "-fx-padding: 15;"
-            );
-            
-            // Mostrar la respuesta correcta
+            seleccionado.setStyle("-fx-background-color: " + toRGBCode(COLOR_INCORRECTO) + ";");
             RadioButton opcionCorrecta = (RadioButton) opcionesBox.getChildren().get(pregunta.getRespuestaCorrecta());
-            opcionCorrecta.setStyle(
-                "-fx-background-color: " + toRGBCode(COLOR_CORRECTO.deriveColor(0, 1, 1, 0.3)) + ";" +
-                "-fx-border-color: " + toRGBCode(COLOR_CORRECTO) + ";" +
-                "-fx-border-width: 2;" +
-                "-fx-border-radius: 10;" +
-                "-fx-background-radius: 10;" +
-                "-fx-padding: 15;"
-            );
-            
-            mostrarResultado(false);
+            opcionCorrecta.setStyle("-fx-background-color: " + toRGBCode(COLOR_CORRECTO) + ";");
         }
+
+        mostrarResultado(esCorrecto);
+        return esCorrecto;
     }
+
     
-    private void verificarRespuestaFillInBlank(PreguntaFillinBlank pregunta) {
+    private boolean verificarRespuestaFillInBlank(PreguntaFillinBlank pregunta) {
         VBox respuestaBox = (VBox) panelFillInBlank.getChildren().get(1);
         TextField textRespuesta = (TextField) respuestaBox.getChildren().get(0);
         
@@ -1159,7 +1175,7 @@ public class VentanaPreguntas extends Application {
         
         if (respuestaUsuario.isEmpty()) {
             mostrarAlerta("Por favor, escribe una respuesta.");
-            return;
+            return false;
         }
         
         if (respuestaUsuario.equalsIgnoreCase(pregunta.getRespuestaCorrectaTexto())) {
@@ -1174,6 +1190,7 @@ public class VentanaPreguntas extends Application {
             );
             
             mostrarResultado(true);
+            return true;
         } else {
             // Respuesta incorrecta
             textRespuesta.setStyle(
@@ -1186,6 +1203,7 @@ public class VentanaPreguntas extends Application {
             );
             
             mostrarResultado(false);
+            return false;
         }
     }
     
@@ -1214,25 +1232,25 @@ public class VentanaPreguntas extends Application {
     }
 
     private void actualizarProgreso() {
-        // Calcular el total de preguntas y la pregunta actual global
         int totalPreguntas = 0;
         int preguntaActualGlobal = 0;
-        
+
         for (int i = 0; i < bloques.size(); i++) {
             int preguntasEnBloque = bloques.get(i).getPreguntas().size();
             totalPreguntas += preguntasEnBloque;
-            
+
             if (i < bloqueActual.get()) {
                 preguntaActualGlobal += preguntasEnBloque;
             }
         }
-        
+
         preguntaActualGlobal += preguntaActual.get() + 1;
-        
-        double progreso = (double) (preguntaActualGlobal - 1) / totalPreguntas;
+
+        double progreso = (double) preguntaActualGlobal / totalPreguntas;
         barraProgreso.setProgress(progreso);
         labelProgreso.setText(preguntaActualGlobal + " de " + totalPreguntas);
     }
+
 
     private String toRGBCode(Color color) {
         return String.format("#%02X%02X%02X",
