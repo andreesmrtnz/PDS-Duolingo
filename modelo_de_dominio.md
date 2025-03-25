@@ -75,7 +75,16 @@ Esto permite a los estudiantes adaptar su experiencia de aprendizaje según sus 
 ---
 
 
-Resumen del Modelo
+## Resumen
 
-Este modelo aborda la creación, gestión y utilización de cursos, incorpora un seguimiento del progreso y las estadísticas de uso, y permite la configuración flexible de estrategias de aprendizaje, alineándose con los objetivos y requerimientos descritos en el enunciado.
+Este modelo aborda:
+- La diferenciación entre la **definición** y la **ejecución** de un curso.
+- La gestión del progreso y las estadísticas del usuario.
+- La configuración flexible de estrategias de aprendizaje.
+
+Todo ello se alinea con los requisitos descritos en el enunciado, ofreciendo una base sólida para el desarrollo y evolución futura de la aplicación.
+
+# Modelo de dominio UML
+![modelo](https://github.com/user-attachments/assets/f3ef5b0f-bd26-4b2e-955e-3828a60c3c27)
+
 
