@@ -66,36 +66,69 @@ A continuación se presenta el detalle de los casos de uso propuestos, con sus r
   - **4a.** Si el curso ya existe, el sistema rechaza el curso.
 
 ---
-5. Guardar el Progreso
+## 5. Importar Curso
+- **Actor:** Usuario Creador
+- **Descripción:**  
+  El creador puede cargar un curso desde un fichero externo (JSON/YAML). La aplicación verifica la estructura del archivo y, si ya existe un curso con el mismo identificador, ofrece opciones para sobreescribirlo o crear una copia.
+- **Precondiciones:**  
+  - El usuario debe tener el rol de creador.
+  - El archivo debe estar en el formato correcto.
+- **Flujo Principal:**
+  1. El usuario accede a la opción de importar curso.
+  2. Selecciona un archivo JSON/YAML.
+  3. El sistema valida la estructura del archivo.
+  4. Si el curso no existe, se importa como nuevo.
+  5. Si el curso ya existe, se ofrece la opción de sobreescribirlo o crear una copia.
+- **Flujo Alternativo:**
+  - **3a.** Si el archivo es inválido, el sistema muestra un mensaje de error.
 
-Actor: Usuario registradoDescripción: El usuario puede guardar su progreso en cualquier momento, almacenando el ejercicio actual, la estrategia de aprendizaje y las respuestas dadas. La próxima vez que inicie sesión, podrá continuar desde donde lo dejó.
+---
 
-6. Configurar Estrategia de Aprendizaje
+## 6. Seleccionar Curso
+- **Actor:** Usuario Estudiante
+- **Descripción:**  
+  El estudiante accede a su biblioteca personal y puede buscar o filtrar los cursos disponibles (por nombre, autor, categoría o dificultad). Al seleccionar un curso, se muestra un resumen de su contenido y estadísticas relevantes.
+- **Flujo Principal:**
+  1. El usuario accede a la aplicación.
+  2. El sistema muestra la lista de cursos disponibles.
+  3. El usuario selecciona un curso de la lista.
+  4. El sistema carga el curso y lo prepara para su ejecución.
+- **Flujo Alternativo:**
+  - **3b.** No hay cursos disponibles y el usuario no puede seleccionar ninguno.
 
-Actor: Usuario registradoDescripción: El usuario puede elegir entre distintas estrategias de aprendizaje:
+---
 
-Secuencial: Los ejercicios se presentan en un orden fijo.
+## 7. Empezar Curso
+- **Actor:** Usuario Estudiante
+- **Descripción:**  
+  El estudiante inicia un curso seleccionado. Se carga la primera unidad o bloque de contenido y se establece la estrategia de aprendizaje por defecto o preseleccionada.
+- **Precondiciones:**  
+  - El usuario debe estar registrado y autenticado.
+  - El curso debe estar disponible en la biblioteca del usuario.
+- **Flujo Principal:**
+  1. El usuario selecciona un curso de su biblioteca.
+  2. El sistema carga la primera unidad o bloque de contenido.
+  3. Se establece la estrategia de aprendizaje predefinida o preseleccionada.
+  4. El usuario comienza a interactuar con los ejercicios o tarjetas de aprendizaje.
+- **Flujo Alternativo:**
+  - **2a.** Si el curso no está disponible, el sistema muestra un mensaje de error.
 
-Aleatorio: Los ejercicios se presentan de forma aleatoria.
+---
 
-Repetición Espaciada: Las preguntas más difíciles se repiten con mayor frecuencia.
+## 8. Reanudar Curso
+- **Actor:** Usuario Estudiante
+- **Descripción:**  
+  Si el estudiante ha guardado su progreso previamente, puede reanudar el curso desde el último punto de guardado, permitiendo la continuidad en el aprendizaje sin perder avances previos.
+- **Precondiciones:**  
+  - El usuario debe estar registrado y autenticado.
+  - El curso debe haber sido iniciado previamente y tener un progreso guardado.
+- **Flujo Principal:**
+  1. El usuario accede a su biblioteca de cursos.
+  2. Selecciona un curso previamente iniciado.
+  3. El sistema carga el último punto de guardado.
+  4. El usuario continúa con el curso desde donde lo dejó.
 
-7. Registrar Estadísticas
-
-Actor: Usuario registradoDescripción: Se almacenan datos del usuario para evaluar su progreso, incluyendo:
-
-Tiempo total de uso.
-
-Racha de aprendizaje (días consecutivos de uso).
-
-Porcentaje de respuestas correctas.
-
-Evolución en distintos tipos de ejercicios.
-
-8. Compartir un Curso
-
-Actor: Usuario registradoDescripción: Un usuario puede compartir un curso exportándolo en formato JSON/YAML, generando un enlace de descarga o enviándolo por correo. Otros usuarios pueden importarlo a su biblioteca personal.
-
+---
 9. Gestionar Usuarios
 
 Actor: UsuarioDescripción: Los usuarios pueden registrarse, iniciar sesión y gestionar su perfil. Se permite modificar datos personales y establecer preferencias de aprendizaje, como idioma o nivel de dificultad.
