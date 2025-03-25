@@ -1,41 +1,58 @@
-Modelo de Dominio
+M# Modelo de Dominio
 
-El modelo de dominio elegido se basa en representar los elementos clave de la aplicación de aprendizaje de manera modular y extensible, cumpliendo con los requerimientos del enunciado. A continuación, se ofrece una breve explicación de cada uno de los componentes:
+El modelo de dominio elegido representa los elementos clave de la aplicación de aprendizaje de manera **modular** y **extensible**, asegurando que se diferencien correctamente los conceptos de *curso* como entidad y *curso* como experiencia de usuario.
 
-Componentes del Modelo de Dominio
+---
 
-1. ControladorAplicacion y RepositorioUsuarios
+## Usuario y Estadísticas
 
-Estos elementos conforman la capa de control y persistencia:
+- **Usuario**  
+  Representa a la persona que usa la aplicación.  
+  Puede ser:
+  - **Creador:** Diseña y genera cursos.
+  - **Estudiante:** Realiza y consume cursos.
 
-ControladorAplicacion: Se encarga de la lógica central, como iniciar sesión, registrar usuarios o arrancar un curso.
+- **Estadísticas**  
+  Cada usuario tiene asociadas estadísticas donde se almacenan datos de uso, tales como:
+  - Tiempo total de estudio.
+  - Racha de días consecutivos.
+  - Porcentaje de aciertos.
 
-RepositorioUsuarios: Permite acceder y almacenar la información de los usuarios.
+Estas estadísticas permiten evaluar y motivar el rendimiento del estudiante.
 
-2. Usuario y Estadísticas
+---
 
-Usuario: Representa a la persona que usa la aplicación.
+## Curso y CursoEnProgreso
 
-Estadísticas: Almacena datos de uso como:
+- **Curso:**  
+  Es la especificación general de un conjunto de contenidos y ejercicios, creado por un usuario con rol de **Creador**.  
+  Características:
+  - Contiene *Bloques* de contenido.
+  - Incluye diferentes tipos de *Preguntas*.
 
-Tiempo total de uso.
+- **CursoEnProgreso:**  
+  Se genera cuando un **Estudiante** inicia un curso.  
+  Características:
+  - Almacena información sobre el progreso del estudiante.
+  - Registra la estrategia de aprendizaje elegida.
+  - Guarda estadísticas de desempeño específicas para la experiencia en curso.
 
-Racha de aprendizaje (días consecutivos de uso).
+---
 
-Porcentaje de respuestas correctas.
+## Bloque y Pregunta
 
-Evolución en distintos tipos de ejercicios.
+- **Bloque:**  
+  Un curso está compuesto por múltiples bloques, que organizan el contenido en secciones.
 
-3. Curso, Bloque y Pregunta
+- **Pregunta:**  
+  Cada bloque contiene una o más preguntas, que pueden ser de distintos tipos, por ejemplo:
+  - Opción múltiple.
+  - Completar huecos.
+  - Flashcards.
 
-Curso: Es el contenedor de los contenidos y ejercicios.
+La **clase abstracta Pregunta** facilita la incorporación de nuevos formatos sin afectar la estructura base del sistema.
 
-Bloque: Organiza el contenido en secciones dentro de un curso.
-
-Pregunta: Cada bloque contiene una o más preguntas.
-
-La clase abstracta Pregunta permite definir distintos tipos de ejercicios (como test, completar huecos o flashcards), facilitando la extensión del sistema sin modificar la arquitectura básica.
-
+---
 4. Estrategia de Aprendizaje
 
 La estrategia de aprendizaje define la forma en que se presentan los ejercicios en un curso. Se manejan los siguientes valores:
