@@ -129,60 +129,74 @@ A continuación se presenta el detalle de los casos de uso propuestos, con sus r
   4. El usuario continúa con el curso desde donde lo dejó.
 
 ---
-9. Gestionar Usuarios
+## 9. Configurar Estrategia de Aprendizaje
+- **Actor:** Usuario Estudiante
+- **Descripción:**  
+  Antes o durante el curso, el estudiante puede elegir entre diferentes estrategias de aprendizaje (por ejemplo, secuencial, aleatorio o repetición espaciada) que determinan el orden y la frecuencia de los ejercicios presentados.
+- **Precondiciones:**  
+  - El usuario debe haber iniciado sesión en la aplicación.
+  - El sistema debe contar con una lista de estrategias de aprendizaje predefinidas.
+- **Flujo Principal:**
+  1. El usuario accede a la configuración de su perfil o al menú de ajustes del curso.
+  2. El sistema muestra una lista de estrategias de aprendizaje disponibles:
+     - **Secuencial:** Los ejercicios se presentan en el orden definido por el curso.
+     - **Aleatorio:** Los ejercicios aparecen en orden aleatorio.
+     - **Repetición Espaciada:** Los ejercicios más difíciles se repiten con mayor frecuencia.
+  3. El usuario selecciona la estrategia de aprendizaje deseada.
+  4. El sistema guarda la configuración y la asocia al curso actual del usuario.
+  5. El usuario puede continuar con el curso utilizando la estrategia seleccionada.
 
-Actor: UsuarioDescripción: Los usuarios pueden registrarse, iniciar sesión y gestionar su perfil. Se permite modificar datos personales y establecer preferencias de aprendizaje, como idioma o nivel de dificultad.
+---
 
-10. Añadir Nuevos Tipos de Ejercicios
+## 10. Guardar Progreso
+- **Actor:** Usuario Estudiante
+- **Descripción:**  
+  Durante el desarrollo del curso, el sistema permite guardar el estado actual, incluyendo el bloque en curso, las respuestas y la estrategia de aprendizaje utilizada, para poder retomar la actividad más tarde.
+- **Precondiciones:**  
+  - El usuario debe haber iniciado sesión.
+  - Debe estar realizando un curso.
+- **Flujo Principal:**
+  1. El usuario selecciona la opción de "Guardar Progreso".
+  2. El sistema almacena la información del estado actual del curso (ejercicio, respuestas, estrategia).
+  3. Se confirma que el progreso ha sido guardado correctamente.
+- **Flujo Alternativo:**
+  - Si hay un error al guardar, el sistema notifica al usuario y ofrece reintentar.
+- **Postcondiciones:**  
+  - El usuario puede reanudar el curso desde el último punto guardado.
 
-Actor: Administrador o usuario avanzadoDescripción: La aplicación permite ampliar la variedad de ejercicios sin afectar los cursos existentes. Los desarrolladores pueden definir nuevos formatos de preguntas y modificar la interfaz para soportarlos. Los usuarios también pueden utilizar estos nuevos ejercicios al crear cursos.
+---
 
-Ejemplo de Casos de Uso Detallados
+## 11. Registrar Estadísticas
+- **Actor:** Usuario Estudiante
+- **Descripción:**  
+  El sistema recopila datos de uso y rendimiento del estudiante, como el tiempo total dedicado, la racha de días consecutivos de estudio, porcentaje de respuestas correctas y evolución en el rendimiento según tipos de ejercicio.
+- **Precondiciones:**  
+  - El usuario debe haber iniciado sesión.
+  - Debe haber completado al menos un ejercicio.
+- **Flujo Principal:**
+  1. El usuario realiza ejercicios en un curso.
+  2. El sistema registra estadísticas tales como:
+     - Tiempo total de estudio.
+     - Racha de días consecutivos.
+     - Porcentaje de respuestas correctas.
+     - Evolución en diferentes tipos de ejercicios.
+  3. El usuario puede consultar su historial de progreso en cualquier momento.
+- **Flujo Alternativo:**
+  - Si hay un error al registrar los datos, el sistema reintenta o guarda localmente hasta restaurar la conexión.
+- **Postcondiciones:**  
+  - Se actualizan las métricas de rendimiento del usuario.
 
-Caso de Uso 1: Seleccionar un Curso
+---
 
-Actor: Usuario registradoDescripción: El usuario selecciona un curso disponible en la aplicación para comenzar a realizar los ejercicios.
-
-Flujo Principal:
-
-El usuario accede a la aplicación.
-
-El sistema muestra la lista de cursos disponibles.
-
-El usuario selecciona un curso de la lista.
-
-El sistema carga el curso y lo prepara para su ejecución.
-
-Se muestra la primera actividad según la estrategia de aprendizaje configurada.
-
-Flujo Alternativo:
-
-3a. Si el usuario no ha iniciado sesión, se le solicita que lo haga antes de continuar.
-
-4a. Si el curso seleccionado no está disponible, se muestra un mensaje de error.
-
-Caso de Uso 2: Realizar un Curso
-
-Actor: Usuario registradoDescripción: El usuario interactúa con los ejercicios del curso según la estrategia de aprendizaje seleccionada.
-
-Flujo Principal:
-
-El usuario ha seleccionado un curso.
-
-El sistema presenta la primera actividad según la estrategia de aprendizaje.
-
-El usuario responde a la actividad.
-
-El sistema evalúa la respuesta y proporciona retroalimentación.
-
-Se registra el avance del usuario.
-
-Se presenta la siguiente actividad según la estrategia configurada.
-
-El proceso se repite hasta completar el curso.
-
-Flujo Alternativo:
-
-3a. Si el usuario abandona el curso, el sistema guarda el progreso para su reanudación posterior.
-
-4a. Si el usuario responde incorrectamente, el sistema puede ofrecer pistas o repetir la pregunta más adelante según la estrategia de aprendizaje.
+## 12. Gestionar Perfil de Usuario
+- **Actor:** Usuario (Estudiante y Creador)
+- **Descripción:**  
+  Permite a cualquier usuario modificar sus datos personales, preferencias de aprendizaje y gestionar la configuración de su cuenta.
+- **Precondiciones:**  
+  - El usuario debe haber iniciado sesión.
+- **Flujo Principal:**
+  1. El usuario accede a la configuración de su perfil.
+  2. Puede modificar datos como nombre y preferencias.
+  3. El sistema valida y guarda los cambios.
+- **Flujo Alternativo:**
+  - Si los datos ingresados son inválidos, el sistema muestra un mensaje de error.
