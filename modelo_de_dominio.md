@@ -53,21 +53,27 @@ Estas estadísticas permiten evaluar y motivar el rendimiento del estudiante.
 La **clase abstracta Pregunta** facilita la incorporación de nuevos formatos sin afectar la estructura base del sistema.
 
 ---
-4. Estrategia de Aprendizaje
+## Estrategia de Aprendizaje
 
-La estrategia de aprendizaje define la forma en que se presentan los ejercicios en un curso. Se manejan los siguientes valores:
+La aplicación permite configurar diferentes estrategias de aprendizaje mediante una enumeración llamada **EstrategiaAprendizaje**, que incluye opciones como:
+- **Secuencial:** Los ejercicios se presentan en orden predefinido.
+- **Aleatoria:** Los ejercicios se muestran en orden aleatorio.
+- **Repetición Espaciada:** Se priorizan los ejercicios más difíciles, repitiéndolos con mayor frecuencia.
 
-SECUENCIAL: Los ejercicios se presentan en un orden fijo.
+Esto permite a los estudiantes adaptar su experiencia de aprendizaje según sus preferencias.
 
-ALEATORIO: Los ejercicios se presentan de forma aleatoria.
+---
 
-REPETICIÓN_ESPACIADA: Las preguntas más difíciles se repiten con mayor frecuencia.
+## Compartición y Ampliación de Cursos
 
-5. Aspecto Social y Extensibilidad
+- **Compartición:**  
+  La relación entre **Usuario** y **Curso** permite que los usuarios no solo consuman contenido, sino que también lo generen y compartan con otros.
 
-Relación entre Usuario y Curso: Permite que los usuarios puedan crear y compartir cursos.
+- **Ampliación:**  
+  La arquitectura basada en clases abstractas y modularidad garantiza que el sistema pueda ampliarse con nuevos tipos de ejercicios y funcionalidades sin afectar la estructura existente.
 
-Extensibilidad: Gracias al uso de clases abstractas (como en Pregunta), es posible incorporar nuevos tipos de ejercicios sin modificar la arquitectura principal.
+---
+
 
 Resumen del Modelo
 
