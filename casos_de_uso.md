@@ -1,21 +1,71 @@
-Casos de Uso
+# Desarrollo de Casos de Uso
 
-1. Crear un Curso
+A continuación se presenta el detalle de los casos de uso propuestos, con sus respectivos actores, descripciones, precondiciones, flujos principales, flujos alternativos y postcondiciones cuando corresponda.
 
-Actor: Usuario registradoDescripción: El usuario puede crear un nuevo curso definiendo su estructura general, incluyendo bloques de contenido y distintos tipos de ejercicios (preguntas de opción múltiple, completar huecos, traducir, flashcards, etc.). Además, podrá configurar el título del curso, descripción y nivel de dificultad. El curso se guarda en formato JSON/YAML para su posterior uso o modificación.
+---
 
-2. Cargar un Curso
+## 1. Iniciar Sesión
+- **Actor:** Usuario (Estudiante o Creador)
+- **Descripción:**  
+  El usuario ya registrado introduce sus credenciales para acceder a la aplicación. Se valida su identidad y se inicia una sesión segura.
+- **Precondiciones:**  
+  - El usuario debe estar registrado en el sistema.
+- **Flujo Principal:**
+  1. El usuario accede a la pantalla de inicio de sesión.
+  2. El usuario introduce su correo electrónico y contraseña.
+  3. El sistema valida las credenciales.
+  4. Si la validación es exitosa, se inicia una sesión y se redirige al usuario a su perfil.
+- **Flujo Alternativo:**
+  - **3a.** Si las credenciales son incorrectas, el sistema muestra un mensaje de error e invita a reintentar.
 
-Actor: Usuario registradoDescripción: El usuario puede importar un curso previamente creado desde un archivo JSON/YAML. La aplicación verifica la estructura del archivo antes de importarlo. Si el curso ya existe en la biblioteca del usuario, se le ofrece la opción de sobrescribir o crear una copia.
+---
 
-3. Seleccionar un Curso
+## 2. Registrar Usuario Estudiante
+- **Actor:** Usuario Estudiante
+- **Descripción:**  
+  Permite a un usuario interesado en consumir cursos registrarse en la plataforma como estudiante. Se recopilan datos básicos y se asigna un rol con permisos limitados a consumir contenido.
+- **Precondiciones:**  
+  - El sistema debe permitir registros nuevos.
+- **Flujo Principal:**
+  1. El usuario accede al formulario de registro.
+  2. Introduce su nombre, correo electrónico y contraseña.
+  3. El sistema valida los datos y crea la cuenta con el rol de estudiante.
+- **Flujo Alternativo:**
+  - **2a.** Si el correo ya está registrado, el sistema muestra un mensaje de error.
 
-Actor: Usuario registradoDescripción: El usuario puede visualizar una lista de cursos disponibles en su biblioteca personal, filtrarlos por nombre, categoría o dificultad y seleccionar uno mostrando un resumen de lo que ofrece y su estructura.
+---
 
-4. Realizar un Curso
+## 3. Registrar Usuario Creador
+- **Actor:** Usuario Creador
+- **Descripción:**  
+  Permite a un usuario registrarse con un perfil de creador, lo que le habilita la creación e importación de cursos.
+- **Precondiciones:**  
+  - El usuario debe proporcionar información válida.
+- **Flujo Principal:**
+  1. El usuario accede al formulario de registro.
+  2. Introduce su nombre, correo electrónico y contraseña.
+  3. El sistema valida los datos y crea la cuenta con el rol de creador.
+- **Flujo Alternativo:**
+  - **2a.** Si el correo ya está registrado, el sistema muestra un mensaje de error.
 
-Actor: Usuario registradoDescripción: El usuario interactúa con los ejercicios del curso siguiendo una estrategia de aprendizaje predefinida. Se registra cada respuesta y se proporciona retroalimentación inmediata. Las respuestas correctas e incorrectas se guardan con el objetivo de actualizar las estadísticas de rendimiento.
+---
 
+## 4. Crear un Curso (añadido por nosotros)
+- **Actor:** Usuario Creador
+- **Descripción:**  
+  El creador de cursos genera un nuevo curso desde la aplicación, definiendo su estructura, título, descripción, bloques de contenido y los diferentes tipos de ejercicios (por ejemplo, opción múltiple, completar huecos, traducción, flashcards, etc.). El curso se guarda en formato JSON/YAML para permitir futuras ediciones y publicación.
+- **Precondiciones:**  
+  - El usuario debe tener el rol de creador.
+  - Debe haber un mecanismo para definir y almacenar cursos.
+- **Flujo Principal:**
+  1. El usuario accede a la opción de crear cursos.
+  2. Introduce los datos del curso (título, descripción, estructura).
+  3. Agrega bloques de contenido y ejercicios.
+  4. El curso queda disponible para edición y publicación.
+- **Flujo Alternativo:**
+  - **4a.** Si el curso ya existe, el sistema rechaza el curso.
+
+---
 5. Guardar el Progreso
 
 Actor: Usuario registradoDescripción: El usuario puede guardar su progreso en cualquier momento, almacenando el ejercicio actual, la estrategia de aprendizaje y las respuestas dadas. La próxima vez que inicie sesión, podrá continuar desde donde lo dejó.
