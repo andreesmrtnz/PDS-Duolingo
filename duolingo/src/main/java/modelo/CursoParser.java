@@ -52,7 +52,7 @@ public class CursoParser {
     /**
      * Convierte un DTO a un objeto Curso
      */
-    private static Curso convertirDTOaCurso(CursoDTO dto, Usuario creador) {
+    static Curso convertirDTOaCurso(CursoDTO dto, Usuario creador) {
         // Convertir bloques
         List<Bloque> bloques = new ArrayList<>();
         if (dto.getBloques() != null) {

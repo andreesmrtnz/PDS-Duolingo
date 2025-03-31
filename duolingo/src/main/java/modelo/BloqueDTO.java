@@ -10,7 +10,7 @@ public class BloqueDTO {
     private Long id;
     private String titulo;
     private String descripcion;
-    private List<PreguntaDTO> preguntas;
+    private List<PreguntaDTOTest> preguntas;
     
     // Constructor vacío para Jackson
     public BloqueDTO() {
@@ -24,10 +24,10 @@ public class BloqueDTO {
         this.preguntas = convertirPreguntasADTO(bloque.getPreguntas());
     }
     
-    private List<PreguntaDTO> convertirPreguntasADTO(List<Pregunta> preguntas) {
-        List<PreguntaDTO> preguntasDTO = new ArrayList<>();
+    private List<PreguntaDTOTest> convertirPreguntasADTO(List<Pregunta> preguntas) {
+        List<PreguntaDTOTest> preguntasDTO = new ArrayList<>();
         for (Pregunta pregunta : preguntas) {
-            preguntasDTO.add(PreguntaDTO.crearDesdeObjeto(pregunta));
+            preguntasDTO.add(PreguntaDTOTest.crearDesdeObjeto(pregunta));
         }
         return preguntasDTO;
     }
@@ -57,18 +57,18 @@ public class BloqueDTO {
         this.descripcion = descripcion;
     }
     
-    public List<PreguntaDTO> getPreguntas() {
+    public List<PreguntaDTOTest> getPreguntas() {
         return preguntas;
     }
     
-    public void setPreguntas(List<PreguntaDTO> preguntas) {
+    public void setPreguntas(List<PreguntaDTOTest> preguntas) {
         this.preguntas = preguntas;
     }
     
     // Convertir de DTO a objeto de dominio
     public Bloque toBloqueObjeto() {
         List<Pregunta> preguntasObjetos = new ArrayList<>();
-        for (PreguntaDTO preguntaDTO : preguntas) {
+        for (PreguntaDTOTest preguntaDTO : preguntas) {
             preguntasObjetos.add(preguntaDTO.toPreguntaObjeto());
         }
         

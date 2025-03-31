@@ -10,10 +10,8 @@ class CursoDTOTest {
     @Test
     void testConversionFromCurso() {
         Usuario creador = new Usuario();
-        creador.setId(100L);
-        
         Bloque bloque = new Bloque();
-        bloque.setContenido("Hola Mundo");
+        bloque.setDescripcion("Hola Mundo");
         List<Bloque> bloques = new ArrayList<>(List.of(bloque));
         
         Curso curso = new Curso(1L, "Java", "Programación", creador, bloques, 0);
