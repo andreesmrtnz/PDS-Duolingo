@@ -6,40 +6,31 @@ import jakarta.persistence.EntityManager;
 import modelo.Bloque;
 import modelo.Curso;
 import modelo.Pregunta;
+import modelo.Pregunta.TipoPregunta;
 import java.util.List;
+import java.util.ArrayList;
 
-class PreguntaDAOTest {
+class BloqueDAOTest {
     
-    private PreguntaDAO preguntaDAO;
     private BloqueDAO bloqueDAO;
     private CursoDAO cursoDAO;
-    private Bloque bloquePrueba;
     private Curso cursoPrueba;
     
     @BeforeEach
     void setUp() {
-        preguntaDAO = new PreguntaDAO();
         bloqueDAO = new BloqueDAO();
         cursoDAO = new CursoDAO();
         
         // Crear un curso de prueba
         cursoPrueba = new Curso();
-        cursoPrueba.setNombre("Curso de Prueba");
-        cursoPrueba.setDescripcion("Descripción del curso de prueba");
+        cursoPrueba.setTitulo("Curso de Prueba");
         cursoDAO.guardar(cursoPrueba);
-        
-        // Crear un bloque de prueba
-        bloquePrueba = new Bloque();
-        bloquePrueba.setTitulo("Bloque de prueba");
-        bloquePrueba.setDescripcion("Descripción del bloque de prueba");
-        bloquePrueba.setCurso(cursoPrueba);
-        bloqueDAO.guardar(bloquePrueba);
     }
     
     @AfterEach
     void tearDown() {
         // Limpiar datos de prueba
-        EntityManager em = preguntaDAO.getEntityManager();
+        EntityManager em = bloqueDAO.getEntityManager();
         try {
             em.getTransaction().begin();
             em.createQuery("DELETE FROM Pregunta").executeUpdate();
@@ -50,149 +41,153 @@ class PreguntaDAOTest {
             em.close();
         }
         
-        preguntaDAO.cerrar();
         bloqueDAO.cerrar();
         cursoDAO.cerrar();
     }
     
     @Test
-    void testGuardarPregunta() {
-        // Crear una pregunta de prueba
-        Pregunta pregunta = new Pregunta();
-        pregunta.setTexto("¿Cuál es la capital de Francia?");
-        pregunta.setOpciones("A) Londres\nB) París\nC) Madrid\nD) Roma");
-        pregunta.setRespuestaCorrecta("B");
-        pregunta.setExplicacion("París es la capital de Francia.");
-        pregunta.setBloque(bloquePrueba);
+    void testGuardarBloque() {
+        // Crear un bloque de prueba
+        Bloque bloque = new Bloque("Bloque de prueba", "Descripción del bloque de prueba");
+        bloque.setCurso(cursoPrueba);
         
-        // Guardar la pregunta
-        preguntaDAO.guardar(pregunta);
+        // Guardar el bloque
+        bloqueDAO.guardar(bloque);
         
         // Verificar que el id no sea nulo
-        assertNotNull(pregunta.getId(), "El ID de la pregunta no debería ser nulo después de guardarla");
+        assertNotNull(bloque.getId(), "El ID del bloque no debería ser nulo después de guardarlo");
         
-        // Buscar la pregunta por ID
-        Pregunta preguntaRecuperada = preguntaDAO.buscarPorId(pregunta.getId());
+        // Buscar el bloque por ID
+        Bloque bloqueRecuperado = bloqueDAO.buscarPorId(bloque.getId());
         
-        // Verificar que la pregunta se recuperó correctamente
-        assertNotNull(preguntaRecuperada, "La pregunta recuperada no debería ser nula");
-        assertEquals(pregunta.getTexto(), preguntaRecuperada.getTexto(), "Los textos deberían coincidir");
-        assertEquals(pregunta.getOpciones(), preguntaRecuperada.getOpciones(), "Las opciones deberían coincidir");
-        assertEquals(pregunta.getRespuestaCorrecta(), preguntaRecuperada.getRespuestaCorrecta(), "Las respuestas correctas deberían coincidir");
-        assertEquals(pregunta.getExplicacion(), preguntaRecuperada.getExplicacion(), "Las explicaciones deberían coincidir");
-        assertEquals(bloquePrueba.getId(), preguntaRecuperada.getBloque().getId(), "Los IDs de bloque deberían coincidir");
+        // Verificar que el bloque se recuperó correctamente
+        assertNotNull(bloqueRecuperado, "El bloque recuperado no debería ser nulo");
+        assertEquals(bloque.getTitulo(), bloqueRecuperado.getTitulo(), "Los títulos deberían coincidir");
+        assertEquals(bloque.getDescripcion(), bloqueRecuperado.getDescripcion(), "Las descripciones deberían coincidir");
+        assertEquals(cursoPrueba.getId(), bloqueRecuperado.getCurso().getId(), "Los IDs de curso deberían coincidir");
     }
     
     @Test
-    void testActualizarPregunta() {
-        // Crear una pregunta de prueba
-        Pregunta pregunta = new Pregunta();
-        pregunta.setTexto("Pregunta original");
-        pregunta.setOpciones("Opciones originales");
-        pregunta.setRespuestaCorrecta("A");
-        pregunta.setExplicacion("Explicación original");
-        pregunta.setBloque(bloquePrueba);
+    void testActualizarBloque() {
+        // Crear un bloque de prueba
+        Bloque bloque = new Bloque("Título original", "Descripción original");
+        bloque.setCurso(cursoPrueba);
         
-        // Guardar la pregunta
-        preguntaDAO.guardar(pregunta);
+        // Guardar el bloque
+        bloqueDAO.guardar(bloque);
         
-        // Modificar la pregunta
-        pregunta.setTexto("Pregunta actualizada");
-        pregunta.setOpciones("Opciones actualizadas");
-        pregunta.setRespuestaCorrecta("B");
-        pregunta.setExplicacion("Explicación actualizada");
+        // Modificar el bloque
+        bloque.setTitulo("Título actualizado");
+        bloque.setDescripcion("Descripción actualizada");
         
-        // Actualizar la pregunta
-        preguntaDAO.guardar(pregunta);
+        // Actualizar el bloque
+        bloqueDAO.guardar(bloque);
         
-        // Recuperar la pregunta actualizada
-        Pregunta preguntaActualizada = preguntaDAO.buscarPorId(pregunta.getId());
+        // Recuperar el bloque actualizado
+        Bloque bloqueActualizado = bloqueDAO.buscarPorId(bloque.getId());
         
         // Verificar que los cambios se guardaron
-        assertEquals("Pregunta actualizada", preguntaActualizada.getTexto(), "El texto actualizado debería coincidir");
-        assertEquals("Opciones actualizadas", preguntaActualizada.getOpciones(), "Las opciones actualizadas deberían coincidir");
-        assertEquals("B", preguntaActualizada.getRespuestaCorrecta(), "La respuesta correcta actualizada debería coincidir");
-        assertEquals("Explicación actualizada", preguntaActualizada.getExplicacion(), "La explicación actualizada debería coincidir");
+        assertEquals("Título actualizado", bloqueActualizado.getTitulo(), "El título actualizado debería coincidir");
+        assertEquals("Descripción actualizada", bloqueActualizado.getDescripcion(), "La descripción actualizada debería coincidir");
     }
     
     @Test
-    void testBuscarPorBloque() {
-        // Crear varias preguntas para el mismo bloque
-        Pregunta pregunta1 = new Pregunta();
-        pregunta1.setTexto("Pregunta 1");
-        pregunta1.setOpciones("Opciones 1");
-        pregunta1.setRespuestaCorrecta("A");
-        pregunta1.setExplicacion("Explicación 1");
-        pregunta1.setBloque(bloquePrueba);
-        preguntaDAO.guardar(pregunta1);
+    void testBuscarPorCurso() {
+        // Crear varios bloques para el mismo curso
+        Bloque bloque1 = new Bloque("Bloque 1", "Descripción 1");
+        bloque1.setCurso(cursoPrueba);
+        bloqueDAO.guardar(bloque1);
         
-        Pregunta pregunta2 = new Pregunta();
-        pregunta2.setTexto("Pregunta 2");
-        pregunta2.setOpciones("Opciones 2");
-        pregunta2.setRespuestaCorrecta("B");
-        pregunta2.setExplicacion("Explicación 2");
-        pregunta2.setBloque(bloquePrueba);
-        preguntaDAO.guardar(pregunta2);
+        Bloque bloque2 = new Bloque("Bloque 2", "Descripción 2");
+        bloque2.setCurso(cursoPrueba);
+        bloqueDAO.guardar(bloque2);
         
-        // Crear otro bloque y pregunta
-        Bloque otroBloque = new Bloque();
-        otroBloque.setTitulo("Otro bloque");
-        otroBloque.setDescripcion("Descripción de otro bloque");
-        otroBloque.setCurso(cursoPrueba);
-        bloqueDAO.guardar(otroBloque);
+        // Crear otro curso y bloque
+        Curso otroCurso = new Curso();
+        otroCurso.setTitulo("Otro curso");
+        cursoDAO.guardar(otroCurso);
         
-        Pregunta pregunta3 = new Pregunta();
-        pregunta3.setTexto("Pregunta 3");
-        pregunta3.setOpciones("Opciones 3");
-        pregunta3.setRespuestaCorrecta("C");
-        pregunta3.setExplicacion("Explicación 3");
-        pregunta3.setBloque(otroBloque);
-        preguntaDAO.guardar(pregunta3);
+        Bloque bloque3 = new Bloque("Bloque 3", "Descripción 3");
+        bloque3.setCurso(otroCurso);
+        bloqueDAO.guardar(bloque3);
         
-        // Buscar preguntas por bloque
-        List<Pregunta> preguntas = preguntaDAO.buscarPorBloque(bloquePrueba.getId());
+        // Buscar bloques por curso
+        List<Bloque> bloques = bloqueDAO.buscarPorCurso(cursoPrueba.getId());
         
-        // Verificar que se encontraron las preguntas correctas
-        assertNotNull(preguntas, "La lista de preguntas no debería ser nula");
-        assertEquals(2, preguntas.size(), "Deberían haber 2 preguntas para el bloque de prueba");
+        // Verificar que se encontraron los bloques correctos
+        assertNotNull(bloques, "La lista de bloques no debería ser nula");
+        assertEquals(2, bloques.size(), "Deberían haber 2 bloques para el curso de prueba");
         
-        // Verificar que las preguntas encontradas son las correctas
-        boolean encontroPregunta1 = false;
-        boolean encontroPregunta2 = false;
+        // Verificar que los bloques encontrados son los correctos
+        boolean encontroBloque1 = false;
+        boolean encontroBloque2 = false;
         
-        for (Pregunta p : preguntas) {
-            if (p.getId().equals(pregunta1.getId())) {
-                encontroPregunta1 = true;
-            } else if (p.getId().equals(pregunta2.getId())) {
-                encontroPregunta2 = true;
+        for (Bloque b : bloques) {
+            if (b.getId().equals(bloque1.getId())) {
+                encontroBloque1 = true;
+            } else if (b.getId().equals(bloque2.getId())) {
+                encontroBloque2 = true;
             }
         }
         
-        assertTrue(encontroPregunta1, "Debería encontrarse la pregunta 1");
-        assertTrue(encontroPregunta2, "Debería encontrarse la pregunta 2");
+        assertTrue(encontroBloque1, "Debería encontrarse el bloque 1");
+        assertTrue(encontroBloque2, "Debería encontrarse el bloque 2");
     }
     
     @Test
-    void testEliminarPregunta() {
-        // Crear una pregunta de prueba
-        Pregunta pregunta = new Pregunta();
-        pregunta.setTexto("Pregunta a eliminar");
-        pregunta.setOpciones("Opciones a eliminar");
-        pregunta.setRespuestaCorrecta("A");
-        pregunta.setExplicacion("Explicación a eliminar");
-        pregunta.setBloque(bloquePrueba);
+    void testEliminarBloque() {
+        // Crear un bloque de prueba
+        Bloque bloque = new Bloque("Bloque a eliminar", "Descripción a eliminar");
+        bloque.setCurso(cursoPrueba);
         
-        // Guardar la pregunta
-        preguntaDAO.guardar(pregunta);
-        Long idPregunta = pregunta.getId();
+        // Guardar el bloque
+        bloqueDAO.guardar(bloque);
+        Long idBloque = bloque.getId();
         
         // Verificar que existe
-        assertNotNull(preguntaDAO.buscarPorId(idPregunta), "La pregunta debería existir antes de eliminarla");
+        assertNotNull(bloqueDAO.buscarPorId(idBloque), "El bloque debería existir antes de eliminarlo");
         
-        // Eliminar la pregunta
-        preguntaDAO.eliminar(pregunta);
+        // Eliminar el bloque
+        bloqueDAO.eliminar(bloque);
         
         // Verificar que ya no existe
-        assertNull(preguntaDAO.buscarPorId(idPregunta), "La pregunta no debería existir después de eliminarla");
+        assertNull(bloqueDAO.buscarPorId(idBloque), "El bloque no debería existir después de eliminarlo");
+    }
+    
+    @Test
+    void testRelacionBidireccionalConPreguntas() {
+        // Crear un bloque
+        Bloque bloque = new Bloque("Bloque con preguntas", "Contiene preguntas");
+        bloque.setCurso(cursoPrueba);
+        
+        // Crear preguntas
+        Pregunta pregunta1 = new Pregunta("¿Pregunta 1?", 
+                                          List.of("Opción 1", "Opción 2", "Opción 3"), 
+                                          1, 
+                                          TipoPregunta.SELECCION_MULTIPLE);
+        
+        Pregunta pregunta2 = new Pregunta("¿Pregunta 2?", 
+                                          List.of("Opción A", "Opción B"), 
+                                          0, 
+                                          TipoPregunta.SELECCION_MULTIPLE);
+        
+        // Agregar preguntas al bloque
+        bloque.addPregunta(pregunta1);
+        bloque.addPregunta(pregunta2);
+        
+        // Guardar el bloque (debería guardar también las preguntas por cascada)
+        bloqueDAO.guardar(bloque);
+        
+        // Recuperar el bloque
+        Bloque bloqueRecuperado = bloqueDAO.buscarPorId(bloque.getId());
+        
+        // Verificar que las preguntas se guardaron
+        assertNotNull(bloqueRecuperado, "El bloque recuperado no debería ser nulo");
+        assertEquals(2, bloqueRecuperado.getPreguntas().size(), "El bloque debería tener 2 preguntas");
+        
+        // Verificar que la relación bidireccional se mantiene
+        for (Pregunta p : bloqueRecuperado.getPreguntas()) {
+            assertEquals(bloqueRecuperado, p.getBloque(), "La relación bidireccional debería mantenerse");
+        }
     }
 }

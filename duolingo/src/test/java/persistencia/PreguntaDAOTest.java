@@ -6,7 +6,9 @@ import jakarta.persistence.EntityManager;
 import modelo.Bloque;
 import modelo.Curso;
 import modelo.Pregunta;
+import modelo.Pregunta.TipoPregunta;
 import java.util.List;
+import java.util.ArrayList;
 
 class PreguntaDAOTest {
     
@@ -24,14 +26,11 @@ class PreguntaDAOTest {
         
         // Crear un curso de prueba
         cursoPrueba = new Curso();
-        cursoPrueba.setNombre("Curso de Prueba");
-        cursoPrueba.setDescripcion("Descripción del curso de prueba");
+        cursoPrueba.setTitulo("Curso de Prueba");
         cursoDAO.guardar(cursoPrueba);
         
         // Crear un bloque de prueba
-        bloquePrueba = new Bloque();
-        bloquePrueba.setTitulo("Bloque de prueba");
-        bloquePrueba.setDescripcion("Descripción del bloque de prueba");
+        bloquePrueba = new Bloque("Bloque de prueba", "Descripción del bloque de prueba");
         bloquePrueba.setCurso(cursoPrueba);
         bloqueDAO.guardar(bloquePrueba);
     }
@@ -58,11 +57,16 @@ class PreguntaDAOTest {
     @Test
     void testGuardarPregunta() {
         // Crear una pregunta de prueba
-        Pregunta pregunta = new Pregunta();
-        pregunta.setTexto("¿Cuál es la capital de Francia?");
-        pregunta.setOpciones("A) Londres\nB) París\nC) Madrid\nD) Roma");
-        pregunta.setRespuestaCorrecta("B");
-        pregunta.setExplicacion("París es la capital de Francia.");
+        List<String> opciones = new ArrayList<>();
+        opciones.add("Londres");
+        opciones.add("París");
+        opciones.add("Madrid");
+        opciones.add("Roma");
+        
+        Pregunta pregunta = new Pregunta("¿Cuál es la capital de Francia?", 
+                                         opciones, 
+                                         1, 
+                                         TipoPregunta.SELECCION_MULTIPLE);
         pregunta.setBloque(bloquePrueba);
         
         // Guardar la pregunta
@@ -76,31 +80,36 @@ class PreguntaDAOTest {
         
         // Verificar que la pregunta se recuperó correctamente
         assertNotNull(preguntaRecuperada, "La pregunta recuperada no debería ser nula");
-        assertEquals(pregunta.getTexto(), preguntaRecuperada.getTexto(), "Los textos deberían coincidir");
-        assertEquals(pregunta.getOpciones(), preguntaRecuperada.getOpciones(), "Las opciones deberían coincidir");
+        assertEquals(pregunta.getEnunciado(), preguntaRecuperada.getEnunciado(), "Los enunciados deberían coincidir");
+        assertArrayEquals(pregunta.getOpciones(), preguntaRecuperada.getOpciones(), "Las opciones deberían coincidir");
         assertEquals(pregunta.getRespuestaCorrecta(), preguntaRecuperada.getRespuestaCorrecta(), "Las respuestas correctas deberían coincidir");
-        assertEquals(pregunta.getExplicacion(), preguntaRecuperada.getExplicacion(), "Las explicaciones deberían coincidir");
         assertEquals(bloquePrueba.getId(), preguntaRecuperada.getBloque().getId(), "Los IDs de bloque deberían coincidir");
     }
     
     @Test
     void testActualizarPregunta() {
         // Crear una pregunta de prueba
-        Pregunta pregunta = new Pregunta();
-        pregunta.setTexto("Pregunta original");
-        pregunta.setOpciones("Opciones originales");
-        pregunta.setRespuestaCorrecta("A");
-        pregunta.setExplicacion("Explicación original");
+        List<String> opcionesOriginales = new ArrayList<>();
+        opcionesOriginales.add("Opción A");
+        opcionesOriginales.add("Opción B");
+        
+        Pregunta pregunta = new Pregunta("Pregunta original", 
+                                         opcionesOriginales, 
+                                         0, 
+                                         TipoPregunta.SELECCION_MULTIPLE);
         pregunta.setBloque(bloquePrueba);
         
         // Guardar la pregunta
         preguntaDAO.guardar(pregunta);
         
         // Modificar la pregunta
-        pregunta.setTexto("Pregunta actualizada");
-        pregunta.setOpciones("Opciones actualizadas");
-        pregunta.setRespuestaCorrecta("B");
-        pregunta.setExplicacion("Explicación actualizada");
+        pregunta.setEnunciado("Pregunta actualizada");
+        List<String> opcionesActualizadas = new ArrayList<>();
+        opcionesActualizadas.add("Opción C");
+        opcionesActualizadas.add("Opción D");
+        
+        pregunta.setOpcionesList(opcionesActualizadas);
+        pregunta.setRespuestaCorrecta(1);
         
         // Actualizar la pregunta
         preguntaDAO.guardar(pregunta);
@@ -109,43 +118,38 @@ class PreguntaDAOTest {
         Pregunta preguntaActualizada = preguntaDAO.buscarPorId(pregunta.getId());
         
         // Verificar que los cambios se guardaron
-        assertEquals("Pregunta actualizada", preguntaActualizada.getTexto(), "El texto actualizado debería coincidir");
-        assertEquals("Opciones actualizadas", preguntaActualizada.getOpciones(), "Las opciones actualizadas deberían coincidir");
-        assertEquals("B", preguntaActualizada.getRespuestaCorrecta(), "La respuesta correcta actualizada debería coincidir");
-        assertEquals("Explicación actualizada", preguntaActualizada.getExplicacion(), "La explicación actualizada debería coincidir");
+        assertEquals("Pregunta actualizada", preguntaActualizada.getEnunciado(), "El enunciado actualizado debería coincidir");
+        assertEquals("Opción C", preguntaActualizada.getOpciones()[0], "La primera opción actualizada debería coincidir");
+        assertEquals("Opción D", preguntaActualizada.getOpciones()[1], "La segunda opción actualizada debería coincidir");
+        assertEquals(1, preguntaActualizada.getRespuestaCorrecta(), "La respuesta correcta actualizada debería coincidir");
     }
     
     @Test
     void testBuscarPorBloque() {
         // Crear varias preguntas para el mismo bloque
-        Pregunta pregunta1 = new Pregunta();
-        pregunta1.setTexto("Pregunta 1");
-        pregunta1.setOpciones("Opciones 1");
-        pregunta1.setRespuestaCorrecta("A");
-        pregunta1.setExplicacion("Explicación 1");
+        Pregunta pregunta1 = new Pregunta("Pregunta 1", 
+                                          List.of("Opción 1", "Opción 2"), 
+                                          0, 
+                                          TipoPregunta.SELECCION_MULTIPLE);
         pregunta1.setBloque(bloquePrueba);
         preguntaDAO.guardar(pregunta1);
         
-        Pregunta pregunta2 = new Pregunta();
-        pregunta2.setTexto("Pregunta 2");
-        pregunta2.setOpciones("Opciones 2");
-        pregunta2.setRespuestaCorrecta("B");
-        pregunta2.setExplicacion("Explicación 2");
+        Pregunta pregunta2 = new Pregunta("Pregunta 2", 
+                                          List.of("Opción A", "Opción B"), 
+                                          1, 
+                                          TipoPregunta.SELECCION_MULTIPLE);
         pregunta2.setBloque(bloquePrueba);
         preguntaDAO.guardar(pregunta2);
         
         // Crear otro bloque y pregunta
-        Bloque otroBloque = new Bloque();
-        otroBloque.setTitulo("Otro bloque");
-        otroBloque.setDescripcion("Descripción de otro bloque");
+        Bloque otroBloque = new Bloque("Otro bloque", "Descripción de otro bloque");
         otroBloque.setCurso(cursoPrueba);
         bloqueDAO.guardar(otroBloque);
         
-        Pregunta pregunta3 = new Pregunta();
-        pregunta3.setTexto("Pregunta 3");
-        pregunta3.setOpciones("Opciones 3");
-        pregunta3.setRespuestaCorrecta("C");
-        pregunta3.setExplicacion("Explicación 3");
+        Pregunta pregunta3 = new Pregunta("Pregunta 3", 
+                                          List.of("Opción X", "Opción Y", "Opción Z"), 
+                                          2, 
+                                          TipoPregunta.SELECCION_MULTIPLE);
         pregunta3.setBloque(otroBloque);
         preguntaDAO.guardar(pregunta3);
         
@@ -175,11 +179,10 @@ class PreguntaDAOTest {
     @Test
     void testEliminarPregunta() {
         // Crear una pregunta de prueba
-        Pregunta pregunta = new Pregunta();
-        pregunta.setTexto("Pregunta a eliminar");
-        pregunta.setOpciones("Opciones a eliminar");
-        pregunta.setRespuestaCorrecta("A");
-        pregunta.setExplicacion("Explicación a eliminar");
+        Pregunta pregunta = new Pregunta("Pregunta a eliminar", 
+                                         List.of("Opción X", "Opción Y"), 
+                                         0, 
+                                         TipoPregunta.SELECCION_MULTIPLE);
         pregunta.setBloque(bloquePrueba);
         
         // Guardar la pregunta
@@ -194,5 +197,36 @@ class PreguntaDAOTest {
         
         // Verificar que ya no existe
         assertNull(preguntaDAO.buscarPorId(idPregunta), "La pregunta no debería existir después de eliminarla");
+    }
+    
+    @Test
+    void testTiposPregunta() {
+        // Probar diferentes tipos de preguntas
+        
+        // Pregunta de selección múltiple
+        Pregunta preguntaSeleccion = new Pregunta("Pregunta selección múltiple", 
+                                                 List.of("Opción 1", "Opción 2", "Opción 3"), 
+                                                 1, 
+                                                 TipoPregunta.SELECCION_MULTIPLE);
+        preguntaSeleccion.setBloque(bloquePrueba);
+        preguntaDAO.guardar(preguntaSeleccion);
+        
+        // Pregunta de emparejamiento
+        Pregunta preguntaEmparejamiento = new Pregunta("Pregunta emparejamiento", 
+                                                      List.of("Elemento A", "Elemento B", "Coincide con A", "Coincide con B"), 
+                                                      0, 
+                                                      TipoPregunta.EMPAREJAMIENTO);
+        preguntaEmparejamiento.setBloque(bloquePrueba);
+        preguntaDAO.guardar(preguntaEmparejamiento);
+        
+        // Recuperar preguntas
+        Pregunta seleccionRecuperada = preguntaDAO.buscarPorId(preguntaSeleccion.getId());
+        Pregunta emparejamientoRecuperada = preguntaDAO.buscarPorId(preguntaEmparejamiento.getId());
+        
+        // Verificar tipos
+        assertEquals(TipoPregunta.SELECCION_MULTIPLE, seleccionRecuperada.getTipo(), 
+                   "El tipo de pregunta de selección múltiple debería conservarse");
+        assertEquals(TipoPregunta.EMPAREJAMIENTO, emparejamientoRecuperada.getTipo(), 
+                   "El tipo de pregunta de emparejamiento debería conservarse");
     }
 }

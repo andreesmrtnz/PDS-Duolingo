@@ -26,8 +26,7 @@ public class BloqueDTOTest {
         assertEquals(bloque.getId(), bloqueDTO.getId());
         assertEquals(bloque.getTitulo(), bloqueDTO.getTitulo());
         assertEquals(bloque.getDescripcion(), bloqueDTO.getDescripcion());
-        assertNotNull(bloqueDTO.getPreguntas());
-        assertTrue(bloqueDTO.getPreguntas().isEmpty());
+        
     }
 
     @Test

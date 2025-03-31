@@ -1,17 +1,19 @@
-// ControladorTest.java
 package modelo;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith; // <-- Falta esta importación
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import persistencia.CursoDAO;
 import persistencia.UsuarioDAO;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(MockitoExtension.class) // Asegura que Mockito funcione con JUnit 5
 class ControladorTest {
     @Mock
     private RepositorioUsuarios repoUsuarios;
