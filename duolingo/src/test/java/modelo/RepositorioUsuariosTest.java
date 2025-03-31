@@ -23,7 +23,6 @@ class RepositorioUsuariosTest {
  void setUp() {
      repositorio = RepositorioUsuarios.getUnicaInstancia();
      // Inyección manual del mock para pruebas
-     repositorio.usuarioDAO = usuarioDAO;
  }
 
  @Test

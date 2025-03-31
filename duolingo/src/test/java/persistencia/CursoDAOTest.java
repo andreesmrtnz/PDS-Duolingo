@@ -22,7 +22,7 @@ public class CursoDAOTest {
         
         // Crear un usuario para usar como creador de los cursos
         creador = new Usuario();
-        usuarioDAO.guardar(creador);
+        usuarioDAO.registrar(creador);
     }
     
     @AfterAll
@@ -124,7 +124,7 @@ public class CursoDAOTest {
     public void testBuscarPorCreador() {
         // Crear un nuevo usuario para este test
         Usuario otroCreador = new Usuario();
-        usuarioDAO.guardar(otroCreador);
+        usuarioDAO.registrar(otroCreador);
         
         // Crear cursos con diferentes creadores
         Curso curso1 = new Curso();

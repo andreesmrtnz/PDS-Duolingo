@@ -2,8 +2,6 @@ package persistencia;
 
 import modelo.Usuario;
 import org.junit.jupiter.api.*;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 import static org.junit.jupiter.api.Assertions.*;
 
 class UsuarioDAOTest {
