@@ -64,8 +64,6 @@ public class Controlador {
         return usuarioActual;
     }
     
-    // Modificación: ya no se recibe el usuario, se utiliza el usuario actual del controlador
-    // Ahora usa CursoDAO para persistir el curso
     public boolean cargarCursoDesdeArchivo(String rutaArchivo) {
         EntityManager em = usuarioDAO.getEntityManager();
         try {
@@ -73,18 +71,11 @@ public class Controlador {
             
             Curso curso = CursoParser.cargarCurso(rutaArchivo, this.usuarioActual);
             
-            // Establecer correctamente las relaciones bidireccionales
-            for (Bloque bloque : curso.getBloques()) {
-                bloque.setCurso(curso);
-                
-                for (Pregunta pregunta : bloque.getPreguntas()) {
-                    pregunta.setBloque(bloque);
-                }
-            }
+            // Las relaciones bidireccionales ya se establecen en CursoParser.cargarCurso
+            // Pero podemos hacerlo también aquí si fuera necesario
             
             // Eliminar duplicados en la lista de bloques del curso antes de guardarlo
             curso.setBloques(new ArrayList<>(new HashSet<>(curso.getBloques())));
-
             repoCursos.agregarCurso(curso);
             this.usuarioActual.addCurso(curso);
             
@@ -93,6 +84,14 @@ public class Controlador {
             usuarioDAO.actualizar(usuarioActual);
             
             em.getTransaction().commit();
+            
+            // Log de verificación de tipos
+            for (Bloque bloque : curso.getBloques()) {
+                for (Pregunta pregunta : bloque.getPreguntas()) {
+                    System.out.println("Pregunta cargada: " + pregunta.getEnunciado() + 
+                                       " - Tipo: " + pregunta.getClass().getSimpleName());
+                }
+            }
             
             return true;
         } catch (Exception e) {

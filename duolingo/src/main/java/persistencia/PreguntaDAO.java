@@ -2,6 +2,10 @@ package persistencia;
 
 import jakarta.persistence.*;
 import modelo.Pregunta;
+import modelo.PreguntaFillinBlank;
+import modelo.PreguntaFlashCard;
+import modelo.PreguntaMultipleChoice;
+
 import java.util.List;
 
 public class PreguntaDAO {
@@ -82,5 +86,48 @@ public class PreguntaDAO {
         if (emf != null && emf.isOpen()) {
             emf.close();
         }
+    }
+    
+ // Nuevos métodos para PreguntaDAO.java
+    public List<PreguntaMultipleChoice> buscarPreguntasMultipleChoice() {
+        EntityManager em = emf.createEntityManager();
+        List<PreguntaMultipleChoice> preguntas = null;
+        try {
+            preguntas = em.createQuery(
+                    "SELECT p FROM PreguntaMultipleChoice p", 
+                    PreguntaMultipleChoice.class)
+                    .getResultList();
+        } finally {
+            em.close();
+        }
+        return preguntas;
+    }
+
+    public List<PreguntaFlashCard> buscarPreguntasFlashCard() {
+        EntityManager em = emf.createEntityManager();
+        List<PreguntaFlashCard> preguntas = null;
+        try {
+            preguntas = em.createQuery(
+                    "SELECT p FROM PreguntaFlashCard p", 
+                    PreguntaFlashCard.class)
+                    .getResultList();
+        } finally {
+            em.close();
+        }
+        return preguntas;
+    }
+
+    public List<PreguntaFillinBlank> buscarPreguntasFillinBlank() {
+        EntityManager em = emf.createEntityManager();
+        List<PreguntaFillinBlank> preguntas = null;
+        try {
+            preguntas = em.createQuery(
+                    "SELECT p FROM PreguntaFillinBlank p", 
+                    PreguntaFillinBlank.class)
+                    .getResultList();
+        } finally {
+            em.close();
+        }
+        return preguntas;
     }
 }

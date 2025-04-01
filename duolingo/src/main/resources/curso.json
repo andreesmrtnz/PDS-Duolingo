@@ -1,109 +1,51 @@
 {
   "id": null,
-  "titulo": "Programación Java Avanzado",
+  "titulo": "Curso de Ejemplo",
   "dominio": "Programación",
-  "idCreador": 101,
+  "idCreador": 1,
   "posicionActual": 0,
   "bloques": [
     {
       "id": null,
-      "titulo": "Fundamentos de Java",
-      "descripcion": "Conceptos básicos del lenguaje Java",
+      "titulo": "Introducción a Java",
+      "descripcion": "Conceptos básicos de programación en Java",
       "preguntas": [
         {
-          "tipo": "MultipleChoice",
-          "id": null,
-          "enunciado": "¿Qué compila los archivos .java en Java?",
-          "opciones": ["JVM", "JDK", "JRE", "javac"],
-          "respuestaCorrecta": 3
+          "enunciado": "¿Cuál es el modificador de acceso más restrictivo en Java?",
+          "opciones": ["public", "protected", "default", "private"],
+          "respuestaCorrecta": 3,
+          "tipo": "SELECCION_MULTIPLE"
         },
         {
-          "tipo": "MultipleChoice",
-          "id": null,
-          "enunciado": "¿Cuál es la sintaxis correcta para declarar una variable de tipo entero en Java?",
-          "opciones": ["var i = 10;", "int i = 10;", "Integer i = 10;", "i = 10;"],
-          "respuestaCorrecta": 1
-        },
-        {
-          "tipo": "FlashCard",
-          "id": null,
-          "enunciado": "¿Qué significa JVM?",
-          "opciones": ["Java Virtual Machine"],
-          "respuestaCorrecta": 0
+          "enunciado": "¿Qué palabra clave se utiliza para crear una nueva instancia de una clase?",
+          "opciones": ["new", "this", "class", "instance"],
+          "respuestaCorrecta": 0,
+          "tipo": "SELECCION_MULTIPLE"
         }
       ]
     },
     {
       "id": null,
-      "titulo": "Programación Orientada a Objetos",
-      "descripcion": "Conceptos de POO en Java",
+      "titulo": "Herencia y Polimorfismo",
+      "descripcion": "Conceptos avanzados de programación orientada a objetos",
       "preguntas": [
         {
-          "tipo": "MultipleChoice",
-          "id": null,
-          "enunciado": "¿Cuál NO es un pilar de la POO?",
-          "opciones": ["Herencia", "Encapsulamiento", "Compilación", "Polimorfismo"],
-          "respuestaCorrecta": 2
-        },
-        {
-          "tipo": "EMPAREJAMIENTO",
-          "id": null,
-          "enunciado": "Empareja los conceptos con sus definiciones",
-          "opciones": [
-            "Clase", 
-            "Objeto", 
-            "Herencia", 
-            "Interfaz",
-            "Plantilla para crear objetos", 
-            "Instancia de una clase", 
-            "Mecanismo para reutilizar código", 
-            "Contrato de métodos"
-          ],
+          "enunciado": "¿Qué palabra clave se utiliza para que una clase herede de otra?",
+          "opciones": ["extends", "implements", "inherits", "super"],
           "respuestaCorrecta": 0,
-          "seleccionesEmparejamiento": [0, 1, 2, 3]
+          "tipo": "SELECCION_MULTIPLE"
         },
         {
-          "tipo": "COMPLETAR",
-          "id": null,
-          "enunciado": "Para declarar una clase que hereda de otra en Java se usa la palabra clave _____.",
-          "opciones": [],
+          "enunciado": "El concepto 'Herencia' en Java",
+          "opciones": ["Permite a una clase heredar atributos y métodos de otra clase"],
+          "respuestaCorrecta": 0,
+          "tipo": "FLASHCARD"
+        },
+        {
+          "enunciado": "Java soporta herencia ______.",
+          "opciones": ["múltiple"],
           "respuestaCorrecta": -1,
-          "respuestaCorrectaTexto": "extends"
-        }
-      ]
-    },
-    {
-      "id": null,
-      "titulo": "Colecciones en Java",
-      "descripcion": "Framework de colecciones y su uso",
-      "preguntas": [
-        {
-          "tipo": "MultipleChoice",
-          "id": null,
-          "enunciado": "¿Qué interfaz implementan todas las colecciones en Java?",
-          "opciones": ["List", "Collection", "Set", "Map"],
-          "respuestaCorrecta": 1
-        },
-        {
-          "tipo": "ORDENAR_PALABRAS",
-          "id": null,
-          "enunciado": "Ordena las siguientes instrucciones para crear y recorrer un ArrayList",
-          "opciones": [
-            "List<String> lista = new ArrayList<>();", 
-            "lista.add(\"elemento\");", 
-            "for(String s : lista) {", 
-            "    System.out.println(s);", 
-            "}"
-          ],
-          "respuestaCorrecta": 0,
-          "ordenSeleccionado": []
-        },
-        {
-          "tipo": "FlashCard",
-          "id": null,
-          "enunciado": "¿Cuál es la diferencia entre ArrayList y LinkedList?",
-          "opciones": ["ArrayList usa un array dinámico y es mejor para acceso aleatorio. LinkedList usa una lista doblemente enlazada y es mejor para inserciones/eliminaciones frecuentes."],
-          "respuestaCorrecta": 0
+          "tipo": "COMPLETAR"
         }
       ]
     }
