@@ -84,7 +84,8 @@ Este modelo aborda:
 
 Todo ello se alinea con los requisitos descritos en el enunciado, ofreciendo una base sólida para el desarrollo y evolución futura de la aplicación.
 
-# Modelo de dominio UML
-![modelo](https://github.com/user-attachments/assets/f3ef5b0f-bd26-4b2e-955e-3828a60c3c27)
+---
 
+# Modelo de dominio UML
+![modelo-v2](https://github.com/user-attachments/assets/2f668b27-db30-49cf-92b6-c54244cf7f3f)
 
