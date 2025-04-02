@@ -4,7 +4,6 @@
              version="3.0">
     <persistence-unit name="miUnidadPersistencia" transaction-type="RESOURCE_LOCAL">
         <properties>
-        
             <!-- Configuración de la base de datos -->
             <property name="jakarta.persistence.jdbc.driver" value="org.h2.Driver" />
             <property name="jakarta.persistence.jdbc.url" value="jdbc:h2:./bd/miapp;AUTO_SERVER=TRUE" />
