@@ -115,21 +115,7 @@ A continuación se presenta el detalle de los casos de uso propuestos, con sus r
 
 ---
 
-## 8. Reanudar Curso
-- **Actor:** Usuario Estudiante
-- **Descripción:**  
-  Si el estudiante ha guardado su progreso previamente, puede reanudar el curso desde el último punto de guardado, permitiendo la continuidad en el aprendizaje sin perder avances previos.
-- **Precondiciones:**  
-  - El usuario debe estar registrado y autenticado.
-  - El curso debe haber sido iniciado previamente y tener un progreso guardado.
-- **Flujo Principal:**
-  1. El usuario accede a su biblioteca de cursos.
-  2. Selecciona un curso previamente iniciado.
-  3. El sistema carga el último punto de guardado.
-  4. El usuario continúa con el curso desde donde lo dejó.
-
----
-## 9. Configurar Estrategia de Aprendizaje
+## 8. Configurar Estrategia de Aprendizaje
 - **Actor:** Usuario Estudiante
 - **Descripción:**  
   Antes o durante el curso, el estudiante puede elegir entre diferentes estrategias de aprendizaje (por ejemplo, secuencial, aleatorio o repetición espaciada) que determinan el orden y la frecuencia de los ejercicios presentados.
@@ -148,47 +134,7 @@ A continuación se presenta el detalle de los casos de uso propuestos, con sus r
 
 ---
 
-## 10. Guardar Progreso
-- **Actor:** Usuario Estudiante
-- **Descripción:**  
-  Durante el desarrollo del curso, el sistema permite guardar el estado actual, incluyendo el bloque en curso, las respuestas y la estrategia de aprendizaje utilizada, para poder retomar la actividad más tarde.
-- **Precondiciones:**  
-  - El usuario debe haber iniciado sesión.
-  - Debe estar realizando un curso.
-- **Flujo Principal:**
-  1. El usuario selecciona la opción de "Guardar Progreso".
-  2. El sistema almacena la información del estado actual del curso (ejercicio, respuestas, estrategia).
-  3. Se confirma que el progreso ha sido guardado correctamente.
-- **Flujo Alternativo:**
-  - Si hay un error al guardar, el sistema notifica al usuario y ofrece reintentar.
-- **Postcondiciones:**  
-  - El usuario puede reanudar el curso desde el último punto guardado.
-
----
-
-## 11. Registrar Estadísticas
-- **Actor:** Usuario Estudiante
-- **Descripción:**  
-  El sistema recopila datos de uso y rendimiento del estudiante, como el tiempo total dedicado, la racha de días consecutivos de estudio, porcentaje de respuestas correctas y evolución en el rendimiento según tipos de ejercicio.
-- **Precondiciones:**  
-  - El usuario debe haber iniciado sesión.
-  - Debe haber completado al menos un ejercicio.
-- **Flujo Principal:**
-  1. El usuario realiza ejercicios en un curso.
-  2. El sistema registra estadísticas tales como:
-     - Tiempo total de estudio.
-     - Racha de días consecutivos.
-     - Porcentaje de respuestas correctas.
-     - Evolución en diferentes tipos de ejercicios.
-  3. El usuario puede consultar su historial de progreso en cualquier momento.
-- **Flujo Alternativo:**
-  - Si hay un error al registrar los datos, el sistema reintenta o guarda localmente hasta restaurar la conexión.
-- **Postcondiciones:**  
-  - Se actualizan las métricas de rendimiento del usuario.
-
----
-
-## 12. Gestionar Perfil de Usuario
+## 9. Gestionar Perfil de Usuario
 - **Actor:** Usuario (Estudiante y Creador)
 - **Descripción:**  
   Permite a cualquier usuario modificar sus datos personales, preferencias de aprendizaje y gestionar la configuración de su cuenta.
