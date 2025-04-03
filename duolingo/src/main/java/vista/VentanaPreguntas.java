@@ -2,6 +2,7 @@ package vista;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import javafx.application.Application;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -11,6 +12,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.RadioButton;
@@ -54,6 +56,7 @@ public class VentanaPreguntas extends Application {
     private List<Bloque> bloques;
     private SimpleIntegerProperty bloqueActual = new SimpleIntegerProperty(0);
     private SimpleIntegerProperty preguntaActual = new SimpleIntegerProperty(0);
+    private boolean preguntaRespondida = false;
     
     // Componentes UI principales
     private BorderPane panelPrincipal;
@@ -61,6 +64,8 @@ public class VentanaPreguntas extends Application {
     private Label labelTituloCurso;
     private ProgressBar barraProgreso;
     private Label labelProgreso;
+    private Label labelCorrectas;
+    private Label labelIncorrectas;
     
     // Paneles específicos para cada tipo de pregunta
     private VBox panelMultipleChoice;
@@ -126,7 +131,25 @@ public class VentanaPreguntas extends Application {
         HBox.setHgrow(progressBox, javafx.scene.layout.Priority.ALWAYS);
         progressBox.setAlignment(Pos.CENTER_RIGHT);
         
-        panelPrincipal.setTop(panelInfo);
+        // Añadir contador de preguntas acertadas y falladas
+        HBox panelEstadisticas = new HBox(20);
+        panelEstadisticas.setAlignment(Pos.CENTER);
+        panelEstadisticas.setPadding(new Insets(10, 0, 0, 0));
+
+        labelCorrectas = new Label("Correctas: 0");
+        labelCorrectas.setFont(Font.font("System", FontWeight.BOLD, 16));
+        labelCorrectas.setTextFill(COLOR_CORRECTO);
+
+        labelIncorrectas = new Label("Incorrectas: 0");
+        labelIncorrectas.setFont(Font.font("System", FontWeight.BOLD, 16));
+        labelIncorrectas.setTextFill(COLOR_INCORRECTO);
+
+        panelEstadisticas.getChildren().addAll(labelCorrectas, labelIncorrectas);
+        
+        VBox panelInfoCompleto = new VBox(10);
+        panelInfoCompleto.getChildren().addAll(panelInfo, panelEstadisticas);
+        
+        panelPrincipal.setTop(panelInfoCompleto);
         
         // Panel central (contenido de preguntas)
         contenedorPreguntas = new StackPane();
@@ -339,6 +362,11 @@ public class VentanaPreguntas extends Application {
         
         rotacion.play();
         mostrandoFrente = !mostrandoFrente;
+        
+        // Las flashcards siempre se consideran respondidas una vez volteadas
+        if (!preguntaRespondida) {
+            preguntaRespondida = true;
+        }
     }
     
     private void inicializarPanelFillInBlank() {
@@ -383,14 +411,19 @@ public class VentanaPreguntas extends Application {
             labelTituloCurso.setText(cursoActual.getTitulo());
             
             if (bloques != null && !bloques.isEmpty()) {
+                // Recuperar el progreso actual si existe
+                bloqueActual.set(controlador.getBloqueActual());
+                preguntaActual.set(controlador.getPreguntaActual());
+                
+                actualizarContadorCorrectas();
+                actualizarContadorIncorrectas();
                 actualizarProgreso();
                 mostrarPreguntaActual();
             } else {
                 mostrarAlerta("El curso no tiene bloques.");
             }
-        }
-        else {
-        	System.out.println("curso no cargado");
+        } else {
+            System.out.println("curso no cargado");
         }
     }
     
@@ -415,6 +448,10 @@ public class VentanaPreguntas extends Application {
         panelFlashCard.setVisible(false);
         panelFillInBlank.setVisible(false);
 
+        // Verificar si la pregunta ya fue respondida usando CursoEnProgreso
+        preguntaRespondida = controlador.isPreguntaRespondida(bloqueActual.get(), preguntaActual.get());
+
+        // Usar la enumeración TipoPregunta en lugar de instanceof
         if (pregunta instanceof PreguntaMultipleChoice) {
             mostrarPreguntaMultipleChoice((PreguntaMultipleChoice) pregunta);
         } else if (pregunta instanceof PreguntaFlashCard) {
@@ -426,6 +463,8 @@ public class VentanaPreguntas extends Application {
         	System.out.println("pregunta sin tipo");
         }
 
+        actualizarContadorCorrectas();
+        actualizarContadorIncorrectas();
         actualizarProgreso();
         actualizarBotonSiguiente();
     }
@@ -445,13 +484,9 @@ public class VentanaPreguntas extends Application {
             btnSiguiente.setOnAction(e -> mostrarPreguntaSiguiente());
         }
     }
-
-
-
     
-    
-    
-    private void mostrarPreguntaMultipleChoice(PreguntaMultipleChoice pregunta) {
+ // Modifica el método mostrarPreguntaMultipleChoice para usar los métodos de Pregunta
+    private void mostrarPreguntaMultipleChoice(Pregunta pregunta) {
         panelMultipleChoice.setVisible(true);
         
         // Limpiar y configurar
@@ -510,10 +545,31 @@ public class VentanaPreguntas extends Application {
                 )
             );
             
+            // Si la pregunta ya fue respondida, restaurar el estado
+            if (preguntaRespondida) {
+                int[] seleccionUsuario = pregunta.getSeleccionUsuario();
+                
+                if (seleccionUsuario != null && seleccionUsuario.length > 0 && seleccionUsuario[0] == i) {
+                    radio.setSelected(true);
+                    if (i == pregunta.getRespuestaCorrecta()) {
+                        radio.setStyle("-fx-background-color: " + toRGBCode(COLOR_CORRECTO) + ";");
+                    } else {
+                        radio.setStyle("-fx-background-color: " + toRGBCode(COLOR_INCORRECTO) + ";");
+                    }
+                } else if (i == pregunta.getRespuestaCorrecta() && 
+                        seleccionUsuario != null && seleccionUsuario.length > 0 && 
+                        seleccionUsuario[0] != pregunta.getRespuestaCorrecta()) {
+                    radio.setStyle("-fx-background-color: " + toRGBCode(COLOR_CORRECTO) + ";");
+                }
+                
+                // Deshabilitar si ya se respondió
+                radio.setDisable(true);
+            }
+            
             opcionesBox.getChildren().add(radio);
         }
     }
-    
+
     private void mostrarPreguntaFlashCard(PreguntaFlashCard pregunta) {
         panelFlashCard.setVisible(true);
         mostrandoFrente = true;
@@ -531,8 +587,9 @@ public class VentanaPreguntas extends Application {
         cardFrente.setVisible(true);
         cardReverso.setVisible(false);
     }
-    
-    private void mostrarPreguntaFillInBlank(PreguntaFillinBlank pregunta) {
+
+    // Modifica el método mostrarPreguntaFillInBlank
+    private void mostrarPreguntaFillInBlank(Pregunta pregunta) {
         panelFillInBlank.setVisible(true);
         
         // Configurar el contenido
@@ -542,81 +599,87 @@ public class VentanaPreguntas extends Application {
         VBox respuestaBox = (VBox) panelFillInBlank.getChildren().get(1);
         TextField textRespuesta = (TextField) respuestaBox.getChildren().get(0);
         textRespuesta.clear();
-    }
-    
-    private void mostrarPreguntaAnterior() {
-        int actual = preguntaActual.get() - 1;
         
-        if (actual < 0) {
-            int bloqueAnt = bloqueActual.get() - 1;
+        // Si la pregunta ya fue respondida, restaurar el estado
+        if (preguntaRespondida) {
+            // Obtener la respuesta del usuario de la lista ordenSeleccionado
+            if (pregunta.getOrdenSeleccionado() != null && !pregunta.getOrdenSeleccionado().isEmpty()) {
+                textRespuesta.setText(pregunta.getOrdenSeleccionado().get(0));
+                
+                // Verificar si la respuesta es correcta
+                String respuestaCorrectaTexto = pregunta.getOpciones()[pregunta.getRespuestaCorrecta()];
+                
+                if (pregunta.getOrdenSeleccionado().get(0).equalsIgnoreCase(respuestaCorrectaTexto)) {
+                    textRespuesta.setStyle(
+                        "-fx-background-color: " + toRGBCode(COLOR_CORRECTO.deriveColor(0, 1, 1, 0.2)) + ";" +
+                        "-fx-border-color: " + toRGBCode(COLOR_CORRECTO) + ";" +
+                        "-fx-border-width: 2;" +
+                        "-fx-border-radius: 10;" +
+                        "-fx-background-radius: 10;" +
+                        "-fx-padding: 10;"
+                    );
+                } else {
+                    textRespuesta.setStyle(
+                        "-fx-background-color: " + toRGBCode(COLOR_INCORRECTO.deriveColor(0, 1, 1, 0.2)) + ";" +
+                        "-fx-border-color: " + toRGBCode(COLOR_INCORRECTO) + ";" +
+                        "-fx-border-width: 2;" +
+                        "-fx-border-radius: 10;" +
+                        "-fx-background-radius: 10;" +
+                        "-fx-padding: 10;"
+                    );
+                }
+                
+                // Deshabilitar si ya se respondió
+                textRespuesta.setEditable(false);
+            }
+        }
+    }
+
+    private boolean verificarRespuestaFillInBlank(PreguntaFillinBlank pregunta) {
+    	VBox respuestaBox = (VBox) panelFillInBlank.getChildren().get(1);
+        TextField textRespuesta = (TextField) respuestaBox.getChildren().get(0);
+        
+        String respuestaUsuario = textRespuesta.getText().trim();
+        
+        if (respuestaUsuario.isEmpty()) {
+            mostrarAlerta("Por favor, escribe una respuesta.");
+            return false;
+        }
+        
+        if (respuestaUsuario.equalsIgnoreCase(pregunta.getRespuestaCorrectaTexto())) {
+            // Respuesta correcta
+            textRespuesta.setStyle(
+                "-fx-background-color: " + toRGBCode(COLOR_CORRECTO.deriveColor(0, 1, 1, 0.2)) + ";" +
+                "-fx-border-color: " + toRGBCode(COLOR_CORRECTO) + ";" +
+                "-fx-border-width: 2;" +
+                "-fx-border-radius: 10;" +
+                "-fx-background-radius: 10;" +
+                "-fx-padding: 10;"
+            );
             
-            if (bloqueAnt < 0) {
-                // Ya estamos en la primera pregunta
-                return;
-            } else {
-                bloqueActual.set(bloqueAnt);
-                preguntaActual.set(bloques.get(bloqueAnt).getPreguntas().size() - 1);
-            }
+            textRespuesta.setVisible(false);
+            
+            mostrarResultado(true);
+            return true;
         } else {
-            preguntaActual.set(actual);
-        }
-        
-        mostrarPreguntaActual();
-    }
-    
-    private void mostrarPreguntaSiguiente() {
-        int actual = preguntaActual.get() + 1;
-        Bloque bloqueActualObj = bloques.get(bloqueActual.get());
-
-        if (actual >= bloqueActualObj.getPreguntas().size()) {
-            int bloqueSig = bloqueActual.get() + 1;
-            if (bloqueSig >= bloques.size()) {
-                return;
-            }
-            bloqueActual.set(bloqueSig);
-            preguntaActual.set(0);
-        } else {
-            preguntaActual.set(actual);
-        }
-
-        mostrarPreguntaActual();
-    }
-    
-    private void finalizarCurso() {
-        controlador.finalizarCurso();
-        mostrarAlerta("¡Curso finalizado!");
-        
-        // Obtener la ventana actual y cerrarla
-        Stage stage = (Stage) panelPrincipal.getScene().getWindow();
-        stage.close();
-    }
-
-   
-    private void verificarRespuesta() {
-        Pregunta pregunta = bloques.get(bloqueActual.get()).getPreguntas().get(preguntaActual.get());
-        boolean respuestaCorrecta = false;
-
-        if (pregunta instanceof PreguntaMultipleChoice) {
-            respuestaCorrecta = verificarRespuestaMultipleChoice((PreguntaMultipleChoice) pregunta);
-        } else if (pregunta instanceof PreguntaFillinBlank) {
-            respuestaCorrecta = verificarRespuestaFillInBlank((PreguntaFillinBlank) pregunta);
-        } else if (pregunta instanceof PreguntaFlashCard) {
-            voltearTarjeta();
-            return;
-        }
-
-        if (respuestaCorrecta) {
-            actualizarProgreso();
+            // Respuesta incorrecta
+            textRespuesta.setStyle(
+                "-fx-background-color: " + toRGBCode(COLOR_INCORRECTO.deriveColor(0, 1, 1, 0.2)) + ";" +
+                "-fx-border-color: " + toRGBCode(COLOR_INCORRECTO) + ";" +
+                "-fx-border-width: 2;" +
+                "-fx-border-radius: 10;" +
+                "-fx-background-radius: 10;" +
+                "-fx-padding: 10;"
+            );
+            textRespuesta.setVisible(false);
+            
+            mostrarResultado(false);
+            return false;
         }
     }
 
-
-    
-
-    
-
-    
-    private boolean verificarRespuestaMultipleChoice(PreguntaMultipleChoice pregunta) {
+    // Modifica el método de verificación de Multiple Choice
+    private boolean verificarRespuestaMultipleChoice(Pregunta pregunta) {
         VBox vbox = (VBox) panelMultipleChoice;
         VBox opcionesBox = (VBox) vbox.getChildren().get(1);
 
@@ -639,6 +702,10 @@ public class VentanaPreguntas extends Application {
 
         boolean esCorrecto = seleccionUsuario == pregunta.getRespuestaCorrecta();
         
+        // Guardar la respuesta del usuario en el modelo
+        // Usa el arreglo seleccionUsuario
+        pregunta.setSeleccionUsuario(new int[]{seleccionUsuario});
+        
         if (esCorrecto) {
             seleccionado.setStyle("-fx-background-color: " + toRGBCode(COLOR_CORRECTO) + ";");
         } else {
@@ -647,51 +714,152 @@ public class VentanaPreguntas extends Application {
             opcionCorrecta.setStyle("-fx-background-color: " + toRGBCode(COLOR_CORRECTO) + ";");
         }
 
+        // Deshabilitar las opciones después de responder
+        for (int i = 0; i < opcionesBox.getChildren().size(); i++) {
+            RadioButton radio = (RadioButton) opcionesBox.getChildren().get(i);
+            radio.setDisable(true);
+        }
+
         mostrarResultado(esCorrecto);
         return esCorrecto;
     }
 
-    
-    private boolean verificarRespuestaFillInBlank(PreguntaFillinBlank pregunta) {
-        VBox respuestaBox = (VBox) panelFillInBlank.getChildren().get(1);
-        TextField textRespuesta = (TextField) respuestaBox.getChildren().get(0);
-        
-        String respuestaUsuario = textRespuesta.getText().trim();
-        
-        if (respuestaUsuario.isEmpty()) {
-            mostrarAlerta("Por favor, escribe una respuesta.");
-            return false;
+    // Modifica el método verificarRespuesta para usar el tipo de pregunta adecuado
+    private void verificarRespuesta() {
+        if (preguntaRespondida) {
+            return; // Evitar verificar múltiples veces
         }
         
-        if (respuestaUsuario.equalsIgnoreCase(pregunta.getRespuestaCorrectaTexto())) {
-            // Respuesta correcta
-            textRespuesta.setStyle(
-                "-fx-background-color: " + toRGBCode(COLOR_CORRECTO.deriveColor(0, 1, 1, 0.2)) + ";" +
-                "-fx-border-color: " + toRGBCode(COLOR_CORRECTO) + ";" +
-                "-fx-border-width: 2;" +
-                "-fx-border-radius: 10;" +
-                "-fx-background-radius: 10;" +
-                "-fx-padding: 10;"
-            );
-            
-            mostrarResultado(true);
-            return true;
+        Pregunta pregunta = bloques.get(bloqueActual.get()).getPreguntas().get(preguntaActual.get());
+        boolean respuestaCorrecta = false;
+
+        if (pregunta instanceof PreguntaMultipleChoice) {
+            respuestaCorrecta = verificarRespuestaMultipleChoice((PreguntaMultipleChoice) pregunta);
+        } else if (pregunta instanceof PreguntaFillinBlank) {
+            respuestaCorrecta = verificarRespuestaFillInBlank((PreguntaFillinBlank) pregunta);
+        } else if (pregunta instanceof PreguntaFlashCard) {
+            voltearTarjeta();
+            return;
+        }
+
+        if (respuestaCorrecta) {
+            controlador.registrarRespuesta(true);
+            actualizarContadorCorrectas();
         } else {
-            // Respuesta incorrecta
-            textRespuesta.setStyle(
-                "-fx-background-color: " + toRGBCode(COLOR_INCORRECTO.deriveColor(0, 1, 1, 0.2)) + ";" +
-                "-fx-border-color: " + toRGBCode(COLOR_INCORRECTO) + ";" +
-                "-fx-border-width: 2;" +
-                "-fx-border-radius: 10;" +
-                "-fx-background-radius: 10;" +
-                "-fx-padding: 10;"
-            );
-            
-            mostrarResultado(false);
-            return false;
+            controlador.registrarRespuesta(false);
+            actualizarContadorIncorrectas();
         }
+        
+        preguntaRespondida = true;
+        actualizarProgreso();
     }
     
+    
+    
+    private void mostrarPreguntaAnterior() {
+        int actual = preguntaActual.get() - 1;
+        
+        if (actual < 0) {
+            int bloqueAnt = bloqueActual.get() - 1;
+            
+            if (bloqueAnt < 0) {
+                // Ya estamos en la primera pregunta
+                return;
+            } else {
+                bloqueActual.set(bloqueAnt);
+                preguntaActual.set(bloques.get(bloqueAnt).getPreguntas().size() - 1);
+            }
+        } else {
+            preguntaActual.set(actual);
+        }
+        
+        // Actualizar los índices en el controlador
+        controlador.setBloqueActual(bloqueActual.get());
+        controlador.setPreguntaActual(preguntaActual.get());
+        
+        mostrarPreguntaActual();
+    }
+    
+    private void mostrarPreguntaSiguiente() {
+        if (!preguntaRespondida && 
+                !(bloques.get(bloqueActual.get()).getPreguntas().get(preguntaActual.get()) instanceof PreguntaFlashCard)) {
+            mostrarAlerta("Debes responder esta pregunta antes de continuar");
+            return;
+        }
+
+        int actual = preguntaActual.get() + 1;
+        Bloque bloqueActualObj = bloques.get(bloqueActual.get());
+
+        if (actual >= bloqueActualObj.getPreguntas().size()) {
+            int bloqueSig = bloqueActual.get() + 1;
+            if (bloqueSig >= bloques.size()) {
+                finalizarCurso();
+                return;
+            }
+            bloqueActual.set(bloqueSig);
+            preguntaActual.set(0);
+        } else {
+            preguntaActual.set(actual);
+        }
+
+        // Actualizar los índices en el controlador
+        controlador.setBloqueActual(bloqueActual.get());
+        controlador.setPreguntaActual(preguntaActual.get());
+        
+        preguntaRespondida = false; // Resetear el estado para la nueva pregunta
+        mostrarPreguntaActual();
+    }
+
+    private void finalizarCurso() {
+        // Crear un diálogo de confirmación
+        Alert confirmacion = new Alert(AlertType.CONFIRMATION);
+        confirmacion.setTitle("Finalizar curso");
+        confirmacion.setHeaderText("¿Estás seguro de que deseas finalizar el curso?");
+        confirmacion.setContentText("Se guardará tu progreso actual.");
+        
+        Optional<ButtonType> resultado = confirmacion.showAndWait();
+        if (resultado.isPresent() && resultado.get() == ButtonType.OK) {
+            // Llamar al controlador para finalizar el curso y guardar progreso
+            controlador.finalizarCurso();
+            
+            // Mostrar resumen final
+            Alert resumen = new Alert(AlertType.INFORMATION);
+            resumen.setTitle("Curso finalizado");
+            resumen.setHeaderText("¡Has completado el curso!");
+            resumen.setContentText(
+                "Resumen:\n" +
+                "Preguntas correctas: " + controlador.getPreguntasCorrectas() + "\n" +
+                "Preguntas incorrectas: " + controlador.getPreguntasIncorrectas() + "\n" +
+                "Porcentaje de acierto: " + 
+                String.format("%.1f%%", 
+                    (double)controlador.getPreguntasCorrectas() * 100 / 
+                    (controlador.getPreguntasCorrectas() + controlador.getPreguntasIncorrectas()))
+            );
+            
+            resumen.showAndWait();
+            
+            // Cerrar la ventana actual
+            Stage stage = (Stage) panelPrincipal.getScene().getWindow();
+            stage.close();
+        }
+    }
+
+    
+
+    private void actualizarContadorCorrectas() {
+        int correctas = controlador.getPreguntasCorrectas();
+        labelCorrectas.setText("Correctas: " + correctas);
+    }
+
+    private void actualizarContadorIncorrectas() {
+        int incorrectas = controlador.getPreguntasIncorrectas();
+        labelIncorrectas.setText("Incorrectas: " + incorrectas);
+    }
+
+    
+
+    
+
     private void mostrarResultado(boolean correcto) {
         Alert alerta = new Alert(AlertType.INFORMATION);
         alerta.setTitle("Resultado");
@@ -707,6 +875,10 @@ public class VentanaPreguntas extends Application {
         
         alerta.showAndWait();
     }
+
+
+    
+
     
     private void mostrarAlerta(String mensaje) {
         Alert alert = new Alert(AlertType.WARNING);

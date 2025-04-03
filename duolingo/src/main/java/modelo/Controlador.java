@@ -8,6 +8,7 @@ import java.util.List;
 import jakarta.persistence.EntityManager;
 import persistencia.UsuarioDAO;
 import persistencia.CursoDAO;
+import persistencia.CursoEnProgresoDAO;
 
 import java.io.File;
 
@@ -18,16 +19,19 @@ public class Controlador {
     private RepositorioCursos repoCursos;
     private UsuarioDAO usuarioDAO;
     private CursoDAO cursoDAO;
+    private CursoEnProgresoDAO cursoEnProgresoDAO;
     
     // Usuario actual, que se establece durante el login
     private Usuario usuarioActual;
     private Curso cursoActual;
+    private CursoEnProgreso progresoActual;
     
     private Controlador() {
         this.repoUsuarios = RepositorioUsuarios.getUnicaInstancia();
         this.repoCursos = RepositorioCursos.getInstancia();
         this.usuarioDAO = new UsuarioDAO();
         this.cursoDAO = new CursoDAO();
+        this.cursoEnProgresoDAO = new CursoEnProgresoDAO();
     }
     
     public static synchronized Controlador getInstancia() {
@@ -107,9 +111,21 @@ public class Controlador {
     }
     
     public void finalizarCurso() {
-        if (cursoActual != null) {
+        if (cursoActual != null && progresoActual != null) {
+            // Marcar el curso como completado
+            progresoActual.setCompletado(true);
+            // Actualizar la fecha de última actividad
+            progresoActual.setFechaUltimaActividad(new java.util.Date());
+            // Guardar el progreso en la base de datos
+            cursoEnProgresoDAO.actualizar(progresoActual);
+            
             System.out.println("Curso finalizado: " + cursoActual.getTitulo());
+            System.out.println("Preguntas correctas: " + progresoActual.getPreguntasCorrectas());
+            System.out.println("Preguntas incorrectas: " + progresoActual.getPreguntasIncorrectas());
+            
+            // Limpiar las referencias actuales
             cursoActual = null;
+            progresoActual = null;
         }
     }
     
@@ -125,8 +141,59 @@ public class Controlador {
     
     // Método para iniciar un curso
     public void iniciarCurso(Curso curso) {
-        // Aquí se podría invocar lógica adicional
         this.cursoActual = curso;
+        
+        // Buscar si ya existe un progreso para este usuario y curso
+        CursoEnProgreso progreso = cursoEnProgresoDAO.buscarPorUsuarioYCurso(usuarioActual, curso);
+        
+        // Si no existe, crear uno nuevo
+        if (progreso == null) {
+            progreso = new CursoEnProgreso(usuarioActual, curso);
+            cursoEnProgresoDAO.guardar(progreso);
+        }
+        
+        this.progresoActual = progreso;
+    }
+    
+    // Método para registrar respuesta
+    public void registrarRespuesta(boolean correcta) {
+        if (progresoActual != null) {
+            if (correcta) {
+                progresoActual.registrarRespuestaCorrecta();
+            } else {
+                progresoActual.registrarRespuestaIncorrecta();
+            }
+            // Guardar el progreso actualizado
+            cursoEnProgresoDAO.actualizar(progresoActual);
+        }
+    }
+    
+    // Método para verificar si la pregunta actual ya fue respondida
+    public boolean isPreguntaRespondida() {
+        return progresoActual != null && progresoActual.isPreguntaRespondida();
+    }
+    
+    // Métodos para navegar entre preguntas
+    public boolean avanzarPregunta() {
+        if (progresoActual != null && cursoActual != null) {
+            boolean resultado = progresoActual.avanzarPregunta(cursoActual);
+            if (resultado) {
+                cursoEnProgresoDAO.actualizar(progresoActual);
+            }
+            return resultado;
+        }
+        return false;
+    }
+    
+    public boolean retrocederPregunta() {
+        if (progresoActual != null && cursoActual != null) {
+            boolean resultado = progresoActual.retrocederPregunta(cursoActual);
+            if (resultado) {
+                cursoEnProgresoDAO.actualizar(progresoActual);
+            }
+            return resultado;
+        }
+        return false;
     }
     
     // Acceso al repositorio (si se requiere)
@@ -139,6 +206,7 @@ public class Controlador {
         repoUsuarios.cerrarRecursos();
         usuarioDAO.cerrar();
         cursoDAO.cerrar();
+        cursoEnProgresoDAO.cerrar();
     }
 
     /**
@@ -223,8 +291,58 @@ public class Controlador {
         return cursoDAO.buscarPorCreador(creador);
     }
 
-	public Curso getCursoActual() {
-		// TODO Auto-generated method stub
-		return this.cursoActual;
-	}
+    public Curso getCursoActual() {
+        return this.cursoActual;
+    }
+    
+    public CursoEnProgreso getProgresoActual() {
+        return this.progresoActual;
+    }
+    
+    // Obtener estadísticas del progreso actual
+    public int getPreguntasCorrectas() {
+        return progresoActual != null ? progresoActual.getPreguntasCorrectas() : 0;
+    }
+    
+    public int getPreguntasIncorrectas() {
+        return progresoActual != null ? progresoActual.getPreguntasIncorrectas() : 0;
+    }
+    
+    public double getPorcentajeCompletado() {
+        if (progresoActual != null && cursoActual != null) {
+            return progresoActual.getPorcentajeCompletado(cursoActual);
+        }
+        return 0.0;
+    }
+    
+    public int getBloqueActual() {
+        return progresoActual != null ? progresoActual.getBloqueActual() : 0;
+    }
+    
+    public int getPreguntaActual() {
+        return progresoActual != null ? progresoActual.getPreguntaActual() : 0;
+    }
+    
+    public void setBloqueActual(int bloqueActual) {
+        if (progresoActual != null) {
+            progresoActual.setBloqueActual(bloqueActual);
+            cursoEnProgresoDAO.actualizar(progresoActual);
+        }
+    }
+    
+    public void setPreguntaActual(int preguntaActual) {
+        if (progresoActual != null) {
+            progresoActual.setPreguntaActual(preguntaActual);
+            cursoEnProgresoDAO.actualizar(progresoActual);
+        }
+    }
+
+ // Método para verificar si una pregunta específica ya fue respondida
+    public boolean isPreguntaRespondida(int bloqueIdx, int preguntaIdx) {
+        if (progresoActual != null) {
+            // Llamar al método correspondiente en CursoEnProgreso
+            return progresoActual.getEstadoPregunta(bloqueIdx, preguntaIdx) != 0;
+        }
+        return false;
+    }
 }
