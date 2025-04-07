@@ -1,6 +1,7 @@
 package vista;
 
 import javafx.animation.FadeTransition;
+import java.text.SimpleDateFormat;
 import javafx.animation.ParallelTransition;
 import javafx.animation.ScaleTransition;
 import javafx.geometry.Insets;
@@ -10,6 +11,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Arc;
+import javafx.scene.shape.ArcType;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -21,12 +24,16 @@ import modelo.Bloque;
 import modelo.Controlador;
 import modelo.Curso;
 import modelo.CursoEnProgreso;
+import modelo.Estadistica;
 import modelo.Pregunta;
 import modelo.Usuario;
 import persistencia.CursoEnProgresoDAO;
+import persistencia.EstadisticaDAO;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -43,6 +50,7 @@ public class VentanaPrincipal {
     private VBox profilePane;
     private VBox statsPane;
     private CursoEnProgresoDAO cursoEnProgresoDAO;
+    private long sessionStartTime;
     
     public VentanaPrincipal() {
         this.controlador = Controlador.getInstancia();
@@ -51,6 +59,41 @@ public class VentanaPrincipal {
     
     public void start(Stage primaryStage) {
         setupMainUI(primaryStage);
+        
+        // Registrar el inicio de la sesión
+        sessionStartTime = System.currentTimeMillis();
+        
+        // Agregar evento al cerrar la ventana para actualizar estadísticas
+        primaryStage.setOnCloseRequest(e -> {
+            long sessionEndTime = System.currentTimeMillis();
+            long tiempoSesion = sessionEndTime - sessionStartTime;
+            
+            // Actualizar tiempo total de uso
+            Usuario usuarioActual = controlador.getUsuarioActual();
+            EstadisticaDAO estadisticaDAO = new EstadisticaDAO();
+            try {
+                estadisticaDAO.actualizarTiempoUso(usuarioActual, tiempoSesion);
+            } catch (Exception ex) {
+                System.err.println("Error al actualizar el tiempo de uso: " + ex.getMessage());
+            }
+            
+            // Actualizar días consecutivos si la última conexión fue en un día distinto
+            Estadistica estadistica = estadisticaDAO.buscarPorUsuario(usuarioActual);
+            if (estadistica != null) {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+                String fechaUltima = sdf.format(estadistica.getUltimaConexion());
+                String fechaActual = sdf.format(new Date());
+                if (!fechaUltima.equals(fechaActual)) {
+                    try {
+                        estadisticaDAO.incrementarDiasConsecutivos(usuarioActual);
+                    } catch (Exception ex) {
+                        System.err.println("Error al incrementar días consecutivos: " + ex.getMessage());
+                    }
+                }
+            }
+        });
+        
+        primaryStage.show();
     }
     
     private void setupMainUI(Stage stage) {
@@ -663,76 +706,338 @@ public class VentanaPrincipal {
         resetSidebarButtonStyles();
         ((Button) sidebar.getChildren().get(4)).getStyleClass().add("sidebar-button-active");
         
+        // Obtener las estadísticas reales del usuario
+        Usuario usuarioActual = controlador.getUsuarioActual();
+        EstadisticaDAO estadisticaDAO = new EstadisticaDAO();
+        Estadistica estadistica = estadisticaDAO.buscarPorUsuario(usuarioActual);
+        
+        // Si no hay estadísticas, crear unas por defecto
+        if (estadistica == null) {
+            estadistica = new Estadistica(null, 0, 0, 0);
+            estadistica.setUsuario(usuarioActual);
+            estadisticaDAO.guardar(estadistica);
+        }
+        
+        // Actualizar la fecha de última conexión
+        estadistica.setUltimaConexion(new Date());
+        estadisticaDAO.actualizar(estadistica);
+        
+        // Obtener datos de progreso global de cursos
+        CursoEnProgresoDAO cursoEnProgresoDAO = new CursoEnProgresoDAO();
+        List<CursoEnProgreso> cursosEnProgreso = cursoEnProgresoDAO.buscarPorUsuario(usuarioActual);
+        
+        int totalPreguntasCorrectas = 0;
+        int totalPreguntasIncorrectas = 0;
+        int cursosCompletados = 0;
+        int totalLeccionesCompletadas = 0;
+        
+        for (CursoEnProgreso progreso : cursosEnProgreso) {
+            totalPreguntasCorrectas += progreso.getPreguntasCorrectas();
+            totalPreguntasIncorrectas += progreso.getPreguntasIncorrectas();
+            
+            if (progreso.isCompletado()) {
+                cursosCompletados++;
+            }
+            
+            // Contar lecciones (bloques) completados
+            if (progreso.getBloqueActual() > 0) {
+                totalLeccionesCompletadas += progreso.getBloqueActual();
+            }
+        }
+        
+        // Calcular puntos XP (simple: 10 puntos por pregunta correcta)
+        int puntosXP = totalPreguntasCorrectas * 10;
+        
+        // Crear el panel de estadísticas
         statsPane = new VBox(25);
         statsPane.setPadding(new Insets(30));
         
         Text pageTitle = new Text("Mis Estadísticas");
         pageTitle.setFont(Font.font("System", FontWeight.BOLD, 28));
         
+        // Panel de resumen con estadísticas reales
         HBox summaryPanel = new HBox(30);
         summaryPanel.setAlignment(Pos.CENTER);
         summaryPanel.setPadding(new Insets(25));
         summaryPanel.setStyle("-fx-background-color: white; -fx-background-radius: 12;");
         
-        VBox dailyActivity = createStatBox("7", "Días consecutivos");
-        VBox totalXP = createStatBox("1,250", "Puntos XP");
-        VBox completedLessons = createStatBox("23", "Lecciones completadas");
-        VBox masteredSkills = createStatBox("15", "Habilidades dominadas");
-        summaryPanel.getChildren().addAll(dailyActivity, totalXP, completedLessons, masteredSkills);
+        VBox diasConsecutivosBox = createStatBox(String.valueOf(estadistica.getDiasConsecutivos()), "Días consecutivos");
+        VBox xpBox = createStatBox(String.format("%,d", puntosXP), "Puntos XP");
+        VBox leccionesBox = createStatBox(String.valueOf(totalLeccionesCompletadas), "Lecciones completadas");
+        VBox cursosCompletadosBox = createStatBox(String.valueOf(cursosCompletados), "Cursos completados");
         
+        summaryPanel.getChildren().addAll(diasConsecutivosBox, xpBox, leccionesBox, cursosCompletadosBox);
+        
+        // Panel de precisión y estadísticas de aprendizaje
+        Text learningStatsTitle = new Text("Estadísticas de Aprendizaje");
+        learningStatsTitle.setFont(Font.font("System", FontWeight.BOLD, 20));
+        
+        // Calcular precisión
+        double precision = 0;
+        if (totalPreguntasCorrectas + totalPreguntasIncorrectas > 0) {
+            precision = (double) totalPreguntasCorrectas / (totalPreguntasCorrectas + totalPreguntasIncorrectas) * 100;
+        }
+        
+        VBox learningPanel = new VBox(20);
+        learningPanel.setPadding(new Insets(20));
+        learningPanel.setStyle("-fx-background-color: white; -fx-background-radius: 12;");
+        
+        // Panel de precisión
+        HBox precisionBox = new HBox(15);
+        precisionBox.setAlignment(Pos.CENTER_LEFT);
+        
+        // Crear indicador de precisión circular
+        double radius = 50;
+        StackPane precisionIndicator = new StackPane();
+        
+        Circle backgroundCircle = new Circle(radius);
+        backgroundCircle.setFill(Color.LIGHTGRAY);
+        
+        // Crear arco para mostrar precisión
+        Arc precisionArc = new Arc(0, 0, radius, radius, 90, -precision * 3.6);
+        precisionArc.setType(ArcType.ROUND);
+        precisionArc.setFill(precision >= 70 ? Color.valueOf("#06d6a0") : 
+                            precision >= 40 ? Color.valueOf("#ffd166") : 
+                            Color.valueOf("#ef476f"));
+        
+        // Añadir texto de porcentaje en el centro
+        Text precisionText = new Text(String.format("%.1f%%", precision));
+        precisionText.setFont(Font.font("System", FontWeight.BOLD, 14));
+        
+        // Añadir circulo central para mejorar diseño
+        Circle innerCircle = new Circle(radius * 0.7);
+        innerCircle.setFill(Color.WHITE);
+        
+        precisionIndicator.getChildren().addAll(backgroundCircle, precisionArc, innerCircle, precisionText);
+        
+        // Información de preguntas
+        VBox questionsInfo = new VBox(10);
+        questionsInfo.setAlignment(Pos.CENTER_LEFT);
+        
+        Text precisionTitle = new Text("Precisión de Respuestas");
+        precisionTitle.setFont(Font.font("System", FontWeight.BOLD, 16));
+        
+        Text correctasText = new Text("Respuestas correctas: " + totalPreguntasCorrectas);
+        correctasText.setFill(Color.valueOf("#06d6a0"));
+        
+        Text incorrectasText = new Text("Respuestas incorrectas: " + totalPreguntasIncorrectas);
+        incorrectasText.setFill(Color.valueOf("#ef476f"));
+        
+        Text totalText = new Text("Total de respuestas: " + (totalPreguntasCorrectas + totalPreguntasIncorrectas));
+        
+        questionsInfo.getChildren().addAll(precisionTitle, correctasText, incorrectasText, totalText);
+        
+        precisionBox.getChildren().addAll(precisionIndicator, questionsInfo);
+        
+        // Información adicional
+        HBox additionalInfo = new HBox(30);
+        additionalInfo.setAlignment(Pos.CENTER);
+        
+        VBox tiempoBox = createInfoBox("Tiempo total de uso", 
+                formatTime(estadistica.getTiempoTotalUso()), 
+                "clock");
+        
+        VBox rachaBox = createInfoBox("Mejor racha", 
+                estadistica.getMejorRacha() + " días", 
+                "streak");
+        
+        VBox ultimaConexionBox = createInfoBox("Última conexión", 
+                formatDate(estadistica.getUltimaConexion()), 
+                "calendar");
+        
+        additionalInfo.getChildren().addAll(tiempoBox, rachaBox, ultimaConexionBox);
+        
+        learningPanel.getChildren().addAll(precisionBox, new Separator(), additionalInfo);
+        
+        // Panel de cursos en progreso
         Text progressTitle = new Text("Progreso por Curso");
         progressTitle.setFont(Font.font("System", FontWeight.BOLD, 20));
         
         VBox progressPanel = new VBox(15);
         progressPanel.setPadding(new Insets(20));
         progressPanel.setStyle("-fx-background-color: white; -fx-background-radius: 12;");
-        // Se omite el detalle de cada curso para simplificar
         
+        // Mostrar hasta 5 cursos en progreso con sus barras de progreso
+        int coursesToShow = Math.min(cursosEnProgreso.size(), 5);
+        if (coursesToShow > 0) {
+            for (int i = 0; i < coursesToShow; i++) {
+                CursoEnProgreso progreso = cursosEnProgreso.get(i);
+                Curso curso = progreso.getCurso();
+                
+                if (curso != null) {
+                    // Calcular progreso real para este curso
+                    double porcentaje = calcularPorcentajeCompletado(progreso, curso);
+                    
+                    HBox courseProgressBox = new HBox(15);
+                    courseProgressBox.setAlignment(Pos.CENTER_LEFT);
+                    
+                    Circle courseIcon = new Circle(15);
+                    courseIcon.setFill(getColorForCourse(curso.getTitulo()));
+                    
+                    VBox courseInfo = new VBox(5);
+                    courseInfo.setPrefWidth(300);
+                    
+                    Text courseTitle = new Text(curso.getTitulo());
+                    courseTitle.setFont(Font.font("System", FontWeight.BOLD, 14));
+                    
+                    HBox progressBarInfo = new HBox(10);
+                    progressBarInfo.setAlignment(Pos.CENTER_LEFT);
+                    
+                    ProgressBar progressBar = new ProgressBar(porcentaje / 100);
+                    progressBar.setPrefWidth(200);
+                    
+                    Text percentText = new Text(String.format("%.1f%%", porcentaje));
+                    
+                    progressBarInfo.getChildren().addAll(progressBar, percentText);
+                    courseInfo.getChildren().addAll(courseTitle, progressBarInfo);
+                    
+                    courseProgressBox.getChildren().addAll(courseIcon, courseInfo);
+                    progressPanel.getChildren().add(courseProgressBox);
+                    
+                    if (i < coursesToShow - 1) {
+                        Separator separator = new Separator();
+                        separator.setPadding(new Insets(5, 0, 5, 0));
+                        progressPanel.getChildren().add(separator);
+                    }
+                }
+            }
+        } else {
+            Text noCourses = new Text("No tienes cursos en progreso actualmente");
+            noCourses.setStyle("-fx-fill: #666;");
+            progressPanel.getChildren().add(noCourses);
+        }
+        
+        // Actividad reciente
         Text recentActivityTitle = new Text("Actividad Reciente");
         recentActivityTitle.setFont(Font.font("System", FontWeight.BOLD, 20));
         
         VBox activityPanel = new VBox(10);
         activityPanel.setPadding(new Insets(20));
         activityPanel.setStyle("-fx-background-color: white; -fx-background-radius: 12;");
-        String[] activities = {
-            "Completaste la Lección 13 de Java",
-            "Ganaste 50 XP en Algoritmos",
-            "Completaste un ejercicio en Python",
-            "Alcanzaste 7 días consecutivos",
-            "Completaste la Lección 12 de Java"
-        };
-        String[] times = {
-            "Hace 2 horas",
-            "Ayer",
-            "Hace 2 días",
-            "Hace 2 días",
-            "Hace 3 días"
-        };
-        for (int i = 0; i < activities.length; i++) {
-            HBox activityItem = new HBox(15);
-            activityItem.setAlignment(Pos.CENTER_LEFT);
-            Circle activityDot = new Circle(5, Color.valueOf("#4a69bd"));
-            VBox activityInfo = new VBox(3);
-            Text activityText = new Text(activities[i]);
-            activityText.setStyle("-fx-font-weight: bold;");
-            Text timeText = new Text(times[i]);
-            timeText.setStyle("-fx-fill: #666;");
-            activityInfo.getChildren().addAll(activityText, timeText);
-            activityItem.getChildren().addAll(activityDot, activityInfo);
-            activityPanel.getChildren().add(activityItem);
-            if (i < activities.length - 1) {
-                Separator separator = new Separator();
-                separator.setPadding(new Insets(5, 0, 5, 0));
-                activityPanel.getChildren().add(separator);
+        
+        // Generar actividades basadas en datos reales (ultimas 5 actividades)
+        List<String> actividades = new ArrayList<>();
+        List<String> tiempos = new ArrayList<>();
+        
+        // Aquí podrías obtener las actividades reales del usuario desde una tabla de actividades
+        // Por ahora usaremos actividades genéricas basadas en los cursos en progreso
+        for (CursoEnProgreso progreso : cursosEnProgreso) {
+            Curso curso = progreso.getCurso();
+            if (curso != null) {
+                actividades.add("Progreso en curso de " + curso.getTitulo());
+                tiempos.add(formatTimeAgo(progreso.getFechaUltimaActividad()));
+                
+                if (actividades.size() >= 5) break;
             }
         }
         
-        statsPane.getChildren().addAll(pageTitle, summaryPanel, progressTitle, progressPanel, recentActivityTitle, activityPanel);
+        // Si no hay suficientes actividades, añadir algunas genéricas
+        if (actividades.isEmpty()) {
+            Text noActivity = new Text("No hay actividad reciente");
+            noActivity.setStyle("-fx-fill: #666;");
+            activityPanel.getChildren().add(noActivity);
+        } else {
+            for (int i = 0; i < actividades.size(); i++) {
+                HBox activityItem = new HBox(15);
+                activityItem.setAlignment(Pos.CENTER_LEFT);
+                
+                Circle activityDot = new Circle(5);
+                activityDot.setFill(Color.valueOf("#4a69bd"));
+                
+                VBox activityInfo = new VBox(3);
+                Text activityText = new Text(actividades.get(i));
+                activityText.setStyle("-fx-font-weight: bold;");
+                Text timeText = new Text(tiempos.get(i));
+                timeText.setStyle("-fx-fill: #666;");
+                
+                activityInfo.getChildren().addAll(activityText, timeText);
+                activityItem.getChildren().addAll(activityDot, activityInfo);
+                activityPanel.getChildren().add(activityItem);
+                
+                if (i < actividades.size() - 1) {
+                    Separator separator = new Separator();
+                    separator.setPadding(new Insets(5, 0, 5, 0));
+                    activityPanel.getChildren().add(separator);
+                }
+            }
+        }
+        
+        // Añadir todo al panel principal
+        statsPane.getChildren().addAll(
+            pageTitle, 
+            summaryPanel, 
+            learningStatsTitle,
+            learningPanel,
+            progressTitle,
+            progressPanel,
+            recentActivityTitle,
+            activityPanel
+        );
+        
+        // Crear ScrollPane para el contenido
         ScrollPane scrollPane = new ScrollPane(statsPane);
         scrollPane.setFitToWidth(true);
         scrollPane.setStyle("-fx-background-color: transparent; -fx-background: transparent;");
+        
         contentArea.getChildren().add(scrollPane);
         animateContentEntry(scrollPane);
+    }
+
+    // Método auxiliar para crear boxes de información con icono
+    private VBox createInfoBox(String title, String value, String iconType) {
+        VBox box = new VBox(5);
+        box.setAlignment(Pos.CENTER);
+        
+        // En una aplicación real aquí podrías usar iconos reales
+        Circle icon = new Circle(20);
+        icon.setFill(Color.valueOf("#4a69bd"));
+        
+        Text valueText = new Text(value);
+        valueText.setFont(Font.font("System", FontWeight.BOLD, 16));
+        
+        Text titleText = new Text(title);
+        titleText.setStyle("-fx-font-size: 14px; -fx-fill: #666;");
+        
+        box.getChildren().addAll(icon, valueText, titleText);
+        return box;
+    }
+
+    // Método para formatear tiempo (en milisegundos) a formato legible
+    private String formatTime(long timeInMillis) {
+        long hours = timeInMillis / (60 * 60 * 1000);
+        long minutes = (timeInMillis % (60 * 60 * 1000)) / (60 * 1000);
+        
+        if (hours > 0) {
+            return hours + "h " + minutes + "min";
+        } else {
+            return minutes + " minutos";
+        }
+    }
+
+    // Método para formatear fecha
+    private String formatDate(Date date) {
+        if (date == null) return "Nunca";
+        
+        SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+        return format.format(date);
+    }
+
+    // Método para formatear tiempo relativo (ej: "hace 2 horas")
+    private String formatTimeAgo(Date date) {
+        if (date == null) return "Fecha desconocida";
+        
+        long diff = new Date().getTime() - date.getTime();
+        long diffMinutes = diff / (60 * 1000);
+        long diffHours = diff / (60 * 60 * 1000);
+        long diffDays = diff / (24 * 60 * 60 * 1000);
+        
+        if (diffMinutes < 60) {
+            return "Hace " + diffMinutes + " minutos";
+        } else if (diffHours < 24) {
+            return "Hace " + diffHours + " horas";
+        } else {
+            return "Hace " + diffDays + " días";
+        }
     }
     
     private void handleLogout() {

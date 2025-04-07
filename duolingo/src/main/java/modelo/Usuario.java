@@ -15,17 +15,13 @@ public class Usuario {
 
     private String nombre;
     private String email;
-    // Podrías añadir un campo password
     private String password;
+    
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Curso> cursos = new LinkedList<>();
 
-    // Ejemplo de relación con "Curso" si es bidireccional:
-    // @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL)
-    // private List<Curso> cursosInstalados;
-
-    // @OneToOne (cascade = CascadeType.ALL)
-    // private Estadistica estadisticas;
+    @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Estadistica estadistica;
 
     public Usuario() { /* Constructor vacío requerido por JPA */ }
 
@@ -33,6 +29,9 @@ public class Usuario {
         this.nombre = nombre;
         this.email = email;
         this.password = password;
+        // Inicializar estadísticas para el usuario
+        this.estadistica = new Estadistica(null, 0, 0, 0);
+        this.estadistica.setUsuario(this);
     }
 
     public Long getId() { return id; }
@@ -42,6 +41,7 @@ public class Usuario {
     public List<Curso> getCursos() {
     	return new LinkedList<Curso>(this.cursos);
     }
+    public Estadistica getEstadistica() { return estadistica; }
 
     public void setNombre(String nombre) { this.nombre = nombre; }
     public void setEmail(String email) { this.email = email; }
@@ -49,5 +49,18 @@ public class Usuario {
     public void addCurso(Curso c) {
         this.cursos.add(c);
         c.setCreador(this); // Set the back-reference
+    }
+    public void setEstadistica(Estadistica estadistica) { 
+        this.estadistica = estadistica;
+        if (estadistica != null) {
+            estadistica.setUsuario(this);
+        }
+    }
+    
+    public void inicializarEstadistica() {
+        if (this.estadistica == null) {
+            this.estadistica = new Estadistica(null, 0, 0, 0);
+            this.estadistica.setUsuario(this);
+        }
     }
 }
