@@ -2,7 +2,7 @@
   "id": null,
   "titulo": "Curso de Ejemplo",
   "dominio": "Programación",
-  "idCreador": 1,
+  "idCreador": null,
   "posicionActual": 0,
   "bloques": [
     {

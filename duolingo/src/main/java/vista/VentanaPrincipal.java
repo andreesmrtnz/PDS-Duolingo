@@ -25,6 +25,7 @@ import modelo.Controlador;
 import modelo.Curso;
 import modelo.CursoEnProgreso;
 import modelo.Estadistica;
+import modelo.Estrategia;
 import modelo.Pregunta;
 import modelo.Usuario;
 import persistencia.CursoEnProgresoDAO;
@@ -584,32 +585,36 @@ public class VentanaPrincipal {
     }
     
     
- // Inicia el curso seleccionado y abre la VentanaPreguntas
     private void startCourse(Curso curso) {
         try {
-            // Establecer el curso actual en el controlador
-            controlador.iniciarCurso(curso);
+            // Mostrar diálogo para elegir estrategia
+            Estrategia estrategiaSeleccionada = mostrarDialogoEstrategia();
             
-            // Crear una nueva instancia de VentanaPreguntas
-            VentanaPreguntas ventanaPreguntas = new VentanaPreguntas();
-            
-            // Obtener el Stage actual
-            Stage currentStage = (Stage) mainLayout.getScene().getWindow();
-            
-            // Crear un nuevo Stage para la ventana de preguntas
-            Stage questionStage = new Stage();
-            
-            // Iniciar la ventana de preguntas
-            ventanaPreguntas.start(questionStage);
-            
-            // Opcional: cerrar la ventana principal o mantenerla abierta
-            // currentStage.close(); // Descomentar si quieres cerrar la ventana principal
-            
-            // Manejar el cierre de la ventana de preguntas para volver a la pantalla de cursos
-            questionStage.setOnCloseRequest(e -> {
-                showCoursesPage();
-                currentStage.show(); // Solo es necesario si cerraste la ventana principal
-            });
+            if (estrategiaSeleccionada != null) {
+                // Establecer el curso actual en el controlador con la estrategia seleccionada
+                controlador.iniciarCurso(curso, estrategiaSeleccionada);
+                
+                // Crear una nueva instancia de VentanaPreguntas
+                VentanaPreguntas ventanaPreguntas = new VentanaPreguntas();
+                
+                // Obtener el Stage actual
+                Stage currentStage = (Stage) mainLayout.getScene().getWindow();
+                
+                // Crear un nuevo Stage para la ventana de preguntas
+                Stage questionStage = new Stage();
+                
+                // Iniciar la ventana de preguntas
+                ventanaPreguntas.start(questionStage);
+                
+                // Opcional: cerrar la ventana principal o mantenerla abierta
+                // currentStage.close(); // Descomentar si quieres cerrar la ventana principal
+                
+                // Manejar el cierre de la ventana de preguntas para volver a la pantalla de cursos
+                questionStage.setOnCloseRequest(e -> {
+                    showCoursesPage();
+                    currentStage.show(); // Solo es necesario si cerraste la ventana principal
+                });
+            }
         } catch (Exception e) {
             System.err.println("Error al iniciar el curso: " + e.getMessage());
             e.printStackTrace();
@@ -621,6 +626,52 @@ public class VentanaPrincipal {
             alert.setContentText("No se pudo iniciar el curso. " + e.getMessage());
             alert.showAndWait();
         }
+    }
+
+    /**
+     * Muestra un diálogo para que el usuario elija la estrategia de aprendizaje
+     * @return La estrategia seleccionada o null si se cancela
+     */
+    private Estrategia mostrarDialogoEstrategia() {
+        // Crear un diálogo
+        Dialog<Estrategia> dialog = new Dialog<>();
+        dialog.setTitle("Elegir Estrategia");
+        dialog.setHeaderText("Selecciona la estrategia de aprendizaje para este curso");
+        
+        // Configurar los botones
+        ButtonType confirmarButton = new ButtonType("Confirmar", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(confirmarButton, ButtonType.CANCEL);
+        
+        // Crear el combo box con las estrategias
+        ComboBox<Estrategia> comboEstrategias = new ComboBox<>();
+        comboEstrategias.getItems().addAll(Estrategia.values());
+        comboEstrategias.setValue(Estrategia.SECUENCIAL); // Valor por defecto
+        
+        // Crear etiquetas descriptivas para cada estrategia
+        Label descripcionSecuencial = new Label("Secuencial: Las preguntas se presentan en orden uno tras otro.");
+        Label descripcionAleatoria = new Label("Aleatoria: Las preguntas se presentan en orden aleatorio.");
+        Label descripcionRepeticion = new Label("Repetición Espaciada: Las preguntas incorrectas se repiten periódicamente.");
+        
+        // Contenedor para las descripciones
+        VBox descripcionBox = new VBox(5);
+        descripcionBox.getChildren().addAll(descripcionSecuencial, descripcionAleatoria, descripcionRepeticion);
+        
+        // Contenedor principal
+        VBox vbox = new VBox(10);
+        vbox.getChildren().addAll(new Label("Estrategia:"), comboEstrategias, descripcionBox);
+        dialog.getDialogPane().setContent(vbox);
+        
+        // Convertir el resultado
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == confirmarButton) {
+                return comboEstrategias.getValue();
+            }
+            return null;
+        });
+        
+        // Mostrar el diálogo y esperar la respuesta
+        Optional<Estrategia> resultado = dialog.showAndWait();
+        return resultado.orElse(null);
     }
     
     private void showProfilePage() {

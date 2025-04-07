@@ -6,6 +6,8 @@ import java.util.Map;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -55,6 +57,19 @@ public class CursoEnProgreso {
     @Column(name = "pregunta_actual")
     private int preguntaActual;
     
+    // Estrategia de aprendizaje seleccionada
+    @Enumerated(EnumType.STRING)
+    @Column(name = "estrategia")
+    private Estrategia estrategia;
+    
+    // Para la estrategia de repetición espaciada
+    @Column(name = "contador_repeticion")
+    private int contadorRepeticion;
+    
+    // Lista de preguntas a repetir (para REPETICION_ESPACIADA)
+    @Transient
+    private Map<String, Integer> preguntasARepetir = new HashMap<>();
+    
     // Mapa para registrar el estado de cada pregunta (contestada correctamente, incorrectamente, o no contestada)
     // Esta información se guardará en una tabla separada o se serializará
     @Transient
@@ -69,12 +84,19 @@ public class CursoEnProgreso {
         this.preguntasIncorrectas = 0;
         this.bloqueActual = 0;
         this.preguntaActual = 0;
+        this.estrategia = Estrategia.SECUENCIAL; // Por defecto es secuencial
+        this.contadorRepeticion = 0;
     }
     
     public CursoEnProgreso(Usuario usuario, Curso curso) {
         this();
         this.usuario = usuario;
         this.curso = curso;
+    }
+    
+    public CursoEnProgreso(Usuario usuario, Curso curso, Estrategia estrategia) {
+        this(usuario, curso);
+        this.estrategia = estrategia;
     }
     
     // Métodos para registrar respuestas
@@ -84,6 +106,11 @@ public class CursoEnProgreso {
         // Registrar en el mapa de estado (1 = correcta)
         String clave = bloqueActual + ":" + preguntaActual;
         estadoPreguntas.put(clave, 1);
+        
+        // Si es repetición espaciada, eliminamos esta pregunta de las que hay que repetir
+        if (estrategia == Estrategia.REPETICION_ESPACIADA) {
+            preguntasARepetir.remove(clave);
+        }
     }
     
     public void registrarRespuestaIncorrecta() {
@@ -92,6 +119,11 @@ public class CursoEnProgreso {
         // Registrar en el mapa de estado (2 = incorrecta)
         String clave = bloqueActual + ":" + preguntaActual;
         estadoPreguntas.put(clave, 2);
+        
+        // Si es repetición espaciada, añadimos esta pregunta a las que hay que repetir
+        if (estrategia == Estrategia.REPETICION_ESPACIADA) {
+            preguntasARepetir.put(clave, 3); // Repetir después de 3 preguntas
+        }
     }
     
     // Método para verificar si la pregunta actual ya fue respondida
@@ -105,8 +137,22 @@ public class CursoEnProgreso {
         return estadoPreguntas.getOrDefault(clave, 0); // 0 = no contestada
     }
     
-    // Método para avanzar a la siguiente pregunta
+    // Método para avanzar a la siguiente pregunta según la estrategia
     public boolean avanzarPregunta(Curso curso) {
+        switch (estrategia) {
+            case SECUENCIAL:
+                return avanzarPreguntaSecuencial(curso);
+            case ALEATORIO:
+                return avanzarPreguntaAleatoria(curso);
+            case REPETICION_ESPACIADA:
+                return avanzarPreguntaRepeticionEspaciada(curso);
+            default:
+                return avanzarPreguntaSecuencial(curso); // Por defecto
+        }
+    }
+    
+    // Implementación para estrategia secuencial
+    private boolean avanzarPreguntaSecuencial(Curso curso) {
         int numBloques = curso.getBloques().size();
         
         if (bloqueActual >= numBloques) {
@@ -131,7 +177,75 @@ public class CursoEnProgreso {
         }
     }
     
+    // Implementación para estrategia aleatoria
+    private boolean avanzarPreguntaAleatoria(Curso curso) {
+        int numBloques = curso.getBloques().size();
+        int totalPreguntas = getTotalPreguntas(curso);
+        int preguntasRespondidas = preguntasCorrectas + preguntasIncorrectas;
+        
+        if (preguntasRespondidas >= totalPreguntas) {
+            // Todas las preguntas respondidas
+            completado = true;
+            return false;
+        }
+        
+        // Generar índices aleatorios hasta encontrar una pregunta no respondida
+        java.util.Random random = new java.util.Random();
+        int intentos = 0;
+        int maxIntentos = totalPreguntas * 2; // Para evitar bucles infinitos
+        
+        while (intentos < maxIntentos) {
+            int randomBloque = random.nextInt(numBloques);
+            int numPreguntas = curso.getBloques().get(randomBloque).getPreguntas().size();
+            if (numPreguntas > 0) {
+                int randomPregunta = random.nextInt(numPreguntas);
+                
+                String clave = randomBloque + ":" + randomPregunta;
+                if (!estadoPreguntas.containsKey(clave)) {
+                    // Encontramos una pregunta no respondida
+                    bloqueActual = randomBloque;
+                    preguntaActual = randomPregunta;
+                    return true;
+                }
+            }
+            intentos++;
+        }
+        
+        // Si llegamos aquí, no encontramos preguntas sin responder
+        completado = true;
+        return false;
+    }
+    
+    // Implementación para estrategia de repetición espaciada
+    private boolean avanzarPreguntaRepeticionEspaciada(Curso curso) {
+        // Incrementar el contador de repetición
+        contadorRepeticion++;
+        
+        // Verificar si hay alguna pregunta que deba repetirse
+        for (Map.Entry<String, Integer> entrada : preguntasARepetir.entrySet()) {
+            int intervalo = entrada.getValue();
+            if (intervalo <= 1) {
+                // Esta pregunta debe repetirse ahora
+                String[] partes = entrada.getKey().split(":");
+                bloqueActual = Integer.parseInt(partes[0]);
+                preguntaActual = Integer.parseInt(partes[1]);
+                
+                // Actualizar el intervalo para la próxima repetición
+                preguntasARepetir.put(entrada.getKey(), 3); // Repetir de nuevo después de 3 preguntas
+                return true;
+            } else {
+                // Decrementar el intervalo
+                preguntasARepetir.put(entrada.getKey(), intervalo - 1);
+            }
+        }
+        
+        // Si no hay preguntas a repetir, seguir con la secuencia normal
+        return avanzarPreguntaSecuencial(curso);
+    }
+    
     public boolean retrocederPregunta(Curso curso) {
+        // La funcionalidad de retroceder puede ser igual para todas las estrategias
+        // o personalizarse según cada una
         if (preguntaActual > 0) {
             // Retroceder dentro del mismo bloque
             preguntaActual--;
@@ -254,5 +368,29 @@ public class CursoEnProgreso {
 
     public void setEstadoPreguntas(Map<String, Integer> estadoPreguntas) {
         this.estadoPreguntas = estadoPreguntas;
+    }
+    
+    public Estrategia getEstrategia() {
+        return estrategia;
+    }
+    
+    public void setEstrategia(Estrategia estrategia) {
+        this.estrategia = estrategia;
+    }
+    
+    public int getContadorRepeticion() {
+        return contadorRepeticion;
+    }
+    
+    public void setContadorRepeticion(int contadorRepeticion) {
+        this.contadorRepeticion = contadorRepeticion;
+    }
+    
+    public Map<String, Integer> getPreguntasARepetir() {
+        return preguntasARepetir;
+    }
+    
+    public void setPreguntasARepetir(Map<String, Integer> preguntasARepetir) {
+        this.preguntasARepetir = preguntasARepetir;
     }
 }

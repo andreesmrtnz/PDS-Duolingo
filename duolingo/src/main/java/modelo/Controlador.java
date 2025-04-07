@@ -73,7 +73,13 @@ public class Controlador {
         try {
             em.getTransaction().begin();
             
-            Curso curso = CursoParser.cargarCurso(rutaArchivo, this.usuarioActual);
+            Usuario creador = em.find(Usuario.class, usuarioActual.getId());
+            if (creador == null) {
+                System.err.println("Error: El usuario actual no existe en la base de datos");
+                return false;
+            }
+           
+            Curso curso = CursoParser.cargarCurso(rutaArchivo, creador);
             
             // Las relaciones bidireccionales ya se establecen en CursoParser.cargarCurso
             // Pero podemos hacerlo también aquí si fuera necesario
@@ -139,20 +145,33 @@ public class Controlador {
         return true;
     }
     
-    // Método para iniciar un curso
-    public void iniciarCurso(Curso curso) {
+ // Método actualizado para iniciar un curso con una estrategia específica
+    public void iniciarCurso(Curso curso, Estrategia estrategia) {
         this.cursoActual = curso;
         
         // Buscar si ya existe un progreso para este usuario y curso
         CursoEnProgreso progreso = cursoEnProgresoDAO.buscarPorUsuarioYCurso(usuarioActual, curso);
         
-        // Si no existe, crear uno nuevo
+        // Si no existe, crear uno nuevo con la estrategia seleccionada
         if (progreso == null) {
             progreso = new CursoEnProgreso(usuarioActual, curso);
+            progreso.setEstrategia(estrategia);
             cursoEnProgresoDAO.guardar(progreso);
+        } else {
+            // Si ya existe un progreso, actualizamos la estrategia si es diferente
+            if (progreso.getEstrategia() != estrategia) {
+                progreso.setEstrategia(estrategia);
+                cursoEnProgresoDAO.actualizar(progreso);
+            }
         }
         
         this.progresoActual = progreso;
+    }
+    
+    // Mantener el método original para compatibilidad con código existente
+    public void iniciarCurso(Curso curso) {
+        // Por defecto usar estrategia SECUENCIAL
+        iniciarCurso(curso, Estrategia.SECUENCIAL);
     }
     
     // Método para registrar respuesta
