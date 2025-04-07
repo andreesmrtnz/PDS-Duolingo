@@ -345,4 +345,85 @@ public class Controlador {
         }
         return false;
     }
+    
+ // Añadir estos métodos al Controlador.java
+
+    /**
+     * Establece el progreso actual directamente
+     * @param progreso El objeto CursoEnProgreso a establecer
+     */
+    public void setProgresoActual(CursoEnProgreso progreso) {
+        this.progresoActual = progreso;
+    }
+
+    /**
+     * Establece el curso actual directamente
+     * @param curso El objeto Curso a establecer
+     */
+    public void setCursoActual(Curso curso) {
+        this.cursoActual = curso;
+    }
+
+    /**
+     * Reinicia un curso, borrando el progreso anterior y creando uno nuevo
+     * @param curso El curso a reiniciar
+     * @return true si se reinició correctamente, false en caso contrario
+     */
+    public boolean reiniciarCurso(Curso curso) {
+        EntityManager em = cursoEnProgresoDAO.getEntityManager();
+        try {
+            em.getTransaction().begin();
+            
+            // Buscar si ya existe un progreso para este usuario y curso
+            CursoEnProgreso progresoExistente = cursoEnProgresoDAO.buscarPorUsuarioYCurso(usuarioActual, curso);
+            
+            // Si existe, eliminarlo
+            if (progresoExistente != null) {
+                cursoEnProgresoDAO.eliminar(progresoExistente);
+            }
+            
+            // Crear nuevo progreso
+            CursoEnProgreso nuevoProgreso = new CursoEnProgreso(usuarioActual, curso);
+            cursoEnProgresoDAO.guardar(nuevoProgreso);
+            
+            // Establecer el curso y progreso actual
+            this.cursoActual = curso;
+            this.progresoActual = nuevoProgreso;
+            
+            em.getTransaction().commit();
+            return true;
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            System.err.println("Error al reiniciar curso: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Obtiene la lista de cursos en progreso del usuario actual
+     * @return Lista de CursoEnProgreso del usuario
+     */
+    public List<CursoEnProgreso> getCursosEnProgreso() {
+        if (usuarioActual == null) {
+            return new ArrayList<>();
+        }
+        return cursoEnProgresoDAO.buscarPorUsuario(usuarioActual);
+    }
+
+    /**
+     * Verifica si un curso tiene progreso para el usuario actual
+     * @param curso El curso a verificar
+     * @return El objeto CursoEnProgreso si existe, null en caso contrario
+     */
+    public CursoEnProgreso getProgresoDeCurso(Curso curso) {
+        if (usuarioActual == null || curso == null) {
+            return null;
+        }
+        return cursoEnProgresoDAO.buscarPorUsuarioYCurso(usuarioActual, curso);
+    }
 }

@@ -20,11 +20,15 @@ import javafx.util.Duration;
 import modelo.Bloque;
 import modelo.Controlador;
 import modelo.Curso;
+import modelo.CursoEnProgreso;
 import modelo.Pregunta;
 import modelo.Usuario;
+import persistencia.CursoEnProgresoDAO;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class VentanaPrincipal {
 
@@ -38,9 +42,11 @@ public class VentanaPrincipal {
     private ScrollPane coursesScrollPane;
     private VBox profilePane;
     private VBox statsPane;
+    private CursoEnProgresoDAO cursoEnProgresoDAO;
     
     public VentanaPrincipal() {
         this.controlador = Controlador.getInstancia();
+        this.cursoEnProgresoDAO = new CursoEnProgresoDAO();
     }
     
     public void start(Stage primaryStage) {
@@ -86,6 +92,8 @@ public class VentanaPrincipal {
             ".course-card:hover { -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 15, 0, 0, 5); }" +
             ".action-button { -fx-background-color: #4a69bd; -fx-text-fill: white; -fx-background-radius: 5; }" +
             ".action-button:hover { -fx-background-color: #3c58a8; }" +
+            ".secondary-button { -fx-background-color: #e0e0e0; -fx-text-fill: #333; -fx-background-radius: 5; }" +
+            ".secondary-button:hover { -fx-background-color: #d0d0d0; }" +
             ".section-title { -fx-font-size: 24px; -fx-font-weight: bold; -fx-padding: 15 0 10 0; }" +
             ".welcome-banner { -fx-background-color: linear-gradient(to right, #4a69bd, #7b8cde); -fx-background-radius: 10; -fx-padding: 20; }";
         scene.getStylesheets().add("data:text/css," + css.replace(" ", "%20"));
@@ -212,8 +220,7 @@ public class VentanaPrincipal {
     
     // Se obtiene la lista de cursos desde el controlador (en vez de usar cursos predefinidos)
     private void showCoursesPage() {
-    	System.out.println("Mostrando página de cursos");
-        System.out.println("Número de cursos: " + controlador.getCursosDisponibles().size());
+        System.out.println("Mostrando página de cursos");
         
         // Limpiar completamente
         contentArea.getChildren().clear();
@@ -236,27 +243,71 @@ public class VentanaPrincipal {
         // Obtener la lista de cursos
         List<Curso> cursos = controlador.getCursosDisponibles();
         
-        // Crear contenedor para los cursos
+        // Separar los cursos en progreso y los demás
+        List<Curso> cursosEnProgreso = new ArrayList<>();
+        List<Curso> cursosDisponibles = new ArrayList<>();
+        
+        for (Curso curso : cursos) {
+            CursoEnProgreso progreso = controlador.getProgresoDeCurso(curso);
+            if (progreso != null) {
+                cursosEnProgreso.add(curso);
+            } else {
+                cursosDisponibles.add(curso);
+            }
+        }
+        
+        // Mostrar cursos en progreso si hay alguno
+        if (!cursosEnProgreso.isEmpty()) {
+            Text inProgressTitle = new Text("Cursos en Progreso");
+            inProgressTitle.setFont(Font.font("System", FontWeight.BOLD, 20));
+            coursesLayout.getChildren().add(inProgressTitle);
+            
+            GridPane inProgressGrid = new GridPane();
+            inProgressGrid.setHgap(20);
+            inProgressGrid.setVgap(20);
+            
+            for (int i = 0; i < cursosEnProgreso.size(); i++) {
+                Curso curso = cursosEnProgreso.get(i);
+                Pane cursoCard = createCourseCard(curso);
+                inProgressGrid.add(cursoCard, i % 3, i / 3);
+            }
+            
+            coursesLayout.getChildren().add(inProgressGrid);
+            
+            // Añadir separador si hay más cursos que mostrar
+            if (!cursosDisponibles.isEmpty()) {
+                Separator separator = new Separator();
+                separator.setPadding(new Insets(10, 0, 10, 0));
+                coursesLayout.getChildren().add(separator);
+            }
+        }
+        
+        // Mostrar cursos disponibles
+        if (!cursosDisponibles.isEmpty()) {
+            Text availableTitle = new Text(cursosEnProgreso.isEmpty() ? "" : "Cursos Disponibles");
+            availableTitle.setFont(Font.font("System", FontWeight.BOLD, 20));
+            if (!cursosEnProgreso.isEmpty()) {
+                coursesLayout.getChildren().add(availableTitle);
+            }
+            
+            GridPane availableGrid = new GridPane();
+            availableGrid.setHgap(20);
+            availableGrid.setVgap(20);
+            
+            for (int i = 0; i < cursosDisponibles.size(); i++) {
+                Curso curso = cursosDisponibles.get(i);
+                Pane cursoCard = createCourseCard(curso);
+                availableGrid.add(cursoCard, i % 3, i / 3);
+            }
+            
+            coursesLayout.getChildren().add(availableGrid);
+        }
+        
+        // Si no hay cursos mostrar mensaje
         if (cursos.isEmpty()) {
             Label emptyLabel = new Label("No hay cursos cargados. Utilice la opción 'Importar Curso'.");
             emptyLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: #666;");
             coursesLayout.getChildren().add(emptyLabel);
-        } else {
-            // Usar GridPane para organizar los cursos en columnas
-            GridPane coursesGrid = new GridPane();
-            coursesGrid.setHgap(20);
-            coursesGrid.setVgap(20);
-            
-            // Añadir tarjetas de cursos
-            for (int i = 0; i < cursos.size(); i++) {
-                Curso curso = cursos.get(i);
-                Pane cursoCard = createCourseCard(curso);
-                
-                // Calcular posición en la cuadrícula (3 columnas)
-                coursesGrid.add(cursoCard, i % 3, i / 3);
-            }
-            
-            coursesLayout.getChildren().add(coursesGrid);
         }
         
         // Crear ScrollPane para manejar muchos cursos
@@ -273,11 +324,12 @@ public class VentanaPrincipal {
     }
     
     // Se crea una tarjeta para cada curso cargado
+ // Modifica el método createCourseCard para mostrar el progreso
     private Pane createCourseCard(Curso curso) {
         VBox card = new VBox(12);
         card.setPadding(new Insets(15));
         card.setPrefWidth(220);
-        card.setPrefHeight(200);
+        card.setPrefHeight(250); // Aumentamos la altura para incluir información de progreso
         card.getStyleClass().add("course-card");
         
         Circle icon = new Circle(30);
@@ -286,23 +338,186 @@ public class VentanaPrincipal {
         Text title = new Text(curso.getTitulo());
         title.setFont(Font.font("System", FontWeight.BOLD, 16));
         
-        // Se usa el dominio como descripción (puedes ajustar según tus atributos)
+        // Se usa el dominio como descripción
         Text description = new Text(curso.getDominio());
         description.setWrappingWidth(190);
         
         Region spacer = new Region();
         VBox.setVgrow(spacer, Priority.ALWAYS);
         
-        Button startButton = new Button("Iniciar");
-        startButton.getStyleClass().add("action-button");
-        startButton.setPrefWidth(190);
-        startButton.setOnAction(e -> startCourse(curso));
+        // Comprobar si existe un progreso para este curso
+        CursoEnProgreso progreso = cursoEnProgresoDAO.buscarPorUsuarioYCurso(controlador.getUsuarioActual(), curso);
         
-        card.getChildren().addAll(icon, title, description, spacer, startButton);
+        VBox progressInfo = new VBox(5);
+        progressInfo.setAlignment(Pos.CENTER_LEFT);
+        
+        if (progreso != null) {
+            // Mostrar información de progreso
+            double porcentajeCompletado = calcularPorcentajeCompletado(progreso, curso);
+            
+            Text progressText = new Text(String.format("Progreso: %.1f%%", porcentajeCompletado));
+            progressText.setFont(Font.font("System", FontWeight.NORMAL, 14));
+            
+            ProgressBar progressBar = new ProgressBar(porcentajeCompletado / 100);
+            progressBar.setPrefWidth(190);
+            
+            Text statsText = new Text(String.format("Correctas: %d | Incorrectas: %d", 
+                                       progreso.getPreguntasCorrectas(), 
+                                       progreso.getPreguntasIncorrectas()));
+            statsText.setFont(Font.font("System", FontWeight.NORMAL, 12));
+            statsText.setFill(Color.GRAY);
+            
+            progressInfo.getChildren().addAll(progressText, progressBar, statsText);
+            
+            HBox buttonsBox = new HBox(10);
+            buttonsBox.setAlignment(Pos.CENTER);
+            
+            Button resumeButton = new Button("Reanudar");
+            resumeButton.getStyleClass().add("action-button");
+            resumeButton.setPrefWidth(90);
+            resumeButton.setOnAction(e -> resumeCourse(curso, progreso));
+            
+            Button restartButton = new Button("Reiniciar");
+            restartButton.getStyleClass().add("secondary-button");
+            restartButton.setPrefWidth(90);
+            restartButton.setOnAction(e -> confirmRestartCourse(curso));
+            
+            buttonsBox.getChildren().addAll(resumeButton, restartButton);
+            
+            card.getChildren().addAll(icon, title, description, spacer, progressInfo, buttonsBox);
+        } else {
+            // Si no hay progreso, mostrar solo el botón de iniciar
+            Button startButton = new Button("Iniciar");
+            startButton.getStyleClass().add("action-button");
+            startButton.setPrefWidth(190);
+            startButton.setOnAction(e -> startCourse(curso));
+            
+            card.getChildren().addAll(icon, title, description, spacer, startButton);
+        }
+        
         Tooltip tooltip = new Tooltip(curso.getTitulo() + " - " + curso.getDominio());
         Tooltip.install(card, tooltip);
         
         return card;
+    }
+
+    // Método auxiliar para calcular el porcentaje completado
+    private double calcularPorcentajeCompletado(CursoEnProgreso progreso, Curso curso) {
+        // Si ya está completado, retornar 100%
+        if (progreso.isCompletado()) {
+            return 100.0;
+        }
+        
+        // Contamos el total de preguntas en el curso
+        int totalPreguntas = 0;
+        for (Bloque bloque : curso.getBloques()) {
+            totalPreguntas += bloque.getPreguntas().size();
+        }
+        
+        if (totalPreguntas == 0) {
+            return 0.0;
+        }
+        
+        // Contamos las preguntas contestadas (correctas + incorrectas)
+        int preguntasContestadas = progreso.getPreguntasCorrectas() + progreso.getPreguntasIncorrectas();
+        
+        return (preguntasContestadas * 100.0) / totalPreguntas;
+    }
+
+    // Método para reanudar un curso
+    private void resumeCourse(Curso curso, CursoEnProgreso progreso) {
+        try {
+            // Establecer el curso y progreso actual en el controlador
+            controlador.setCursoActual(curso);
+            controlador.setProgresoActual(progreso);
+            
+            // Actualizar la fecha de última actividad
+            progreso.setFechaUltimaActividad(new java.util.Date());
+            cursoEnProgresoDAO.actualizar(progreso);
+            
+            // Crear una nueva instancia de VentanaPreguntas
+            VentanaPreguntas ventanaPreguntas = new VentanaPreguntas();
+            
+            // Obtener el Stage actual
+            Stage currentStage = (Stage) mainLayout.getScene().getWindow();
+            
+            // Crear un nuevo Stage para la ventana de preguntas
+            Stage questionStage = new Stage();
+            
+            // Iniciar la ventana de preguntas
+            ventanaPreguntas.start(questionStage);
+            
+            // Manejar el cierre de la ventana de preguntas para volver a la pantalla de cursos
+            questionStage.setOnCloseRequest(e -> {
+                showCoursesPage();
+                currentStage.show();
+            });
+        } catch (Exception e) {
+            System.err.println("Error al reanudar el curso: " + e.getMessage());
+            e.printStackTrace();
+            
+            // Mostrar una alerta al usuario
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText("Error al reanudar el curso");
+            alert.setContentText("No se pudo reanudar el curso. " + e.getMessage());
+            alert.showAndWait();
+        }
+    }
+
+    // Método para confirmar reinicio de curso
+    private void confirmRestartCourse(Curso curso) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Reiniciar Curso");
+        alert.setHeaderText("¿Estás seguro de que quieres reiniciar este curso?");
+        alert.setContentText("Perderás todo el progreso actual. Esta acción no se puede deshacer.");
+        
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            restartCourse(curso);
+        }
+    }
+
+    // Método para reiniciar un curso
+    private void restartCourse(Curso curso) {
+        try {
+            // Eliminar el progreso anterior
+            CursoEnProgreso progreso = cursoEnProgresoDAO.buscarPorUsuarioYCurso(controlador.getUsuarioActual(), curso);
+            if (progreso != null) {
+                cursoEnProgresoDAO.eliminar(progreso);
+            }
+            
+            // Iniciar el curso desde el principio
+            controlador.iniciarCurso(curso);
+            
+            // Crear una nueva instancia de VentanaPreguntas
+            VentanaPreguntas ventanaPreguntas = new VentanaPreguntas();
+            
+            // Obtener el Stage actual
+            Stage currentStage = (Stage) mainLayout.getScene().getWindow();
+            
+            // Crear un nuevo Stage para la ventana de preguntas
+            Stage questionStage = new Stage();
+            
+            // Iniciar la ventana de preguntas
+            ventanaPreguntas.start(questionStage);
+            
+            // Manejar el cierre de la ventana de preguntas para volver a la pantalla de cursos
+            questionStage.setOnCloseRequest(e -> {
+                showCoursesPage();
+                currentStage.show();
+            });
+        } catch (Exception e) {
+            System.err.println("Error al reiniciar el curso: " + e.getMessage());
+            e.printStackTrace();
+            
+            // Mostrar una alerta al usuario
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText("Error al reiniciar el curso");
+            alert.setContentText("No se pudo reiniciar el curso. " + e.getMessage());
+            alert.showAndWait();
+        }
     }
     
     // Método para asignar un color basado en el título del curso
