@@ -7,6 +7,8 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "usuarios")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "tipo_usuario")
 public class Usuario {
 
     @Id
@@ -62,5 +64,15 @@ public class Usuario {
             this.estadistica = new Estadistica(null, 0, 0, 0);
             this.estadistica.setUsuario(this);
         }
+    }
+    
+    // Método para determinar si el usuario es un Creador
+    public boolean esCreador() {
+        return this instanceof Creador;
+    }
+    
+    // Método para determinar si el usuario es un Estudiante
+    public boolean esEstudiante() {
+        return this instanceof Estudiante;
     }
 }

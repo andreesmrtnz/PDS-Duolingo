@@ -134,7 +134,7 @@ public class Controlador {
         }
     }
     
-    // Método para registrar un usuario; retorna true si se registró correctamente
+ // Método modificado para registrar diferentes tipos de usuarios
     public boolean registrar(Usuario usuario) {
         if (repoUsuarios.buscarPorEmail(usuario.getEmail()) != null) {
             // El usuario ya existe
@@ -144,8 +144,40 @@ public class Controlador {
         return true;
     }
     
- // Método actualizado para iniciar un curso con una estrategia específica
-    public void iniciarCurso(Curso curso, Estrategia estrategia) {
+    // Método nuevo para crear estudiantes
+    public Estudiante crearEstudiante(String nombre, String email, String password) {
+        Estudiante estudiante = new Estudiante(nombre, email, password);
+        if (registrar(estudiante)) {
+            return estudiante;
+        }
+        return null;
+    }
+    
+    // Método nuevo para crear creadores
+    public Creador crearCreador(String nombre, String email, String password) {
+        Creador creador = new Creador(nombre, email, password);
+        if (registrar(creador)) {
+            return creador;
+        }
+        return null;
+    }
+    
+    // Validaciones para restringir acciones según el tipo de usuario
+    public boolean puedeCrearCursos() {
+        return usuarioActual != null && usuarioActual.esCreador();
+    }
+    
+    public boolean puedeRealizarCursos() {
+        return usuarioActual != null && usuarioActual.esEstudiante();
+    }
+    
+    // Método modificado para iniciar un curso (solo para estudiantes)
+    public boolean iniciarCurso(Curso curso, Estrategia estrategia) {
+        if (!puedeRealizarCursos()) {
+            System.err.println("Error: Solo los estudiantes pueden realizar cursos");
+            return false;
+        }
+        
         this.cursoActual = curso;
         
         // Buscar si ya existe un progreso para este usuario y curso
@@ -165,6 +197,60 @@ public class Controlador {
         }
         
         this.progresoActual = progreso;
+        return true;
+    }
+    
+    // Método modificado para crear cursos (solo para creadores)
+    public Curso crearCurso(String titulo, String dominio, List<Bloque> bloques, String rutaArchivo) {
+        if (!puedeCrearCursos()) {
+            System.err.println("Error: Solo los creadores pueden crear cursos");
+            return null;
+        }
+        
+        try {
+            // Usar el usuario actual como creador
+            Usuario creador = this.usuarioActual;
+            
+            // Incrementar contador de cursos creados si es un Creador
+            if (creador instanceof Creador) {
+                ((Creador) creador).incrementarCursosCreados();
+            }
+            
+            // Crear objeto curso con estrategia básica
+            Curso curso = new Curso(null, titulo, dominio, creador, bloques, 0);
+            
+            // Guardar en repositorio y base de datos
+            repoCursos.agregarCurso(curso);
+            creador.addCurso(curso);
+            
+            // Persistir el curso y actualizar el usuario
+            cursoDAO.guardar(curso);
+            usuarioDAO.actualizar(creador);
+            
+            // Si se proporcionó una ruta, guardamos el curso en archivo
+            if (rutaArchivo != null && !rutaArchivo.isEmpty()) {
+                CursoParser.guardarCurso(curso, rutaArchivo);
+            }
+            
+            return curso;
+        } catch (Exception e) {
+            System.err.println("Error al crear curso: " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    /**
+     * Obtiene todos los cursos creados por el usuario actual
+     * @return Lista de cursos creados por el usuario actual
+     */
+    public List<Curso> getCursosCreadosPorUsuario() {
+        if (usuarioActual == null) {
+            return new ArrayList<>();
+        }
+        
+        // Utilizar el DAO de cursos para buscar por creador
+        return cursoDAO.buscarPorCreador(usuarioActual);
     }
     
     // Mantener el método original para compatibilidad con código existente
@@ -250,43 +336,7 @@ public class Controlador {
         return cursoDAO.listarTodos();
     }
     
-    /**
-     * Crea un nuevo curso y lo guarda en un archivo
-     * @param titulo Título del curso
-     * @param dominio Dominio o categoría del curso
-     * @param creador Usuario creador
-     * @param bloques Lista de bloques del curso
-     * @param rutaArchivo Ruta donde guardar el archivo (opcional)
-     * @return El curso creado o null si hubo un error
-     */
-    public Curso crearCurso(String titulo, String dominio, List<Bloque> bloques, String rutaArchivo) {
-        try {
-            // Usar el usuario actual como creador
-            Usuario creador = this.usuarioActual;
-            
-            // Crear objeto curso con estrategia básica
-            Curso curso = new Curso(null, titulo, dominio, creador, bloques, 0);
-            
-            // Guardar en repositorio y base de datos
-            repoCursos.agregarCurso(curso);
-            creador.addCurso(curso);
-            
-            // Persistir el curso y actualizar el usuario
-            cursoDAO.guardar(curso);
-            usuarioDAO.actualizar(creador);
-            
-            // Si se proporcionó una ruta, guardamos el curso en archivo
-            if (rutaArchivo != null && !rutaArchivo.isEmpty()) {
-                CursoParser.guardarCurso(curso, rutaArchivo);
-            }
-            
-            return curso;
-        } catch (Exception e) {
-            System.err.println("Error al crear curso: " + e.getMessage());
-            e.printStackTrace();
-            return null;
-        }
-    }
+    
     
     /**
      * Comparte un curso exportándolo a un archivo

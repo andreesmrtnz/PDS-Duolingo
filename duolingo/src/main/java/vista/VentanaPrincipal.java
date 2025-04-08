@@ -98,13 +98,13 @@ public class VentanaPrincipal {
     }
     
     private void setupMainUI(Stage stage) {
-    	mainLayout = new BorderPane();
+        mainLayout = new BorderPane();
         setupSidebar();
         mainLayout.setLeft(sidebar);
         
         // Configurar el área de contenido
         setupContentArea();
-        mainLayout.setCenter(contentArea);  // Añadir esta línea
+        mainLayout.setCenter(contentArea);
         
         setupTopBar();
         
@@ -120,6 +120,10 @@ public class VentanaPrincipal {
         
         stage.setTitle("LinguaLearn - Aprende a tu ritmo");
         stage.setScene(scene);
+        
+        // Configurar interfaz según tipo de usuario
+        configurarInterfazSegunTipoUsuario();
+        
         stage.show();
         
         showLandingPage();
@@ -279,13 +283,21 @@ public class VentanaPrincipal {
         VBox coursesLayout = new VBox(25);
         coursesLayout.setPadding(new Insets(15));
         
-        // Título de la página
-        Text pageTitle = new Text("Mis Cursos");
+        // Título de la página que varía según el tipo de usuario
+        String tituloSeccion = controlador.puedeCrearCursos() ? "Mis Cursos Creados" : "Mis Cursos";
+        Text pageTitle = new Text(tituloSeccion);
         pageTitle.setFont(Font.font("System", FontWeight.BOLD, 28));
         coursesLayout.getChildren().add(pageTitle);
         
-        // Obtener la lista de cursos
-        List<Curso> cursos = controlador.getCursosDisponibles();
+        // Obtener la lista de cursos según el tipo de usuario
+        List<Curso> cursos;
+        if (controlador.puedeCrearCursos()) {
+            // Para creadores, mostrar solo los cursos que han creado
+            cursos = controlador.getCursosCreadosPorUsuario();
+        } else {
+            // Para estudiantes, mostrar todos los cursos disponibles
+            cursos = controlador.getCursosDisponibles();
+        }
         
         // Separar los cursos en progreso y los demás
         List<Curso> cursosEnProgreso = new ArrayList<>();
@@ -582,6 +594,47 @@ public class VentanaPrincipal {
             default:
                 return Color.valueOf("#4a69bd");
         }
+    }
+    
+    private void configurarInterfazSegunTipoUsuario() {
+        // Obtener el usuario actual del controlador
+        Usuario usuarioActual = controlador.getUsuarioActual();
+        boolean esCreador = controlador.puedeCrearCursos();
+        boolean esEstudiante = controlador.puedeRealizarCursos();
+        
+        // Referencia a los elementos de la interfaz que necesitan ajustarse
+        Button importButton = null;
+        
+        // Buscar el botón de importar en la barra superior
+        for (Node node : ((HBox) mainLayout.getTop()).getChildren()) {
+            if (node instanceof Button && ((Button) node).getText().equals("Importar Curso")) {
+                importButton = (Button) node;
+                break;
+            }
+        }
+        
+        // Configurar visibilidad según tipo de usuario
+        if (esCreador) {
+            // Mostrar opciones de creación/importación de cursos
+            if (importButton != null) {
+                importButton.setVisible(true);
+            }
+            
+            // Ocultar o deshabilitar funcionalidades específicas de estudiantes
+            // (Aquí puedes ajustar otras partes de la interfaz específicas de estudiantes)
+            
+        } else if (esEstudiante) {
+            // Ocultar opciones de creación/importación
+            if (importButton != null) {
+                importButton.setVisible(false);
+            }
+            
+            // Asegurarse que las funcionalidades de aprendizaje están disponibles
+        }
+        
+        // Actualizar la visualización de cursos en la página principal
+        // para que refleje solo lo que el usuario puede ver/hacer
+        showCoursesPage();
     }
     
     
@@ -1104,6 +1157,14 @@ public class VentanaPrincipal {
     }
     
     private void handleImportCurso() {
+    	// Verificar si el usuario tiene permisos para importar cursos
+        if (!controlador.puedeCrearCursos()) {
+            mostrarAlerta("Acceso denegado", 
+                         "No tienes permisos para importar cursos. Esta funcionalidad está disponible solo para creadores.", 
+                         Alert.AlertType.WARNING);
+            return;
+        }
+    	
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Seleccionar archivo de curso");
         fileChooser.getExtensionFilters().addAll(

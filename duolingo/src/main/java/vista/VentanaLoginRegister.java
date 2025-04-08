@@ -11,13 +11,17 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
+import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import modelo.Controlador;
+import modelo.Creador;
+import modelo.Estudiante;
 import modelo.Usuario;
 
 public class VentanaLoginRegister extends Application {
@@ -36,6 +40,8 @@ public class VentanaLoginRegister extends Application {
     private TextField regNameField;
     private TextField regEmailField;
     private PasswordField regPassField;
+    private RadioButton radioEstudiante;
+    private RadioButton radioCreador;
     
     // Campos de login
     private TextField loginEmailField;
@@ -142,6 +148,22 @@ public class VentanaLoginRegister extends Application {
         regPassField = new PasswordField();
         regPassField.setPromptText("Password");
         
+        // Agregar selector de tipo de usuario
+        Label tipoUsuarioLabel = new Label("Tipo de usuario:");
+        
+        // Crear grupo de botones de radio
+        ToggleGroup grupoTipoUsuario = new ToggleGroup();
+        radioEstudiante = new RadioButton("Estudiante");
+        radioCreador = new RadioButton("Creador");
+        
+        radioEstudiante.setToggleGroup(grupoTipoUsuario);
+        radioCreador.setToggleGroup(grupoTipoUsuario);
+        radioEstudiante.setSelected(true); // Por defecto, seleccionar estudiante
+        
+        // Crear un HBox para los botones de radio
+        HBox radioBox = new HBox(20);
+        radioBox.getChildren().addAll(radioEstudiante, radioCreador);
+        
         Button signUpButton = new Button("SIGN UP");
         signUpButton.getStyleClass().add("action-button");
         signUpButton.setOnAction(e -> handleRegister());
@@ -150,7 +172,9 @@ public class VentanaLoginRegister extends Application {
                 headerRegister, 
                 regNameField, 
                 regEmailField, 
-                regPassField, 
+                regPassField,
+                tipoUsuarioLabel,
+                radioBox,
                 signUpButton
         );
         
@@ -160,7 +184,7 @@ public class VentanaLoginRegister extends Application {
         registerRight.setPrefSize(400, 450);
         registerRight.setAlignment(Pos.CENTER);
         registerRight.setPadding(new Insets(50, 30, 50, 30));
-        registerRight.setId("registerRight");
+        registerRight.getStyleClass().add("colored-panel");
         
         Label welcomeBack = new Label("Welcome Back!");
         welcomeBack.getStyleClass().add("header-label");
@@ -193,7 +217,7 @@ public class VentanaLoginRegister extends Application {
         loginLeft.setPrefSize(400, 450);
         loginLeft.setAlignment(Pos.CENTER);
         loginLeft.setPadding(new Insets(50, 30, 50, 30));
-        loginLeft.setId("loginLeft");
+        loginLeft.getStyleClass().add("colored-panel");
         
         Label helloFriend = new Label("Hello, Friend!");
         helloFriend.getStyleClass().add("header-label");
@@ -254,11 +278,26 @@ public class VentanaLoginRegister extends Application {
             return;
         }
 
-        // Se crea un nuevo usuario
-        Usuario nuevoUsuario = new Usuario(nombre, email, pass);
-        boolean registrado = usuarioService.registrar(nuevoUsuario);
+        Usuario nuevoUsuario = null;
+        boolean registrado = false;
+        
+        // Determinar el tipo de usuario según la selección
+        if (radioEstudiante.isSelected()) {
+            // Crear un estudiante
+            Estudiante estudiante = usuarioService.crearEstudiante(nombre, email, pass);
+            registrado = (estudiante != null);
+            nuevoUsuario = estudiante;
+        } else if (radioCreador.isSelected()) {
+            // Crear un creador
+            Creador creador = usuarioService.crearCreador(nombre, email, pass);
+            registrado = (creador != null);
+            nuevoUsuario = creador;
+        }
+
         if (registrado) {
-            showAlert(Alert.AlertType.INFORMATION, "Registro", "Usuario registrado con éxito.");
+            String tipoUsuario = radioEstudiante.isSelected() ? "Estudiante" : "Creador";
+            showAlert(Alert.AlertType.INFORMATION, "Registro", 
+                    "Usuario registrado con éxito como " + tipoUsuario + ".");
             switchToLogin();
         } else {
             showAlert(Alert.AlertType.ERROR, "Registro", "Error al registrar. El usuario ya existe o datos inválidos.");
@@ -279,7 +318,9 @@ public class VentanaLoginRegister extends Application {
 
         Usuario u = usuarioService.login(email, pass);
         if (u != null) {
-            showAlert(Alert.AlertType.INFORMATION, "Login", "Login correcto. Bienvenido " + u.getNombre() + ".");
+            String tipoUsuario = u.esEstudiante() ? "Estudiante" : "Creador";
+            showAlert(Alert.AlertType.INFORMATION, "Login", 
+                    "Login correcto. Bienvenido " + u.getNombre() + " (" + tipoUsuario + ").");
             // Abrir la ventana principal
             abrirVentanaPrincipal(u);
         } else {
@@ -327,6 +368,7 @@ public class VentanaLoginRegister extends Application {
      * @param showPane El panel a mostrar.
      */
     private void animateRightToLeft(Node hidePane, Node showPane) {
+        // ... (código de animación existente)
         double width = hidePane.getBoundsInParent().getWidth();
 
         TranslateTransition hideTrans = new TranslateTransition(Duration.millis(500), hidePane);
@@ -355,6 +397,7 @@ public class VentanaLoginRegister extends Application {
      * @param showPane El panel a mostrar.
      */
     private void animateLeftToRight(Node hidePane, Node showPane) {
+        // ... (código de animación existente)
         double width = hidePane.getBoundsInParent().getWidth();
 
         TranslateTransition hideTrans = new TranslateTransition(Duration.millis(500), hidePane);
