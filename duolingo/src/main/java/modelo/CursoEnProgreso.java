@@ -75,6 +75,16 @@ public class CursoEnProgreso {
     @Transient
     private Map<String, Integer> estadoPreguntas = new HashMap<>();
     
+    // Variables para recordar la posición antes de hacer una repetición
+    @Transient
+    private int bloqueAnterior = 0;
+    
+    @Transient
+    private int preguntaAnterior = 0;
+    
+    @Transient
+    private boolean enModoRepeticion = false;
+    
     // Constructor vacío para JPA
     public CursoEnProgreso() {
         this.fechaInicio = new Date();
@@ -110,6 +120,13 @@ public class CursoEnProgreso {
         // Si es repetición espaciada, eliminamos esta pregunta de las que hay que repetir
         if (estrategia == Estrategia.REPETICION_ESPACIADA) {
             preguntasARepetir.remove(clave);
+            
+            // Si estábamos en modo repetición, volver a la pregunta donde estábamos
+            if (enModoRepeticion) {
+                bloqueActual = bloqueAnterior;
+                preguntaActual = preguntaAnterior;
+                enModoRepeticion = false;
+            }
         }
     }
     
@@ -123,6 +140,13 @@ public class CursoEnProgreso {
         // Si es repetición espaciada, añadimos esta pregunta a las que hay que repetir
         if (estrategia == Estrategia.REPETICION_ESPACIADA) {
             preguntasARepetir.put(clave, 3); // Repetir después de 3 preguntas
+            
+            // Si estábamos en modo repetición, volver a la pregunta donde estábamos
+            if (enModoRepeticion) {
+                bloqueActual = bloqueAnterior;
+                preguntaActual = preguntaAnterior;
+                enModoRepeticion = false;
+            }
         }
     }
     
@@ -153,6 +177,7 @@ public class CursoEnProgreso {
     
     // Implementación para estrategia secuencial
     private boolean avanzarPreguntaSecuencial(Curso curso) {
+        System.out.println("avanzando sec");
         int numBloques = curso.getBloques().size();
         
         if (bloqueActual >= numBloques) {
@@ -179,6 +204,8 @@ public class CursoEnProgreso {
     
     // Implementación para estrategia aleatoria
     private boolean avanzarPreguntaAleatoria(Curso curso) {
+        System.out.println("avanzando random");
+        
         int numBloques = curso.getBloques().size();
         int totalPreguntas = getTotalPreguntas(curso);
         int preguntasRespondidas = preguntasCorrectas + preguntasIncorrectas;
@@ -220,26 +247,59 @@ public class CursoEnProgreso {
     private boolean avanzarPreguntaRepeticionEspaciada(Curso curso) {
         // Incrementar el contador de repetición
         contadorRepeticion++;
+        System.out.println("avanzando rep. espaciada, contador: " + contadorRepeticion);
+        
+        // Si no estamos en modo repetición, guardar la posición actual como punto de retorno
+        if (!enModoRepeticion) {
+            bloqueAnterior = bloqueActual;
+            preguntaAnterior = preguntaActual;
+        }
         
         // Verificar si hay alguna pregunta que deba repetirse
-        for (Map.Entry<String, Integer> entrada : preguntasARepetir.entrySet()) {
+        for (Map.Entry<String, Integer> entrada : new HashMap<>(preguntasARepetir).entrySet()) {
             int intervalo = entrada.getValue();
             if (intervalo <= 1) {
                 // Esta pregunta debe repetirse ahora
                 String[] partes = entrada.getKey().split(":");
-                bloqueActual = Integer.parseInt(partes[0]);
-                preguntaActual = Integer.parseInt(partes[1]);
+                int bloqueRepetir = Integer.parseInt(partes[0]);
+                int preguntaRepetir = Integer.parseInt(partes[1]);
+                
+                System.out.println("Repitiendo pregunta: " + bloqueRepetir + ":" + preguntaRepetir);
+                
+                // Si no estamos ya en modo repetición, guardar la posición actual
+                if (!enModoRepeticion) {
+                    bloqueAnterior = bloqueActual;
+                    preguntaAnterior = preguntaActual;
+                    enModoRepeticion = true;
+                }
+                
+                // Cambiar a la pregunta a repetir
+                bloqueActual = bloqueRepetir;
+                preguntaActual = preguntaRepetir;
                 
                 // Actualizar el intervalo para la próxima repetición
-                preguntasARepetir.put(entrada.getKey(), 3); // Repetir de nuevo después de 3 preguntas
+                preguntasARepetir.put(entrada.getKey(), 5); // Repetir de nuevo después de 5 preguntas
                 return true;
             } else {
                 // Decrementar el intervalo
+                System.out.println("Decrementando intervalo para " + entrada.getKey() + " de " + intervalo + " a " + (intervalo - 1));
                 preguntasARepetir.put(entrada.getKey(), intervalo - 1);
             }
         }
         
+        // Si estábamos en modo repetición y no hay más preguntas a repetir,
+        // volver a la posición donde estábamos antes de la repetición
+        if (enModoRepeticion) {
+            System.out.println("Volviendo de repetición a: " + bloqueAnterior + ":" + preguntaAnterior);
+            bloqueActual = bloqueAnterior;
+            preguntaActual = preguntaAnterior;
+            enModoRepeticion = false;
+            // Ahora avanzar normalmente desde esa posición
+            return avanzarPreguntaSecuencial(curso);
+        }
+        
         // Si no hay preguntas a repetir, seguir con la secuencia normal
+        System.out.println("Continuando secuencia normal desde: " + bloqueActual + ":" + preguntaActual);
         return avanzarPreguntaSecuencial(curso);
     }
     
@@ -392,5 +452,13 @@ public class CursoEnProgreso {
     
     public void setPreguntasARepetir(Map<String, Integer> preguntasARepetir) {
         this.preguntasARepetir = preguntasARepetir;
+    }
+    
+    public boolean isEnModoRepeticion() {
+        return enModoRepeticion;
+    }
+    
+    public void setEnModoRepeticion(boolean enModoRepeticion) {
+        this.enModoRepeticion = enModoRepeticion;
     }
 }

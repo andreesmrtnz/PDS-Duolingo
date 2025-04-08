@@ -36,6 +36,7 @@ import javafx.animation.RotateTransition;
 import modelo.Bloque;
 import modelo.Controlador;
 import modelo.Curso;
+import modelo.Estrategia;
 import modelo.Pregunta;
 import modelo.PreguntaFillinBlank;
 import modelo.PreguntaFlashCard;
@@ -449,8 +450,14 @@ public class VentanaPreguntas extends Application {
         panelFillInBlank.setVisible(false);
 
         // Verificar si la pregunta ya fue respondida usando CursoEnProgreso
-        preguntaRespondida = controlador.isPreguntaRespondida(bloqueActual.get(), preguntaActual.get());
-
+        if (controlador.getEstrategia() == Estrategia.REPETICION_ESPACIADA && 
+        	    controlador.isRepeticionPregunta(bloqueActual.get(), preguntaActual.get())) {
+        	    // Si es una pregunta repetida en la estrategia de repetición espaciada,
+        	    // permitimos que se responda de nuevo
+        	    preguntaRespondida = false;
+        	} else {
+        	    preguntaRespondida = controlador.isPreguntaRespondida(bloqueActual.get(), preguntaActual.get());
+        	}
         // Usar la enumeración TipoPregunta en lugar de instanceof
         if (pregunta instanceof PreguntaMultipleChoice) {
             mostrarPreguntaMultipleChoice((PreguntaMultipleChoice) pregunta);
@@ -488,6 +495,8 @@ public class VentanaPreguntas extends Application {
  // Modifica el método mostrarPreguntaMultipleChoice para usar los métodos de Pregunta
     private void mostrarPreguntaMultipleChoice(Pregunta pregunta) {
         panelMultipleChoice.setVisible(true);
+        
+        
         
         // Limpiar y configurar
         VBox vbox = (VBox) panelMultipleChoice;
@@ -588,7 +597,6 @@ public class VentanaPreguntas extends Application {
         cardReverso.setVisible(false);
     }
 
-    // Modifica el método mostrarPreguntaFillInBlank
     private void mostrarPreguntaFillInBlank(Pregunta pregunta) {
         panelFillInBlank.setVisible(true);
         
@@ -600,7 +608,25 @@ public class VentanaPreguntas extends Application {
         TextField textRespuesta = (TextField) respuestaBox.getChildren().get(0);
         textRespuesta.clear();
         
-        // Si la pregunta ya fue respondida, restaurar el estado
+        // Resetear el estilo
+        textRespuesta.setStyle(
+            "-fx-background-radius: 10;" + 
+            "-fx-border-radius: 10;" +
+            "-fx-border-color: " + toRGBCode(COLOR_PRIMARIO) + ";" +
+            "-fx-border-width: 2;" +
+            "-fx-padding: 10;"
+        );
+        textRespuesta.setEditable(true);
+        
+        // Si es una pregunta repetida en estrategia de repetición espaciada,
+        // permitimos que se responda nuevamente
+        if (controlador.getEstrategia() == Estrategia.REPETICION_ESPACIADA && 
+            controlador.isRepeticionPregunta(bloqueActual.get(), preguntaActual.get())) {
+            // La pregunta se puede responder de nuevo
+            return;
+        }
+        
+        // Si la pregunta ya fue respondida (y no es repetición), restaurar el estado
         if (preguntaRespondida) {
             // Obtener la respuesta del usuario de la lista ordenSeleccionado
             if (pregunta.getOrdenSeleccionado() != null && !pregunta.getOrdenSeleccionado().isEmpty()) {
@@ -657,7 +683,7 @@ public class VentanaPreguntas extends Application {
                 "-fx-padding: 10;"
             );
             
-            textRespuesta.setVisible(false);
+            textRespuesta.setEditable(false);
             
             mostrarResultado(true);
             return true;
@@ -671,7 +697,7 @@ public class VentanaPreguntas extends Application {
                 "-fx-background-radius: 10;" +
                 "-fx-padding: 10;"
             );
-            textRespuesta.setVisible(false);
+            textRespuesta.setEditable(false);
             
             mostrarResultado(false);
             return false;
@@ -757,57 +783,42 @@ public class VentanaPreguntas extends Application {
     
     
     private void mostrarPreguntaAnterior() {
-        int actual = preguntaActual.get() - 1;
-        
-        if (actual < 0) {
-            int bloqueAnt = bloqueActual.get() - 1;
+        // Verificamos si podemos retroceder usando el controlador
+        if (controlador.retrocederPregunta()) {
+            // Actualizamos variables locales para reflejar el cambio en la interfaz
+            bloqueActual.set(controlador.getBloqueActual());
+            preguntaActual.set(controlador.getPreguntaActual());
             
-            if (bloqueAnt < 0) {
-                // Ya estamos en la primera pregunta
-                return;
-            } else {
-                bloqueActual.set(bloqueAnt);
-                preguntaActual.set(bloques.get(bloqueAnt).getPreguntas().size() - 1);
-            }
+            // Mostramos la pregunta actual
+            mostrarPreguntaActual();
         } else {
-            preguntaActual.set(actual);
+            mostrarAlerta("Ya estás en la primera pregunta.");
         }
-        
-        // Actualizar los índices en el controlador
-        controlador.setBloqueActual(bloqueActual.get());
-        controlador.setPreguntaActual(preguntaActual.get());
-        
-        mostrarPreguntaActual();
     }
-    
+
     private void mostrarPreguntaSiguiente() {
+        // Verificamos si la pregunta actual ha sido respondida (excepto para FlashCards)
         if (!preguntaRespondida && 
                 !(bloques.get(bloqueActual.get()).getPreguntas().get(preguntaActual.get()) instanceof PreguntaFlashCard)) {
             mostrarAlerta("Debes responder esta pregunta antes de continuar");
             return;
         }
-
-        int actual = preguntaActual.get() + 1;
-        Bloque bloqueActualObj = bloques.get(bloqueActual.get());
-
-        if (actual >= bloqueActualObj.getPreguntas().size()) {
-            int bloqueSig = bloqueActual.get() + 1;
-            if (bloqueSig >= bloques.size()) {
-                finalizarCurso();
-                return;
-            }
-            bloqueActual.set(bloqueSig);
-            preguntaActual.set(0);
-        } else {
-            preguntaActual.set(actual);
-        }
-
-        // Actualizar los índices en el controlador
-        controlador.setBloqueActual(bloqueActual.get());
-        controlador.setPreguntaActual(preguntaActual.get());
         
-        preguntaRespondida = false; // Resetear el estado para la nueva pregunta
-        mostrarPreguntaActual();
+        // Utilizamos el controlador para avanzar según la estrategia configurada
+        if (controlador.avanzarPregunta()) {
+            // Actualizamos variables locales para reflejar el cambio en la interfaz
+            bloqueActual.set(controlador.getBloqueActual());
+            preguntaActual.set(controlador.getPreguntaActual());
+            
+            // Reiniciamos el estado para la nueva pregunta
+            preguntaRespondida = false;
+            
+            // Mostramos la nueva pregunta
+            mostrarPreguntaActual();
+        } else {
+            // Si no se puede avanzar más, finalizamos el curso
+            finalizarCurso();
+        }
     }
 
     private void finalizarCurso() {

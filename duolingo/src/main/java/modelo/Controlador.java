@@ -10,7 +10,6 @@ import persistencia.UsuarioDAO;
 import persistencia.CursoDAO;
 import persistencia.CursoEnProgresoDAO;
 
-import java.io.File;
 
 public class Controlador {
     // Instancia única (singleton)
@@ -202,6 +201,21 @@ public class Controlador {
             return resultado;
         }
         return false;
+    }
+    
+    public boolean isRepeticionPregunta(int bloque, int pregunta) {
+        if (progresoActual != null && progresoActual.getEstrategia() == Estrategia.REPETICION_ESPACIADA) {
+            String clave = bloque + ":" + pregunta;
+            return progresoActual.getPreguntasARepetir().containsKey(clave);
+        }
+        return false;
+    }
+
+    public Estrategia getEstrategia() {
+        if (progresoActual != null) {
+            return progresoActual.getEstrategia();
+        }
+        return Estrategia.SECUENCIAL; // Por defecto
     }
     
     public boolean retrocederPregunta() {
