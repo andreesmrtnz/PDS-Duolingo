@@ -1,6 +1,8 @@
 package vista;
 
 import javafx.animation.FadeTransition;
+import javafx.scene.layout.FlowPane;
+import javafx.stage.Screen;
 import java.text.SimpleDateFormat;
 import javafx.animation.ParallelTransition;
 import javafx.animation.ScaleTransition;
@@ -26,11 +28,11 @@ import modelo.Curso;
 import modelo.CursoEnProgreso;
 import modelo.Estadistica;
 import modelo.Estrategia;
-import modelo.Pregunta;
 import modelo.Usuario;
 import persistencia.CursoEnProgresoDAO;
 import persistencia.EstadisticaDAO;
-
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -108,7 +110,20 @@ public class VentanaPrincipal {
         
         setupTopBar();
         
-        Scene scene = new Scene(mainLayout, 1000, 700);
+        // Establecer tamaños mínimos para asegurar todo se vea bien
+        mainLayout.setMinSize(800, 600);
+        
+        // Usar StackPane como contenedor raíz para centrar el contenido
+        StackPane root = new StackPane(mainLayout);
+        root.setAlignment(Pos.CENTER);
+        
+        // Crear ScrollPane para toda la escena
+        ScrollPane mainScrollPane = new ScrollPane(root);
+        mainScrollPane.setFitToWidth(true);
+        mainScrollPane.setFitToHeight(true);
+        mainScrollPane.setPannable(true);
+        
+        Scene scene = new Scene(mainScrollPane, 1000, 700);
         try {
             String cssFile = "/styles.css";
             String css = getClass().getResource(cssFile).toExternalForm();
@@ -120,6 +135,8 @@ public class VentanaPrincipal {
         
         stage.setTitle("LinguaLearn - Aprende a tu ritmo");
         stage.setScene(scene);
+        stage.setMinWidth(900);
+        stage.setMinHeight(650);
         
         // Configurar interfaz según tipo de usuario
         configurarInterfazSegunTipoUsuario();
@@ -132,11 +149,11 @@ public class VentanaPrincipal {
     private void applyFallbackStyles(Scene scene) {
         String css = 
             ".root { -fx-font-family: 'Segoe UI', Arial, sans-serif; -fx-font-size: 14px; -fx-background-color: #f8f9fa; }" +
-            ".sidebar { -fx-background-color: #4a69bd; -fx-padding: 15; }" +
+            ".sidebar { -fx-background-color: #4a69bd; -fx-padding: 15; -fx-min-width: 180px; }" +
             ".sidebar-button { -fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 16px; -fx-alignment: CENTER_LEFT; -fx-padding: 10 15; -fx-cursor: hand; }" +
             ".sidebar-button:hover { -fx-background-color: rgba(255, 255, 255, 0.2); }" +
             ".sidebar-button-active { -fx-background-color: rgba(255, 255, 255, 0.3); }" +
-            ".course-card { -fx-background-color: white; -fx-background-radius: 8; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0, 0, 3); }" +
+            ".course-card { -fx-background-color: white; -fx-background-radius: 8; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0, 0, 3); -fx-min-width: 200px; -fx-max-width: 280px; }" +
             ".course-card:hover { -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 15, 0, 0, 5); }" +
             ".action-button { -fx-background-color: #4a69bd; -fx-text-fill: white; -fx-background-radius: 5; }" +
             ".action-button:hover { -fx-background-color: #3c58a8; }" +
@@ -159,26 +176,30 @@ public class VentanaPrincipal {
         logoBox.setAlignment(Pos.CENTER_LEFT);
         logoBox.setPadding(new Insets(10, 0, 25, 0));
         
-        Circle logoCircle = new Circle(20, Color.WHITE);
+        // Reemplazar el círculo por un icono
+        FontAwesomeIconView logoIcon = new FontAwesomeIconView(FontAwesomeIcon.LANGUAGE);
+        logoIcon.setSize("24");
+        logoIcon.setFill(Color.WHITE);
+        
         Label appName = new Label("LinguaLearn");
         appName.setStyle("-fx-text-fill: white; -fx-font-size: 22px; -fx-font-weight: bold;");
         
-        logoBox.getChildren().addAll(logoCircle, appName);
+        logoBox.getChildren().addAll(logoIcon, appName);
         
-        // Botones de navegación
-        Button homeButton = createSidebarButton("Inicio", true);
+        // Botones de navegación con iconos
+        Button homeButton = createSidebarButton("Inicio", FontAwesomeIcon.HOME, true);
         homeButton.setOnAction(e -> showLandingPage());
         
-        Button coursesButton = createSidebarButton("Mis Cursos", false);
+        Button coursesButton = createSidebarButton("Mis Cursos", FontAwesomeIcon.BOOK, false);
         coursesButton.setOnAction(e -> showCoursesPage());
         
-        Button profileButton = createSidebarButton("Perfil", false);
+        Button profileButton = createSidebarButton("Perfil", FontAwesomeIcon.USER, false);
         profileButton.setOnAction(e -> showProfilePage());
         
-        Button statsButton = createSidebarButton("Estadísticas", false);
+        Button statsButton = createSidebarButton("Estadísticas", FontAwesomeIcon.BAR_CHART, false);
         statsButton.setOnAction(e -> showStatsPage());
         
-        Button logoutButton = createSidebarButton("Cerrar Sesión", false);
+        Button logoutButton = createSidebarButton("Cerrar Sesión", FontAwesomeIcon.SIGN_OUT, false);
         logoutButton.setOnAction(e -> handleLogout());
         
         Region spacer = new Region();
@@ -187,10 +208,20 @@ public class VentanaPrincipal {
         sidebar.getChildren().addAll(logoBox, homeButton, coursesButton, profileButton, statsButton, spacer, logoutButton);
     }
     
-    private Button createSidebarButton(String text, boolean active) {
+    private Button createSidebarButton(String text, FontAwesomeIcon icon, boolean active) {
         Button button = new Button(text);
         button.setPrefWidth(200);
         button.getStyleClass().add("sidebar-button");
+        
+        // Crear y configurar el icono
+        FontAwesomeIconView iconView = new FontAwesomeIconView(icon);
+        iconView.setSize("18");
+        iconView.setFill(Color.WHITE);
+        
+        // Configurar el botón con el icono
+        button.setGraphic(iconView);
+        button.setGraphicTextGap(10);
+        
         if (active) {
             button.getStyleClass().add("sidebar-button-active");
         }
@@ -198,11 +229,15 @@ public class VentanaPrincipal {
     }
     
     private void setupContentArea() {
-    	// Eliminar cualquier configuración previa
+        // Eliminar cualquier configuración previa
         // Crear un nuevo StackPane cada vez
         contentArea = new StackPane();
         contentArea.setPadding(new Insets(20));
         contentArea.setStyle("-fx-background-color: #f8f9fa;");
+        
+        // Configurar restricciones de tamaño para mejor responsividad
+        contentArea.setMinWidth(580);
+        contentArea.setPrefWidth(Region.USE_COMPUTED_SIZE);
         
         // Asegurarse de que el contentArea está en el layout principal
         mainLayout.setCenter(contentArea);
@@ -216,16 +251,25 @@ public class VentanaPrincipal {
         topBar.setAlignment(Pos.CENTER_RIGHT);
         topBar.setStyle("-fx-background-color: white; -fx-border-color: #e0e0e0; -fx-border-width: 0 0 1 0;");
         
-        // Botón para importar curso desde archivo
+        // Botón para importar curso con icono
         Button importButton = new Button("Importar Curso");
+        FontAwesomeIconView importIcon = new FontAwesomeIconView(FontAwesomeIcon.UPLOAD);
+        importIcon.setSize("16");
+        importIcon.setFill(Color.WHITE);
+        importButton.setGraphic(importIcon);
+        importButton.setGraphicTextGap(8);
         importButton.getStyleClass().add("action-button");
         importButton.setOnAction(e -> handleImportCurso());
-        topBar.getChildren().add(importButton);
         
         Label userLabel = new Label("¡Hola, " + controlador.getNombreUsuario() + "!");
         userLabel.setStyle("-fx-font-weight: bold;");
-        Circle userIcon = new Circle(15, Color.valueOf("#4a69bd"));
-        topBar.getChildren().addAll(userLabel, userIcon);
+        
+        // Reemplazar el círculo con un icono de usuario
+        FontAwesomeIconView userIcon = new FontAwesomeIconView(FontAwesomeIcon.USER_CIRCLE);
+        userIcon.setSize("24");
+        userIcon.setFill(Color.valueOf("#4a69bd"));
+        
+        topBar.getChildren().addAll(importButton, userLabel, userIcon);
         
         mainLayout.setTop(topBar);
     }
@@ -312,23 +356,25 @@ public class VentanaPrincipal {
             }
         }
         
-        // Mostrar cursos en progreso si hay alguno
+     // Dentro del método showCoursesPage(), reemplaza los GridPane por FlowPane
         if (!cursosEnProgreso.isEmpty()) {
             Text inProgressTitle = new Text("Cursos en Progreso");
             inProgressTitle.setFont(Font.font("System", FontWeight.BOLD, 20));
             coursesLayout.getChildren().add(inProgressTitle);
             
-            GridPane inProgressGrid = new GridPane();
-            inProgressGrid.setHgap(20);
-            inProgressGrid.setVgap(20);
+            // Usar FlowPane en lugar de GridPane para mejor responsividad
+            FlowPane inProgressFlow = new FlowPane();
+            inProgressFlow.setHgap(20);
+            inProgressFlow.setVgap(20);
+            inProgressFlow.setPrefWrapLength(600); // Se ajustará automáticamente
             
             for (int i = 0; i < cursosEnProgreso.size(); i++) {
                 Curso curso = cursosEnProgreso.get(i);
                 Pane cursoCard = createCourseCard(curso);
-                inProgressGrid.add(cursoCard, i % 3, i / 3);
+                inProgressFlow.getChildren().add(cursoCard);
             }
             
-            coursesLayout.getChildren().add(inProgressGrid);
+            coursesLayout.getChildren().add(inProgressFlow);
             
             // Añadir separador si hay más cursos que mostrar
             if (!cursosDisponibles.isEmpty()) {
@@ -337,8 +383,8 @@ public class VentanaPrincipal {
                 coursesLayout.getChildren().add(separator);
             }
         }
-        
-        // Mostrar cursos disponibles
+
+        // Y lo mismo para los cursos disponibles
         if (!cursosDisponibles.isEmpty()) {
             Text availableTitle = new Text(cursosEnProgreso.isEmpty() ? "" : "Cursos Disponibles");
             availableTitle.setFont(Font.font("System", FontWeight.BOLD, 20));
@@ -346,17 +392,19 @@ public class VentanaPrincipal {
                 coursesLayout.getChildren().add(availableTitle);
             }
             
-            GridPane availableGrid = new GridPane();
-            availableGrid.setHgap(20);
-            availableGrid.setVgap(20);
+            // Usar FlowPane en lugar de GridPane para mejor responsividad
+            FlowPane availableFlow = new FlowPane();
+            availableFlow.setHgap(20);
+            availableFlow.setVgap(20);
+            availableFlow.setPrefWrapLength(600); // Se ajustará automáticamente
             
             for (int i = 0; i < cursosDisponibles.size(); i++) {
                 Curso curso = cursosDisponibles.get(i);
                 Pane cursoCard = createCourseCard(curso);
-                availableGrid.add(cursoCard, i % 3, i / 3);
+                availableFlow.getChildren().add(cursoCard);
             }
             
-            coursesLayout.getChildren().add(availableGrid);
+            coursesLayout.getChildren().add(availableFlow);
         }
         
         // Si no hay cursos mostrar mensaje
@@ -388,13 +436,13 @@ public class VentanaPrincipal {
         card.setPrefHeight(250);
         card.getStyleClass().add("course-card");
         
-        Circle icon = new Circle(30);
+        FontAwesomeIconView icon = new FontAwesomeIconView(getIconForCourse(curso.getTitulo()));
+        icon.setSize("32");
         icon.setFill(getColorForCourse(curso.getTitulo()));
         
         Text title = new Text(curso.getTitulo());
         title.setFont(Font.font("System", FontWeight.BOLD, 16));
         
-        // Se usa el dominio como descripción
         Text description = new Text(curso.getDominio());
         description.setWrappingWidth(190);
         
@@ -433,22 +481,35 @@ public class VentanaPrincipal {
                 HBox buttonsBox = new HBox(10);
                 buttonsBox.setAlignment(Pos.CENTER);
                 
-                // Verificar si el curso ya ha sido iniciado (tiene preguntas respondidas)
                 if (progreso.getPreguntasCorrectas() > 0 || progreso.getPreguntasIncorrectas() > 0) {
                     Button resumeButton = new Button("Reanudar");
+                    FontAwesomeIconView playIcon = new FontAwesomeIconView(FontAwesomeIcon.PLAY);
+                    playIcon.setSize("14");
+                    playIcon.setFill(Color.WHITE);
+                    resumeButton.setGraphic(playIcon);
+                    resumeButton.setGraphicTextGap(5);
                     resumeButton.getStyleClass().add("action-button");
-                    resumeButton.setPrefWidth(90);
+                    resumeButton.setPrefWidth(100);
                     resumeButton.setOnAction(e -> resumeCourse(curso, progreso));
                     
                     Button restartButton = new Button("Reiniciar");
+                    FontAwesomeIconView refreshIcon = new FontAwesomeIconView(FontAwesomeIcon.REFRESH);
+                    refreshIcon.setSize("14");
+                    refreshIcon.setFill(Color.valueOf("#333"));
+                    restartButton.setGraphic(refreshIcon);
+                    restartButton.setGraphicTextGap(5);
                     restartButton.getStyleClass().add("secondary-button");
-                    restartButton.setPrefWidth(90);
+                    restartButton.setPrefWidth(100);
                     restartButton.setOnAction(e -> confirmRestartCourse(curso));
                     
                     buttonsBox.getChildren().addAll(resumeButton, restartButton);
                 } else {
-                    // El curso está inscrito pero no iniciado
                     Button startButton = new Button("Iniciar curso");
+                    FontAwesomeIconView startIcon = new FontAwesomeIconView(FontAwesomeIcon.PLAY_CIRCLE);
+                    startIcon.setSize("16");
+                    startIcon.setFill(Color.WHITE);
+                    startButton.setGraphic(startIcon);
+                    startButton.setGraphicTextGap(8);
                     startButton.getStyleClass().add("action-button");
                     startButton.setPrefWidth(190);
                     startButton.setOnAction(e -> startCourse(curso));
@@ -457,17 +518,18 @@ public class VentanaPrincipal {
                 }
                 card.getChildren().addAll(icon, title, description, spacer, progressInfo, buttonsBox);
             } else {
-                // Si es creador, solo mostrar la información sin botones
                 card.getChildren().addAll(icon, title, description, spacer, progressInfo);
             }
         } else {
-            // Si no hay progreso
             if (esCreador) {
-                // Si es creador, no mostrar botones
                 card.getChildren().addAll(icon, title, description, spacer);
             } else {
-                // Si es estudiante y no está inscrito, mostrar botón de inscripción
                 Button enrollButton = new Button("Inscribirse");
+                FontAwesomeIconView enrollIcon = new FontAwesomeIconView(FontAwesomeIcon.PLUS_CIRCLE);
+                enrollIcon.setSize("16");
+                enrollIcon.setFill(Color.WHITE);
+                enrollButton.setGraphic(enrollIcon);
+                enrollButton.setGraphicTextGap(8);
                 enrollButton.getStyleClass().add("action-button");
                 enrollButton.setPrefWidth(190);
                 enrollButton.setOnAction(e -> inscribirEnCurso(curso));
@@ -480,6 +542,24 @@ public class VentanaPrincipal {
         Tooltip.install(card, tooltip);
         
         return card;
+    }
+    
+ // Método para obtener el icono según el tipo de curso
+    private FontAwesomeIcon getIconForCourse(String courseTitle) {
+        switch (courseTitle) {
+            case "Programación Java":
+                return FontAwesomeIcon.COFFEE;
+            case "Python Básico":
+                return FontAwesomeIcon.CODE;
+            case "Bases de Datos SQL":
+                return FontAwesomeIcon.DATABASE;
+            case "HTML y CSS":
+                return FontAwesomeIcon.HTML5;
+            case "Algoritmos":
+                return FontAwesomeIcon.SITEMAP;
+            default:
+                return FontAwesomeIcon.BOOK;
+        }
     }
     
  // Método para inscribir al usuario en un curso
@@ -1157,8 +1237,9 @@ public class VentanaPrincipal {
         VBox box = new VBox(5);
         box.setAlignment(Pos.CENTER);
         
-        // En una aplicación real aquí podrías usar iconos reales
-        Circle icon = new Circle(20);
+        // Reemplazar círculo con icono según tipo
+        FontAwesomeIconView icon = new FontAwesomeIconView(getIconByType(iconType));
+        icon.setSize("32");
         icon.setFill(Color.valueOf("#4a69bd"));
         
         Text valueText = new Text(value);
@@ -1170,6 +1251,21 @@ public class VentanaPrincipal {
         box.getChildren().addAll(icon, valueText, titleText);
         return box;
     }
+    
+ // Método auxiliar para obtener icono según tipo
+    private FontAwesomeIcon getIconByType(String iconType) {
+        switch (iconType) {
+            case "clock":
+                return FontAwesomeIcon.CLOCK_ALT;
+            case "streak":
+                return FontAwesomeIcon.BOLT;
+            case "calendar":
+                return FontAwesomeIcon.CALENDAR;
+            default:
+                return FontAwesomeIcon.CIRCLE;
+        }
+    }
+
 
     // Método para formatear tiempo (en milisegundos) a formato legible
     private String formatTime(long timeInMillis) {
