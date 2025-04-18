@@ -1,42 +1,40 @@
-# PDS-Duolingo
-Aplicación de Aprendizaje Interactivo
+# 🧠 PDS-Duolingo
+**Aplicación de Aprendizaje Interactivo**
 
-Información del Proyecto
+## 📚 Descripción del Proyecto
 
-Profesor Responsable: ANTONIO LOPEZ MARTINEZ CARRASCO
+Esta aplicación permite a los usuarios crear, compartir y realizar cursos interactivos con diferentes tipos de ejercicios. También se pueden configurar estrategias de aprendizaje personalizadas, registrar estadísticas de progreso y gestionar usuarios. 
 
-Integrantes del Grupo:
+El sistema está diseñado para ser flexible y extensible, permitiendo la incorporación sencilla de nuevos tipos de ejercicios y funcionalidades.
 
-Andrés Martínez Lorca
+---
 
-Mohamed Benamrouche Zidi
+## 👨‍🏫 Profesor Responsable
+- **Antonio López Martínez Carrasco**
 
-Pedro Arias Montes
+## 👥 Integrantes del Grupo
+- Andrés Martínez Lorca  
+- Mohamed Benamrouche Zidi  
+- Pedro Arias Montes  
 
-Descripción
+---
 
-Esta aplicación permite a los usuarios crear, compartir y realizar cursos interactivos con diferentes tipos de ejercicios. Se pueden configurar estrategias de aprendizaje, registrar estadísticas de progreso y gestionar usuarios. La aplicación está diseñada para ser flexible y extensible, facilitando la incorporación de nuevos tipos de ejercicios.
+## 🗂️ Estructura del Repositorio
 
-Estructura del Repositorio
+- [`casos_de_uso.md`](casos_de_uso.md) → Descripción detallada de los casos de uso.
+- [`modelo_de_dominio.md`](modelo_de_dominio.md) → Estructura y componentes del modelo de dominio.
+- [`README.md`](README.md) → Este archivo, con la explicación general del proyecto y su estructura.
 
-casos_de_uso.md → Contiene la descripción detallada de los casos de uso.
+---
 
-modelo_de_dominio.md → Describe la estructura y componentes del modelo de dominio.
+## 🐛 Issues y Navegabilidad
 
-README.md → Explicación general del proyecto y su estructura.
+Para facilitar la organización y revisión del proyecto, hemos creado una sección de **[Issues](https://github.com/andreesmrtnz/PDS-Duolingo/issues)** con tareas clave de desarrollo, mejoras pendientes y seguimiento del progreso.
 
-Issues y Navegabilidad
+---
 
-Para facilitar la corrección y organización del proyecto, se han creado Issues en GitHub con tareas clave del desarrollo. Puedes verlos aquí: Issues del Proyecto.
+## 🚀 Cómo Usar Este Repositorio
 
-Cómo Usar Este Repositorio
-
-Clonar el repositorio:
-
-git clone https://github.com/tu-repositorio.git
-
-Navegar a los archivos:
-
-Revisa los casos de uso en casos_de_uso.md
-
-Consulta el modelo de dominio en modelo_de_dominio.md
+### Clonar el repositorio
+```bash
+git clone https://github.com/andreesmrtnz/PDS-Duolingo.git
