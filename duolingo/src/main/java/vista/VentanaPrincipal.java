@@ -380,12 +380,12 @@ public class VentanaPrincipal {
     }
     
     // Se crea una tarjeta para cada curso cargado
- // Modifica el método createCourseCard para mostrar el progreso
+ // Reemplaza el método createCourseCard existente con esta nueva implementación
     private Pane createCourseCard(Curso curso) {
         VBox card = new VBox(12);
         card.setPadding(new Insets(15));
         card.setPrefWidth(220);
-        card.setPrefHeight(250); // Aumentamos la altura para incluir información de progreso
+        card.setPrefHeight(250);
         card.getStyleClass().add("course-card");
         
         Circle icon = new Circle(30);
@@ -407,6 +407,9 @@ public class VentanaPrincipal {
         VBox progressInfo = new VBox(5);
         progressInfo.setAlignment(Pos.CENTER_LEFT);
         
+        // Verificar si el usuario es creador de cursos
+        boolean esCreador = controlador.puedeCrearCursos();
+        
         if (progreso != null) {
             // Mostrar información de progreso
             double porcentajeCompletado = calcularPorcentajeCompletado(progreso, curso);
@@ -425,36 +428,98 @@ public class VentanaPrincipal {
             
             progressInfo.getChildren().addAll(progressText, progressBar, statsText);
             
-            HBox buttonsBox = new HBox(10);
-            buttonsBox.setAlignment(Pos.CENTER);
-            
-            Button resumeButton = new Button("Reanudar");
-            resumeButton.getStyleClass().add("action-button");
-            resumeButton.setPrefWidth(90);
-            resumeButton.setOnAction(e -> resumeCourse(curso, progreso));
-            
-            Button restartButton = new Button("Reiniciar");
-            restartButton.getStyleClass().add("secondary-button");
-            restartButton.setPrefWidth(90);
-            restartButton.setOnAction(e -> confirmRestartCourse(curso));
-            
-            buttonsBox.getChildren().addAll(resumeButton, restartButton);
-            
-            card.getChildren().addAll(icon, title, description, spacer, progressInfo, buttonsBox);
+            // Solo mostrar botones si no es creador
+            if (!esCreador) {
+                HBox buttonsBox = new HBox(10);
+                buttonsBox.setAlignment(Pos.CENTER);
+                
+                // Verificar si el curso ya ha sido iniciado (tiene preguntas respondidas)
+                if (progreso.getPreguntasCorrectas() > 0 || progreso.getPreguntasIncorrectas() > 0) {
+                    Button resumeButton = new Button("Reanudar");
+                    resumeButton.getStyleClass().add("action-button");
+                    resumeButton.setPrefWidth(90);
+                    resumeButton.setOnAction(e -> resumeCourse(curso, progreso));
+                    
+                    Button restartButton = new Button("Reiniciar");
+                    restartButton.getStyleClass().add("secondary-button");
+                    restartButton.setPrefWidth(90);
+                    restartButton.setOnAction(e -> confirmRestartCourse(curso));
+                    
+                    buttonsBox.getChildren().addAll(resumeButton, restartButton);
+                } else {
+                    // El curso está inscrito pero no iniciado
+                    Button startButton = new Button("Iniciar curso");
+                    startButton.getStyleClass().add("action-button");
+                    startButton.setPrefWidth(190);
+                    startButton.setOnAction(e -> startCourse(curso));
+                    
+                    buttonsBox.getChildren().add(startButton);
+                }
+                card.getChildren().addAll(icon, title, description, spacer, progressInfo, buttonsBox);
+            } else {
+                // Si es creador, solo mostrar la información sin botones
+                card.getChildren().addAll(icon, title, description, spacer, progressInfo);
+            }
         } else {
-            // Si no hay progreso, mostrar solo el botón de iniciar
-            Button startButton = new Button("Iniciar");
-            startButton.getStyleClass().add("action-button");
-            startButton.setPrefWidth(190);
-            startButton.setOnAction(e -> startCourse(curso));
-            
-            card.getChildren().addAll(icon, title, description, spacer, startButton);
+            // Si no hay progreso
+            if (esCreador) {
+                // Si es creador, no mostrar botones
+                card.getChildren().addAll(icon, title, description, spacer);
+            } else {
+                // Si es estudiante y no está inscrito, mostrar botón de inscripción
+                Button enrollButton = new Button("Inscribirse");
+                enrollButton.getStyleClass().add("action-button");
+                enrollButton.setPrefWidth(190);
+                enrollButton.setOnAction(e -> inscribirEnCurso(curso));
+                
+                card.getChildren().addAll(icon, title, description, spacer, enrollButton);
+            }
         }
         
         Tooltip tooltip = new Tooltip(curso.getTitulo() + " - " + curso.getDominio());
         Tooltip.install(card, tooltip);
         
         return card;
+    }
+    
+ // Método para inscribir al usuario en un curso
+    private void inscribirEnCurso(Curso curso) {
+        try {
+            // Crear nuevo registro de progreso pero sin iniciar el curso aún
+            CursoEnProgreso nuevaInscripcion = new CursoEnProgreso();
+            nuevaInscripcion.setUsuario(controlador.getUsuarioActual());
+            nuevaInscripcion.setCurso(curso);
+            nuevaInscripcion.setFechaInicio(new Date());
+            nuevaInscripcion.setFechaUltimaActividad(new Date());
+            nuevaInscripcion.setPreguntasCorrectas(0);
+            nuevaInscripcion.setPreguntasIncorrectas(0);
+            nuevaInscripcion.setBloqueActual(0);
+            nuevaInscripcion.setPreguntaActual(0);
+            nuevaInscripcion.setCompletado(false);
+            
+            // Guardar la inscripción en la base de datos
+            cursoEnProgresoDAO.guardar(nuevaInscripcion);
+            
+            // Mostrar mensaje de éxito
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Inscripción Exitosa");
+            alert.setHeaderText(null);
+            alert.setContentText("Te has inscrito al curso \"" + curso.getTitulo() + "\". Ahora puedes iniciarlo cuando quieras.");
+            alert.showAndWait();
+            
+            // Refrescar la vista de cursos
+            showCoursesPage();
+        } catch (Exception e) {
+            System.err.println("Error al inscribirse en el curso: " + e.getMessage());
+            e.printStackTrace();
+            
+            // Mostrar mensaje de error
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText("Error al inscribirse");
+            alert.setContentText("No se pudo completar la inscripción al curso. " + e.getMessage());
+            alert.showAndWait();
+        }
     }
 
     // Método auxiliar para calcular el porcentaje completado
