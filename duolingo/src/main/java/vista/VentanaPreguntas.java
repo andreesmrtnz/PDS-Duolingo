@@ -1,6 +1,9 @@
 package vista;
 
 import java.util.ArrayList;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+import javafx.scene.control.ScrollPane;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,6 +25,7 @@ import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -31,6 +35,7 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import javafx.animation.FadeTransition;
 import javafx.animation.RotateTransition;
 
 import modelo.Bloque;
@@ -44,12 +49,12 @@ import modelo.PreguntaMultipleChoice;
 
 public class VentanaPreguntas extends Application {
     
-    // Colores estilo Duolingo
-    private final Color COLOR_PRIMARIO = Color.rgb(88, 204, 2); // Verde Duolingo
-    private final Color COLOR_SECUNDARIO = Color.rgb(255, 200, 0); // Amarillo Duolingo
-    private final Color COLOR_FONDO = Color.rgb(245, 245, 245);
-    private final Color COLOR_CORRECTO = Color.rgb(88, 204, 2);
-    private final Color COLOR_INCORRECTO = Color.rgb(255, 75, 75);
+	// Colores con mejor contraste para legibilidad
+	private final Color COLOR_PRIMARIO = Color.rgb(0, 128, 0); // Verde más oscuro
+	private final Color COLOR_SECUNDARIO = Color.rgb(220, 150, 0); // Amarillo más oscuro
+	private final Color COLOR_FONDO = Color.rgb(250, 250, 250);
+	private final Color COLOR_CORRECTO = Color.rgb(0, 150, 0); // Verde más oscuro para correctas
+	private final Color COLOR_INCORRECTO = Color.rgb(220, 53, 53); // Rojo más intenso para incorrectas
     
     // Controlador y modelo
     private Controlador controlador;
@@ -97,8 +102,44 @@ public class VentanaPreguntas extends Application {
         cargarCursoActual();
         
         Scene scene = new Scene(panelPrincipal);
+        
+        
+        
+        // Actualizar la interfaz cuando cambia el tamaño
+        primaryStage.widthProperty().addListener((obs, oldVal, newVal) -> actualizarResponsividad());
+        primaryStage.heightProperty().addListener((obs, oldVal, newVal) -> actualizarResponsividad());
+        
         primaryStage.setScene(scene);
         primaryStage.show();
+    }
+
+    private void actualizarResponsividad() {
+        double ancho = panelPrincipal.getWidth();
+        
+        // Ajustar la interfaz según el ancho disponible
+        if (ancho < 600) {
+            // Para pantallas pequeñas
+            panelMultipleChoice.setPrefWidth(ancho * 0.9);
+            panelFillInBlank.setPrefWidth(ancho * 0.9);
+            
+            if (cardFrente != null && cardReverso != null) {
+                cardFrente.setMinSize(ancho * 0.8, 200);
+                cardFrente.setMaxSize(ancho * 0.8, 200);
+                cardReverso.setMinSize(ancho * 0.8, 200);
+                cardReverso.setMaxSize(ancho * 0.8, 200);
+            }
+        } else {
+            // Para pantallas normales
+            panelMultipleChoice.setPrefWidth(600);
+            panelFillInBlank.setPrefWidth(600);
+            
+            if (cardFrente != null && cardReverso != null) {
+                cardFrente.setMinSize(400, 250);
+                cardFrente.setMaxSize(400, 250);
+                cardReverso.setMinSize(400, 250);
+                cardReverso.setMaxSize(400, 250);
+            }
+        }
     }
     
     private void inicializarUI() {
@@ -112,8 +153,8 @@ public class VentanaPreguntas extends Application {
         panelInfo.setAlignment(Pos.CENTER_LEFT);
         
         labelTituloCurso = new Label();
-        labelTituloCurso.setFont(Font.font("System", FontWeight.BOLD, 22));
-        labelTituloCurso.setTextFill(COLOR_PRIMARIO);
+        labelTituloCurso.setFont(Font.font("System", FontWeight.BOLD, 24));
+        labelTituloCurso.setStyle("-fx-text-fill: #003300;");
         
         VBox progressBox = new VBox(5);
         progressBox.setAlignment(Pos.CENTER_RIGHT);
@@ -137,16 +178,33 @@ public class VentanaPreguntas extends Application {
         panelEstadisticas.setAlignment(Pos.CENTER);
         panelEstadisticas.setPadding(new Insets(10, 0, 0, 0));
 
+     // Icono para correctas
+        FontAwesomeIconView iconoCorrectas = new FontAwesomeIconView(FontAwesomeIcon.CHECK_CIRCLE);
+        iconoCorrectas.setFill(COLOR_CORRECTO);
+        iconoCorrectas.setSize("20");
+        
         labelCorrectas = new Label("Correctas: 0");
         labelCorrectas.setFont(Font.font("System", FontWeight.BOLD, 16));
         labelCorrectas.setTextFill(COLOR_CORRECTO);
+        
+        HBox correctasBox = new HBox(8);
+        correctasBox.setAlignment(Pos.CENTER);
+        correctasBox.getChildren().addAll(iconoCorrectas, labelCorrectas);
 
+        // Icono para incorrectas
+        FontAwesomeIconView iconoIncorrectas = new FontAwesomeIconView(FontAwesomeIcon.TIMES_CIRCLE);
+        iconoIncorrectas.setFill(COLOR_INCORRECTO);
+        iconoIncorrectas.setSize("20");
+        
         labelIncorrectas = new Label("Incorrectas: 0");
         labelIncorrectas.setFont(Font.font("System", FontWeight.BOLD, 16));
         labelIncorrectas.setTextFill(COLOR_INCORRECTO);
-
-        panelEstadisticas.getChildren().addAll(labelCorrectas, labelIncorrectas);
         
+        HBox incorrectasBox = new HBox(8);
+        incorrectasBox.setAlignment(Pos.CENTER);
+        incorrectasBox.getChildren().addAll(iconoIncorrectas, labelIncorrectas);
+
+        panelEstadisticas.getChildren().addAll(correctasBox, incorrectasBox);
         VBox panelInfoCompleto = new VBox(10);
         panelInfoCompleto.getChildren().addAll(panelInfo, panelEstadisticas);
         
@@ -155,6 +213,13 @@ public class VentanaPreguntas extends Application {
         // Panel central (contenido de preguntas)
         contenedorPreguntas = new StackPane();
         contenedorPreguntas.setPadding(new Insets(20));
+        
+        // Añadir un ScrollPane para manejar contenido extenso
+        ScrollPane scrollPane = new ScrollPane(contenedorPreguntas);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setFitToHeight(false);
+        scrollPane.getStyleClass().add("custom-scroll-pane");
+        scrollPane.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
         
         // Inicializar paneles para cada tipo de pregunta
         inicializarPanelMultipleChoice();
@@ -185,21 +250,37 @@ public class VentanaPreguntas extends Application {
         contenedorPreguntas.setClip(clip);
         contenedorPreguntas.setStyle("-fx-background-color: white; -fx-background-radius: 10;");
         
-        panelPrincipal.setCenter(contenedorPreguntas);
+        panelPrincipal.setCenter(scrollPane);
         
         // Panel inferior (botones de navegación)
         HBox panelNavegacion = new HBox(20);
         panelNavegacion.setPadding(new Insets(20, 0, 0, 0));
         panelNavegacion.setAlignment(Pos.CENTER);
         
+     // Crear botones con iconos
         btnAnterior = crearBotonEstiloDuolingo("Anterior", COLOR_SECUNDARIO);
+        FontAwesomeIconView iconoAnterior = new FontAwesomeIconView(FontAwesomeIcon.ARROW_LEFT);
+        iconoAnterior.setFill(Color.WHITE);
+        iconoAnterior.setSize("18");
+        btnAnterior.setGraphic(iconoAnterior);
         btnAnterior.setOnAction(e -> mostrarPreguntaAnterior());
         
         btnVerificar = crearBotonEstiloDuolingo("Verificar", COLOR_PRIMARIO);
+        FontAwesomeIconView iconoVerificar = new FontAwesomeIconView(FontAwesomeIcon.CHECK);
+        iconoVerificar.setFill(Color.WHITE);
+        iconoVerificar.setSize("18");
+        btnVerificar.setGraphic(iconoVerificar);
         btnVerificar.setOnAction(e -> verificarRespuesta());
         
         btnSiguiente = crearBotonEstiloDuolingo("Siguiente", COLOR_SECUNDARIO);
+        FontAwesomeIconView iconoSiguiente = new FontAwesomeIconView(FontAwesomeIcon.ARROW_RIGHT);
+        iconoSiguiente.setFill(Color.WHITE);
+        iconoSiguiente.setSize("18");
+        btnSiguiente.setGraphic(iconoSiguiente);
         btnSiguiente.setOnAction(e -> mostrarPreguntaSiguiente());
+        
+        // Posicionar el icono después del texto para el botón siguiente
+        btnSiguiente.setContentDisplay(javafx.scene.control.ContentDisplay.RIGHT);
         
         panelNavegacion.getChildren().addAll(btnAnterior, btnVerificar, btnSiguiente);
         
@@ -253,13 +334,14 @@ public class VentanaPreguntas extends Application {
         panelMultipleChoice.setAlignment(Pos.CENTER);
         panelMultipleChoice.setPadding(new Insets(20));
         panelMultipleChoice.setMaxWidth(600);
-        panelMultipleChoice.setMaxHeight(400);
+        panelMultipleChoice.setMaxHeight(Region.USE_COMPUTED_SIZE);
         
         Label enunciado = new Label();
-        enunciado.setFont(Font.font("System", FontWeight.BOLD, 20));
+        enunciado.setFont(Font.font("System", FontWeight.BOLD, 22));
         enunciado.setWrapText(true);
         enunciado.setMaxWidth(550);
         enunciado.setAlignment(Pos.CENTER);
+        enunciado.setStyle("-fx-text-fill: #333333;");
         
         VBox opciones = new VBox(15);
         opciones.setAlignment(Pos.CENTER_LEFT);
@@ -291,9 +373,14 @@ public class VentanaPreguntas extends Application {
         labelFrente.setWrapText(true);
         labelFrente.setMaxWidth(350);
         labelFrente.setFont(Font.font("System", FontWeight.BOLD, 22));
-        labelFrente.setTextFill(COLOR_PRIMARIO);
+        labelFrente.setTextFill(Color.rgb(0, 100, 0));
         
-        Button btnMostrarRespuesta = crearBotonEstiloDuolingo("Mostrar Respuesta", COLOR_SECUNDARIO);
+        Button btnMostrarRespuesta = crearBotonEstiloDuolingo("Mostrar", COLOR_SECUNDARIO);
+        FontAwesomeIconView iconoGirar = new FontAwesomeIconView(FontAwesomeIcon.REFRESH);
+        iconoGirar.setFill(Color.WHITE);
+        iconoGirar.setSize("16");
+        btnMostrarRespuesta.setGraphic(iconoGirar);
+        btnMostrarRespuesta.setContentDisplay(javafx.scene.control.ContentDisplay.RIGHT);
         btnMostrarRespuesta.setOnAction(e -> voltearTarjeta());
         
         frenteBox.getChildren().addAll(labelFrente, btnMostrarRespuesta);
@@ -318,9 +405,14 @@ public class VentanaPreguntas extends Application {
         labelReverso.setWrapText(true);
         labelReverso.setMaxWidth(350);
         labelReverso.setFont(Font.font("System", FontWeight.BOLD, 22));
-        labelReverso.setTextFill(COLOR_SECUNDARIO);
+        labelReverso.setTextFill(Color.rgb(0, 100, 0));
         
         Button btnOcultarRespuesta = crearBotonEstiloDuolingo("Volver", COLOR_PRIMARIO);
+        FontAwesomeIconView iconoVolver = new FontAwesomeIconView(FontAwesomeIcon.UNDO);
+        iconoVolver.setFill(Color.WHITE);
+        iconoVolver.setSize("16");
+        btnOcultarRespuesta.setGraphic(iconoVolver);
+        btnOcultarRespuesta.setContentDisplay(javafx.scene.control.ContentDisplay.LEFT);
         btnOcultarRespuesta.setOnAction(e -> voltearTarjeta());
         
         reversoBox.getChildren().addAll(labelReverso, btnOcultarRespuesta);
@@ -377,13 +469,24 @@ public class VentanaPreguntas extends Application {
         panelFillInBlank.setMaxWidth(600);
         
         Label enunciado = new Label();
-        enunciado.setFont(Font.font("System", FontWeight.BOLD, 20));
+        enunciado.setFont(Font.font("System", FontWeight.BOLD, 22));
         enunciado.setWrapText(true);
         enunciado.setMaxWidth(550);
         enunciado.setAlignment(Pos.CENTER);
+        enunciado.setStyle("-fx-text-fill: #333333;");
         
         VBox respuestaBox = new VBox(10);
         respuestaBox.setAlignment(Pos.CENTER);
+        
+        // Crear un contenedor para el campo de texto y el icono
+        HBox campoContainer = new HBox(10);
+        campoContainer.setAlignment(Pos.CENTER);
+        campoContainer.setMaxWidth(350);
+        
+        // Agregar un icono al campo de texto
+        FontAwesomeIconView iconoTextField = new FontAwesomeIconView(FontAwesomeIcon.PENCIL);
+        iconoTextField.setFill(COLOR_PRIMARIO);
+        iconoTextField.setSize("20");
         
         TextField textRespuesta = new TextField();
         textRespuesta.setMaxWidth(300);
@@ -399,7 +502,10 @@ public class VentanaPreguntas extends Application {
             "-fx-padding: 10;"
         );
         
-        respuestaBox.getChildren().add(textRespuesta);
+        HBox.setHgrow(textRespuesta, javafx.scene.layout.Priority.ALWAYS);
+        campoContainer.getChildren().addAll(iconoTextField, textRespuesta);
+        
+        respuestaBox.getChildren().add(campoContainer);
         
         panelFillInBlank.getChildren().addAll(enunciado, respuestaBox);
     }
@@ -492,11 +598,8 @@ public class VentanaPreguntas extends Application {
         }
     }
     
- // Modifica el método mostrarPreguntaMultipleChoice para usar los métodos de Pregunta
     private void mostrarPreguntaMultipleChoice(Pregunta pregunta) {
         panelMultipleChoice.setVisible(true);
-        
-        
         
         // Limpiar y configurar
         VBox vbox = (VBox) panelMultipleChoice;
@@ -510,28 +613,43 @@ public class VentanaPreguntas extends Application {
         String[] opciones = pregunta.getOpciones();
         
         for (int i = 0; i < opciones.length; i++) {
+            HBox opcionContainer = new HBox(10);
+            opcionContainer.setAlignment(Pos.CENTER_LEFT);
+            opcionContainer.setPrefWidth(Region.USE_COMPUTED_SIZE);
+            opcionContainer.setMaxWidth(Double.MAX_VALUE);
+            
             RadioButton radio = new RadioButton(opciones[i]);
             radio.setToggleGroup(grupo);
             radio.setFont(Font.font("System", 16));
             radio.setPadding(new Insets(10));
+            radio.setStyle("-fx-text-fill: #333333;");
             radio.setUserData(i); // Guardar índice como userData
+            radio.setMaxWidth(Double.MAX_VALUE);
+            radio.setWrapText(true);
+            HBox.setHgrow(radio, javafx.scene.layout.Priority.ALWAYS);
             
             // Estilo para las opciones
-            radio.setStyle(
-                "-fx-background-color: white;" +
-                "-fx-border-color: " + toRGBCode(COLOR_PRIMARIO.deriveColor(0, 1, 1, 0.7)) + ";" +
-                "-fx-border-width: 2;" +
-                "-fx-border-radius: 10;" +
-                "-fx-background-radius: 10;" +
-                "-fx-padding: 15;" +
-                "-fx-cursor: hand;"
-            );
+            opcionContainer.setStyle(
+            	    "-fx-background-color: white;" +
+            	    "-fx-border-color: " + toRGBCode(COLOR_PRIMARIO) + ";" +
+            	    "-fx-border-width: 2;" +
+            	    "-fx-border-radius: 10;" +
+            	    "-fx-background-radius: 10;" +
+            	    "-fx-padding: 15;" +
+            	    "-fx-cursor: hand;"
+            	);
             
-            radio.setPrefWidth(500);
+            // Icono para la opción (inicialmente invisible)
+            FontAwesomeIconView iconoOpcion = new FontAwesomeIconView(FontAwesomeIcon.CIRCLE);
+            iconoOpcion.setSize("16");
+            iconoOpcion.setFill(COLOR_PRIMARIO);
+            iconoOpcion.setVisible(false);
+            
+            opcionContainer.getChildren().addAll(radio, iconoOpcion);
             
             // Efectos hover
-            radio.setOnMouseEntered(e -> 
-                radio.setStyle(
+            opcionContainer.setOnMouseEntered(e -> 
+                opcionContainer.setStyle(
                     "-fx-background-color: " + toRGBCode(COLOR_FONDO) + ";" +
                     "-fx-border-color: " + toRGBCode(COLOR_PRIMARIO) + ";" +
                     "-fx-border-width: 2;" +
@@ -542,8 +660,8 @@ public class VentanaPreguntas extends Application {
                 )
             );
             
-            radio.setOnMouseExited(e -> 
-                radio.setStyle(
+            opcionContainer.setOnMouseExited(e -> 
+                opcionContainer.setStyle(
                     "-fx-background-color: white;" +
                     "-fx-border-color: " + toRGBCode(COLOR_PRIMARIO.deriveColor(0, 1, 1, 0.7)) + ";" +
                     "-fx-border-width: 2;" +
@@ -560,22 +678,30 @@ public class VentanaPreguntas extends Application {
                 
                 if (seleccionUsuario != null && seleccionUsuario.length > 0 && seleccionUsuario[0] == i) {
                     radio.setSelected(true);
+                    iconoOpcion.setVisible(true);
                     if (i == pregunta.getRespuestaCorrecta()) {
-                        radio.setStyle("-fx-background-color: " + toRGBCode(COLOR_CORRECTO) + ";");
+                        iconoOpcion.setIcon(FontAwesomeIcon.CHECK_CIRCLE);
+                        iconoOpcion.setFill(COLOR_CORRECTO);
+                        opcionContainer.setStyle("-fx-background-color: " + toRGBCode(COLOR_CORRECTO.deriveColor(0, 1, 1, 0.2)) + ";");
                     } else {
-                        radio.setStyle("-fx-background-color: " + toRGBCode(COLOR_INCORRECTO) + ";");
+                        iconoOpcion.setIcon(FontAwesomeIcon.TIMES_CIRCLE);
+                        iconoOpcion.setFill(COLOR_INCORRECTO);
+                        opcionContainer.setStyle("-fx-background-color: " + toRGBCode(COLOR_INCORRECTO.deriveColor(0, 1, 1, 0.2)) + ";");
                     }
                 } else if (i == pregunta.getRespuestaCorrecta() && 
                         seleccionUsuario != null && seleccionUsuario.length > 0 && 
                         seleccionUsuario[0] != pregunta.getRespuestaCorrecta()) {
-                    radio.setStyle("-fx-background-color: " + toRGBCode(COLOR_CORRECTO) + ";");
+                    iconoOpcion.setIcon(FontAwesomeIcon.CHECK_CIRCLE);
+                    iconoOpcion.setFill(COLOR_CORRECTO);
+                    iconoOpcion.setVisible(true);
+                    opcionContainer.setStyle("-fx-background-color: " + toRGBCode(COLOR_CORRECTO.deriveColor(0, 1, 1, 0.2)) + ";");
                 }
                 
                 // Deshabilitar si ya se respondió
                 radio.setDisable(true);
             }
             
-            opcionesBox.getChildren().add(radio);
+            opcionesBox.getChildren().add(opcionContainer);
         }
     }
 
@@ -605,10 +731,13 @@ public class VentanaPreguntas extends Application {
         enunciado.setText(pregunta.getEnunciado());
         
         VBox respuestaBox = (VBox) panelFillInBlank.getChildren().get(1);
-        TextField textRespuesta = (TextField) respuestaBox.getChildren().get(0);
-        textRespuesta.clear();
         
-        // Resetear el estilo
+        // Corrección aquí: Primero obtenemos el HBox y luego el TextField
+        HBox campoContainer = (HBox) respuestaBox.getChildren().get(0);
+        TextField textRespuesta = (TextField) campoContainer.getChildren().get(1);
+        
+        // Limpiar el campo y resetear el estilo
+        textRespuesta.clear();
         textRespuesta.setStyle(
             "-fx-background-radius: 10;" + 
             "-fx-border-radius: 10;" +
@@ -662,11 +791,13 @@ public class VentanaPreguntas extends Application {
     }
 
     private boolean verificarRespuestaFillInBlank(PreguntaFillinBlank pregunta) {
-    	VBox respuestaBox = (VBox) panelFillInBlank.getChildren().get(1);
-        TextField textRespuesta = (TextField) respuestaBox.getChildren().get(0);
+        VBox respuestaBox = (VBox) panelFillInBlank.getChildren().get(1);
+        // Primero obtenemos el HBox
+        HBox campoContainer = (HBox) respuestaBox.getChildren().get(0);
+        // Luego obtenemos el TextField que está en la posición 1 del HBox (después del icono)
+        TextField textRespuesta = (TextField) campoContainer.getChildren().get(1);
         
         String respuestaUsuario = textRespuesta.getText().trim();
-        
         if (respuestaUsuario.isEmpty()) {
             mostrarAlerta("Por favor, escribe una respuesta.");
             return false;
@@ -710,13 +841,16 @@ public class VentanaPreguntas extends Application {
         VBox opcionesBox = (VBox) vbox.getChildren().get(1);
 
         int seleccionUsuario = -1;
-        RadioButton seleccionado = null;
+        HBox seleccionadoContainer = null;
 
+        // Iterar a través de los contenedores de opciones
         for (int i = 0; i < opcionesBox.getChildren().size(); i++) {
-            RadioButton radio = (RadioButton) opcionesBox.getChildren().get(i);
+            HBox opcionContainer = (HBox) opcionesBox.getChildren().get(i);
+            RadioButton radio = (RadioButton) opcionContainer.getChildren().get(0);
+            
             if (radio.isSelected()) {
                 seleccionUsuario = i;
-                seleccionado = radio;
+                seleccionadoContainer = opcionContainer;
                 break;
             }
         }
@@ -729,20 +863,34 @@ public class VentanaPreguntas extends Application {
         boolean esCorrecto = seleccionUsuario == pregunta.getRespuestaCorrecta();
         
         // Guardar la respuesta del usuario en el modelo
-        // Usa el arreglo seleccionUsuario
         pregunta.setSeleccionUsuario(new int[]{seleccionUsuario});
         
+        // Obtener el icono de la opción seleccionada
+        FontAwesomeIconView iconoSeleccionado = (FontAwesomeIconView) seleccionadoContainer.getChildren().get(1);
+        iconoSeleccionado.setVisible(true);
+        
         if (esCorrecto) {
-            seleccionado.setStyle("-fx-background-color: " + toRGBCode(COLOR_CORRECTO) + ";");
+            seleccionadoContainer.setStyle("-fx-background-color: " + toRGBCode(COLOR_CORRECTO.deriveColor(0, 1, 1, 0.2)) + ";");
+            iconoSeleccionado.setIcon(FontAwesomeIcon.CHECK_CIRCLE);
+            iconoSeleccionado.setFill(COLOR_CORRECTO);
         } else {
-            seleccionado.setStyle("-fx-background-color: " + toRGBCode(COLOR_INCORRECTO) + ";");
-            RadioButton opcionCorrecta = (RadioButton) opcionesBox.getChildren().get(pregunta.getRespuestaCorrecta());
-            opcionCorrecta.setStyle("-fx-background-color: " + toRGBCode(COLOR_CORRECTO) + ";");
+            seleccionadoContainer.setStyle("-fx-background-color: " + toRGBCode(COLOR_INCORRECTO.deriveColor(0, 1, 1, 0.2)) + ";");
+            iconoSeleccionado.setIcon(FontAwesomeIcon.TIMES_CIRCLE);
+            iconoSeleccionado.setFill(COLOR_INCORRECTO);
+            
+            // Marcar la opción correcta
+            HBox opcionCorrectaContainer = (HBox) opcionesBox.getChildren().get(pregunta.getRespuestaCorrecta());
+            FontAwesomeIconView iconoOpcionCorrecta = (FontAwesomeIconView) opcionCorrectaContainer.getChildren().get(1);
+            iconoOpcionCorrecta.setIcon(FontAwesomeIcon.CHECK_CIRCLE);
+            iconoOpcionCorrecta.setFill(COLOR_CORRECTO);
+            iconoOpcionCorrecta.setVisible(true);
+            opcionCorrectaContainer.setStyle("-fx-background-color: " + toRGBCode(COLOR_CORRECTO.deriveColor(0, 1, 1, 0.2)) + ";");
         }
 
         // Deshabilitar las opciones después de responder
         for (int i = 0; i < opcionesBox.getChildren().size(); i++) {
-            RadioButton radio = (RadioButton) opcionesBox.getChildren().get(i);
+            HBox opcionContainer = (HBox) opcionesBox.getChildren().get(i);
+            RadioButton radio = (RadioButton) opcionContainer.getChildren().get(0);
             radio.setDisable(true);
         }
 
@@ -872,19 +1020,74 @@ public class VentanaPreguntas extends Application {
     
 
     private void mostrarResultado(boolean correcto) {
-        Alert alerta = new Alert(AlertType.INFORMATION);
-        alerta.setTitle("Resultado");
-        alerta.setHeaderText(null);
-        
+        // Crear un efecto de "shake" si es incorrecto o "bounce" si es correcto
         if (correcto) {
-            alerta.setContentText("¡Correcto! ¡Muy bien!");
-            alerta.getDialogPane().getStyleClass().add("alert-success");
+            // Efecto de rebote para respuesta correcta
+            FontAwesomeIconView iconoSuccess = new FontAwesomeIconView(FontAwesomeIcon.TROPHY);
+            iconoSuccess.setFill(COLOR_CORRECTO);
+            iconoSuccess.setSize("60");
+            
+            VBox resultadoBox = new VBox(15);
+            resultadoBox.setAlignment(Pos.CENTER);
+            
+            Label mensaje = new Label("¡Correcto!");
+            mensaje.setFont(Font.font("System", FontWeight.BOLD, 24));
+            mensaje.setTextFill(COLOR_CORRECTO);
+            
+            resultadoBox.getChildren().addAll(iconoSuccess, mensaje);
+            
+            // Mostrar efecto flotante
+            StackPane overlay = new StackPane(resultadoBox);
+            overlay.setStyle("-fx-background-color: rgba(255, 255, 255, 0.8);");
+            contenedorPreguntas.getChildren().add(overlay);
+            
+            // Animación para aparecer y desaparecer
+            FadeTransition aparecer = new FadeTransition(Duration.millis(300), overlay);
+            aparecer.setFromValue(0);
+            aparecer.setToValue(1);
+            
+            FadeTransition desaparecer = new FadeTransition(Duration.millis(300), overlay);
+            desaparecer.setFromValue(1);
+            desaparecer.setToValue(0);
+            desaparecer.setDelay(Duration.millis(1200));
+            desaparecer.setOnFinished(e -> contenedorPreguntas.getChildren().remove(overlay));
+            
+            aparecer.play();
+            desaparecer.play();
         } else {
-            alerta.setContentText("Incorrecto. Intenta de nuevo.");
-            alerta.getDialogPane().getStyleClass().add("alert-error");
+            // Efecto de sacudida para respuesta incorrecta
+            FontAwesomeIconView iconoError = new FontAwesomeIconView(FontAwesomeIcon.EXCLAMATION_CIRCLE);
+            iconoError.setFill(COLOR_INCORRECTO);
+            iconoError.setSize("60");
+            
+            VBox resultadoBox = new VBox(15);
+            resultadoBox.setAlignment(Pos.CENTER);
+            
+            Label mensaje = new Label("Incorrecto");
+            mensaje.setFont(Font.font("System", FontWeight.BOLD, 24));
+            mensaje.setTextFill(COLOR_INCORRECTO);
+            
+            resultadoBox.getChildren().addAll(iconoError, mensaje);
+            
+            // Mostrar efecto flotante
+            StackPane overlay = new StackPane(resultadoBox);
+            overlay.setStyle("-fx-background-color: rgba(255, 255, 255, 0.8);");
+            contenedorPreguntas.getChildren().add(overlay);
+            
+            // Animación para aparecer y desaparecer
+            FadeTransition aparecer = new FadeTransition(Duration.millis(300), overlay);
+            aparecer.setFromValue(0);
+            aparecer.setToValue(1);
+            
+            FadeTransition desaparecer = new FadeTransition(Duration.millis(300), overlay);
+            desaparecer.setFromValue(1);
+            desaparecer.setToValue(0);
+            desaparecer.setDelay(Duration.millis(1200));
+            desaparecer.setOnFinished(e -> contenedorPreguntas.getChildren().remove(overlay));
+            
+            aparecer.play();
+            desaparecer.play();
         }
-        
-        alerta.showAndWait();
     }
 
 
