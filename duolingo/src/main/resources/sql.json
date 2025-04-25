@@ -1,0 +1,134 @@
+{
+    "id": null,
+    "titulo": "Bases de Datos SQL",
+    "dominio": "Gestión de Datos",
+    "idCreador": null,
+    "posicionActual": 0,
+    "bloques": [
+      {
+        "id": null,
+        "titulo": "Conceptos Básicos de Bases de Datos",
+        "descripcion": "Introducción a DBMS y modelos de datos",
+        "preguntas": [
+          {
+            "enunciado": "¿Qué significa SQL?",
+            "opciones": ["Structured Query Language", "Simple Query Language", "System Query Language", "Standard Query Logic"],
+            "respuestaCorrecta": 0,
+            "tipo": "SELECCION_MULTIPLE"
+          },
+          {
+            "enunciado": "El concepto 'ACID' en bases de datos",
+            "opciones": ["Atomicidad, Consistencia, Aislamiento y Durabilidad"],
+            "respuestaCorrecta": 0,
+            "tipo": "FLASHCARD"
+          },
+          {
+            "enunciado": "Una base de datos relacional almacena datos en forma de ______.",
+            "opciones": ["tablas"],
+            "respuestaCorrecta": -1,
+            "tipo": "COMPLETAR"
+          }
+        ]
+      },
+      {
+        "id": null,
+        "titulo": "Consultas SQL Básicas",
+        "descripcion": "SELECT, INSERT, UPDATE y DELETE",
+        "preguntas": [
+          {
+            "enunciado": "¿Qué sentencia SQL se utiliza para obtener datos de una tabla?",
+            "opciones": ["SELECT", "GET", "FETCH", "RETRIEVE"],
+            "respuestaCorrecta": 0,
+            "tipo": "SELECCION_MULTIPLE"
+          },
+          {
+            "enunciado": "Para insertar datos en una tabla se utiliza la sentencia ______.",
+            "opciones": ["INSERT"],
+            "respuestaCorrecta": -1,
+            "tipo": "COMPLETAR"
+          },
+          {
+            "enunciado": "¿Qué cláusula se utiliza para filtrar resultados en una consulta SQL?",
+            "opciones": ["WHERE", "FILTER", "HAVING", "BY"],
+            "respuestaCorrecta": 0,
+            "tipo": "SELECCION_MULTIPLE"
+          }
+        ]
+      },
+      {
+        "id": null,
+        "titulo": "Relaciones y Joins",
+        "descripcion": "Tipos de relaciones y operaciones JOIN",
+        "preguntas": [
+          {
+            "enunciado": "¿Qué tipo de JOIN devuelve registros cuando hay coincidencias en ambas tablas?",
+            "opciones": ["INNER JOIN", "LEFT JOIN", "RIGHT JOIN", "FULL JOIN"],
+            "respuestaCorrecta": 0,
+            "tipo": "SELECCION_MULTIPLE"
+          },
+          {
+            "enunciado": "Una clave ______ es un campo que identifica de forma única cada registro en una tabla.",
+            "opciones": ["primaria"],
+            "respuestaCorrecta": -1,
+            "tipo": "COMPLETAR"
+          },
+          {
+            "enunciado": "El concepto 'Clave foránea'",
+            "opciones": ["Campo que establece una relación con la clave primaria de otra tabla"],
+            "respuestaCorrecta": 0,
+            "tipo": "FLASHCARD"
+          }
+        ]
+      },
+      {
+        "id": null,
+        "titulo": "Normalización de Bases de Datos",
+        "descripcion": "Formas normales y proceso de normalización",
+        "preguntas": [
+          {
+            "enunciado": "¿Cuál es el objetivo principal de la normalización?",
+            "opciones": ["Reducir la redundancia de datos", "Aumentar la velocidad de consultas", "Reducir el tamaño de la base de datos", "Simplificar las consultas SQL"],
+            "respuestaCorrecta": 0,
+            "tipo": "SELECCION_MULTIPLE"
+          },
+          {
+            "enunciado": "La Primera Forma Normal (1NF) requiere que los valores de una columna sean ______.",
+            "opciones": ["atómicos"],
+            "respuestaCorrecta": -1,
+            "tipo": "COMPLETAR"
+          },
+          {
+            "enunciado": "¿Cuántas formas normales principales existen?",
+            "opciones": ["3", "5", "7", "10"],
+            "respuestaCorrecta": 1,
+            "tipo": "SELECCION_MULTIPLE"
+          }
+        ]
+      },
+      {
+        "id": null,
+        "titulo": "Índices y Optimización",
+        "descripcion": "Uso de índices y optimización de consultas",
+        "preguntas": [
+          {
+            "enunciado": "¿Para qué se utilizan los índices en bases de datos?",
+            "opciones": ["Acelerar consultas", "Ahorrar espacio", "Prevenir errores", "Cifrar datos"],
+            "respuestaCorrecta": 0,
+            "tipo": "SELECCION_MULTIPLE"
+          },
+          {
+            "enunciado": "Un plan de ejecución muestra cómo el motor de base de datos ______ una consulta.",
+            "opciones": ["ejecuta"],
+            "respuestaCorrecta": -1,
+            "tipo": "COMPLETAR"
+          },
+          {
+            "enunciado": "Los índices de tipo B-Tree",
+            "opciones": ["Estructura de árbol balanceado que permite búsquedas, inserciones y eliminaciones eficientes"],
+            "respuestaCorrecta": 0,
+            "tipo": "FLASHCARD"
+          }
+        ]
+      }
+    ]
+  }

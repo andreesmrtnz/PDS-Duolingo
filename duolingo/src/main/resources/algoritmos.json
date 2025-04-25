@@ -1,0 +1,134 @@
+{
+    "id": null,
+    "titulo": "Algoritmos",
+    "dominio": "Ciencias de la Computación",
+    "idCreador": null,
+    "posicionActual": 0,
+    "bloques": [
+      {
+        "id": null,
+        "titulo": "Introducción a Algoritmos",
+        "descripcion": "Conceptos básicos y notación",
+        "preguntas": [
+          {
+            "enunciado": "¿Qué es un algoritmo?",
+            "opciones": ["Un programa de computadora", "Una secuencia de instrucciones para resolver un problema", "Un lenguaje de programación", "Una estructura de datos"],
+            "respuestaCorrecta": 1,
+            "tipo": "SELECCION_MULTIPLE"
+          },
+          {
+            "enunciado": "La notación Big O se utiliza para describir la ______ de un algoritmo.",
+            "opciones": ["complejidad"],
+            "respuestaCorrecta": -1,
+            "tipo": "COMPLETAR"
+          },
+          {
+            "enunciado": "Características de un buen algoritmo",
+            "opciones": ["Corrección, eficiencia, claridad y generalidad"],
+            "respuestaCorrecta": 0,
+            "tipo": "FLASHCARD"
+          }
+        ]
+      },
+      {
+        "id": null,
+        "titulo": "Algoritmos de Ordenamiento",
+        "descripcion": "Técnicas para ordenar datos",
+        "preguntas": [
+          {
+            "enunciado": "¿Cuál es la complejidad del algoritmo Quicksort en el caso promedio?",
+            "opciones": ["O(n)", "O(n log n)", "O(n²)", "O(log n)"],
+            "respuestaCorrecta": 1,
+            "tipo": "SELECCION_MULTIPLE"
+          },
+          {
+            "enunciado": "El algoritmo BubbleSort compara pares de elementos ______.",
+            "opciones": ["adyacentes"],
+            "respuestaCorrecta": -1,
+            "tipo": "COMPLETAR"
+          },
+          {
+            "enunciado": "¿Cuál de estos algoritmos de ordenamiento es más eficiente para grandes conjuntos de datos?",
+            "opciones": ["Merge Sort", "Bubble Sort", "Selection Sort", "Insertion Sort"],
+            "respuestaCorrecta": 0,
+            "tipo": "SELECCION_MULTIPLE"
+          }
+        ]
+      },
+      {
+        "id": null,
+        "titulo": "Estructuras de Datos",
+        "descripcion": "Estructuras para almacenar y manipular datos",
+        "preguntas": [
+          {
+            "enunciado": "¿Qué estructura de datos sigue el principio LIFO?",
+            "opciones": ["Cola", "Pila", "Lista enlazada", "Árbol"],
+            "respuestaCorrecta": 1,
+            "tipo": "SELECCION_MULTIPLE"
+          },
+          {
+            "enunciado": "Un árbol binario de búsqueda tiene la propiedad de que todos los elementos en el subárbol izquierdo son ______ que el nodo raíz.",
+            "opciones": ["menores"],
+            "respuestaCorrecta": -1,
+            "tipo": "COMPLETAR"
+          },
+          {
+            "enunciado": "La estructura de datos 'Hash Table'",
+            "opciones": ["Implementa un array asociativo que mapea claves a valores usando una función hash"],
+            "respuestaCorrecta": 0,
+            "tipo": "FLASHCARD"
+          }
+        ]
+      },
+      {
+        "id": null,
+        "titulo": "Algoritmos de Búsqueda",
+        "descripcion": "Métodos para encontrar datos",
+        "preguntas": [
+          {
+            "enunciado": "¿Qué algoritmo de búsqueda requiere que los datos estén ordenados?",
+            "opciones": ["Búsqueda lineal", "Búsqueda binaria", "Búsqueda por interpolación", "Todas las anteriores"],
+            "respuestaCorrecta": 1,
+            "tipo": "SELECCION_MULTIPLE"
+          },
+          {
+            "enunciado": "La complejidad de la búsqueda binaria es ______.",
+            "opciones": ["O(log n)"],
+            "respuestaCorrecta": -1,
+            "tipo": "COMPLETAR"
+          },
+          {
+            "enunciado": "¿En qué consiste el algoritmo Breadth-First Search (BFS)?",
+            "opciones": ["Recorre primero todos los nodos vecinos antes de pasar a nodos más profundos", "Explora lo más profundo posible en cada rama", "Usa una heurística para decidir qué nodo explorar", "Compara todos los nodos con el valor buscado"],
+            "respuestaCorrecta": 0,
+            "tipo": "SELECCION_MULTIPLE"
+          }
+        ]
+      },
+      {
+        "id": null,
+        "titulo": "Técnicas de Diseño de Algoritmos",
+        "descripcion": "Paradigmas para diseñar algoritmos eficientes",
+        "preguntas": [
+          {
+            "enunciado": "¿Qué técnica resuelve problemas dividiéndolos en subproblemas más pequeños?",
+            "opciones": ["Fuerza bruta", "Divide y vencerás", "Greedy", "Programación dinámica"],
+            "respuestaCorrecta": 1,
+            "tipo": "SELECCION_MULTIPLE"
+          },
+          {
+            "enunciado": "La programación dinámica utiliza la técnica de ______ para evitar cálculos repetidos.",
+            "opciones": ["memoización"],
+            "respuestaCorrecta": -1,
+            "tipo": "COMPLETAR"
+          },
+          {
+            "enunciado": "El algoritmo voraz (Greedy)",
+            "opciones": ["Toma la mejor decisión local en cada paso con la esperanza de encontrar una solución óptima global"],
+            "respuestaCorrecta": 0,
+            "tipo": "FLASHCARD"
+          }
+        ]
+      }
+    ]
+  }

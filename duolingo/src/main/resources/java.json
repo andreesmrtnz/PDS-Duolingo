@@ -1,0 +1,134 @@
+{
+    "id": null,
+    "titulo": "Programación Java",
+    "dominio": "Desarrollo de Software",
+    "idCreador": null,
+    "posicionActual": 0,
+    "bloques": [
+      {
+        "id": null,
+        "titulo": "Fundamentos de Java",
+        "descripcion": "Elementos básicos del lenguaje Java",
+        "preguntas": [
+          {
+            "enunciado": "¿Qué es JVM?",
+            "opciones": ["Java Virtual Machine", "Java Visual Method", "Java Version Manager", "Java Variable Model"],
+            "respuestaCorrecta": 0,
+            "tipo": "SELECCION_MULTIPLE"
+          },
+          {
+            "enunciado": "¿Cuál es el método principal para iniciar la ejecución de un programa Java?",
+            "opciones": ["main()", "start()", "execute()", "run()"],
+            "respuestaCorrecta": 0,
+            "tipo": "SELECCION_MULTIPLE"
+          },
+          {
+            "enunciado": "Java es un lenguaje ______ orientado a objetos.",
+            "opciones": ["completamente"],
+            "respuestaCorrecta": -1,
+            "tipo": "COMPLETAR"
+          }
+        ]
+      },
+      {
+        "id": null,
+        "titulo": "Programación Orientada a Objetos",
+        "descripcion": "Conceptos fundamentales de POO en Java",
+        "preguntas": [
+          {
+            "enunciado": "¿Cuáles son los pilares de la POO?",
+            "opciones": ["Encapsulamiento, Herencia, Polimorfismo y Abstracción", "Clases, Objetos, Métodos y Atributos", "Público, Privado, Protegido y Estático", "Interfaces, Clases Abstractas, Genéricos y Colecciones"],
+            "respuestaCorrecta": 0,
+            "tipo": "SELECCION_MULTIPLE"
+          },
+          {
+            "enunciado": "El concepto 'Encapsulamiento' en Java",
+            "opciones": ["Ocultar la implementación interna y exponer solo lo necesario mediante interfaces públicas"],
+            "respuestaCorrecta": 0,
+            "tipo": "FLASHCARD"
+          },
+          {
+            "enunciado": "Para definir una clase en Java se utiliza la palabra clave ______.",
+            "opciones": ["class"],
+            "respuestaCorrecta": -1,
+            "tipo": "COMPLETAR"
+          }
+        ]
+      },
+      {
+        "id": null,
+        "titulo": "Interfaces y Clases Abstractas",
+        "descripcion": "Uso y diferencias entre interfaces y clases abstractas",
+        "preguntas": [
+          {
+            "enunciado": "¿Qué define una interfaz en Java?",
+            "opciones": ["Implementación de métodos", "Contratos que deben implementar las clases", "Atributos de instancia", "Constructores"],
+            "respuestaCorrecta": 1,
+            "tipo": "SELECCION_MULTIPLE"
+          },
+          {
+            "enunciado": "Una clase abstracta puede contener métodos ______ y métodos implementados.",
+            "opciones": ["abstractos"],
+            "respuestaCorrecta": -1,
+            "tipo": "COMPLETAR"
+          },
+          {
+            "enunciado": "¿Puede una clase heredar de múltiples interfaces?",
+            "opciones": ["Sí", "No", "Solo si son del mismo paquete", "Solo si extiende de otra clase"],
+            "respuestaCorrecta": 0,
+            "tipo": "SELECCION_MULTIPLE"
+          }
+        ]
+      },
+      {
+        "id": null,
+        "titulo": "Concurrencia y Multithreading",
+        "descripcion": "Manejo de hilos y procesos paralelos en Java",
+        "preguntas": [
+          {
+            "enunciado": "¿Qué interface se implementa para crear un hilo en Java?",
+            "opciones": ["Runnable", "Thread", "Callable", "Executor"],
+            "respuestaCorrecta": 0,
+            "tipo": "SELECCION_MULTIPLE"
+          },
+          {
+            "enunciado": "El método ______ debe implementarse al usar la interfaz Runnable.",
+            "opciones": ["run"],
+            "respuestaCorrecta": -1,
+            "tipo": "COMPLETAR"
+          },
+          {
+            "enunciado": "Synchronized en Java",
+            "opciones": ["Mecanismo para controlar el acceso a recursos compartidos por múltiples hilos"],
+            "respuestaCorrecta": 0,
+            "tipo": "FLASHCARD"
+          }
+        ]
+      },
+      {
+        "id": null,
+        "titulo": "Desarrollo de Aplicaciones Web con Java",
+        "descripcion": "Introducción a Servlets, JSP y frameworks web",
+        "preguntas": [
+          {
+            "enunciado": "¿Qué es un Servlet?",
+            "opciones": ["Una página HTML", "Una clase Java que maneja peticiones HTTP", "Un servidor web", "Un lenguaje de scripts"],
+            "respuestaCorrecta": 1,
+            "tipo": "SELECCION_MULTIPLE"
+          },
+          {
+            "enunciado": "Spring Boot es un framework de Java para desarrollo ______.",
+            "opciones": ["web"],
+            "respuestaCorrecta": -1,
+            "tipo": "COMPLETAR"
+          },
+          {
+            "enunciado": "JSP significa ______.",
+            "opciones": ["JavaServer Pages"],
+            "respuestaCorrecta": -1,
+            "tipo": "COMPLETAR"
+          }
+        ]
+      }
+    ]
+  }

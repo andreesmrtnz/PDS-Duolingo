@@ -1,0 +1,134 @@
+{
+  "id": null,
+  "titulo": "Python Básico",
+  "dominio": "Programación",
+  "idCreador": null,
+  "posicionActual": 0,
+  "bloques": [
+    {
+      "id": null,
+      "titulo": "Introducción a Python",
+      "descripcion": "Primeros pasos con Python y su sintaxis",
+      "preguntas": [
+        {
+          "enunciado": "¿Qué tipo de lenguaje es Python?",
+          "opciones": ["Compilado", "Interpretado", "Ensamblador", "Máquina"],
+          "respuestaCorrecta": 1,
+          "tipo": "SELECCION_MULTIPLE"
+        },
+        {
+          "enunciado": "El concepto 'Indentación' en Python",
+          "opciones": ["Es significativa y determina los bloques de código en Python"],
+          "respuestaCorrecta": 0,
+          "tipo": "FLASHCARD"
+        },
+        {
+          "enunciado": "Para comentar una línea en Python se utiliza el símbolo ______.",
+          "opciones": ["#"],
+          "respuestaCorrecta": -1,
+          "tipo": "COMPLETAR"
+        }
+      ]
+    },
+    {
+      "id": null,
+      "titulo": "Estructuras de Datos",
+      "descripcion": "Listas, tuplas, diccionarios y conjuntos",
+      "preguntas": [
+        {
+          "enunciado": "¿Cuál de las siguientes estructuras es mutable?",
+          "opciones": ["Lista", "Tupla", "String", "Entero"],
+          "respuestaCorrecta": 0,
+          "tipo": "SELECCION_MULTIPLE"
+        },
+        {
+          "enunciado": "Un diccionario en Python almacena elementos en pares ______.",
+          "opciones": ["clave-valor"],
+          "respuestaCorrecta": -1,
+          "tipo": "COMPLETAR"
+        },
+        {
+          "enunciado": "¿Qué método se usa para agregar un elemento al final de una lista?",
+          "opciones": ["append()", "add()", "insert()", "push()"],
+          "respuestaCorrecta": 0,
+          "tipo": "SELECCION_MULTIPLE"
+        }
+      ]
+    },
+    {
+      "id": null,
+      "titulo": "Control de Flujo",
+      "descripcion": "Condicionales, bucles y manejo de excepciones",
+      "preguntas": [
+        {
+          "enunciado": "¿Qué palabra clave se utiliza para definir una función en Python?",
+          "opciones": ["function", "def", "func", "define"],
+          "respuestaCorrecta": 1,
+          "tipo": "SELECCION_MULTIPLE"
+        },
+        {
+          "enunciado": "La estructura 'try-except' en Python",
+          "opciones": ["Se utiliza para manejar errores y excepciones durante la ejecución"],
+          "respuestaCorrecta": 0,
+          "tipo": "FLASHCARD"
+        },
+        {
+          "enunciado": "Para un bucle que itera sobre un rango de números se utiliza la función ______.",
+          "opciones": ["range"],
+          "respuestaCorrecta": -1,
+          "tipo": "COMPLETAR"
+        }
+      ]
+    },
+    {
+      "id": null,
+      "titulo": "Funciones y Módulos",
+      "descripcion": "Creación de funciones y uso de módulos en Python",
+      "preguntas": [
+        {
+          "enunciado": "¿Cómo se importa un módulo completo en Python?",
+          "opciones": ["import módulo", "from módulo import *", "include módulo", "using módulo"],
+          "respuestaCorrecta": 0,
+          "tipo": "SELECCION_MULTIPLE"
+        },
+        {
+          "enunciado": "Los argumentos con valores predeterminados en una función se denominan argumentos ______.",
+          "opciones": ["por defecto"],
+          "respuestaCorrecta": -1,
+          "tipo": "COMPLETAR"
+        },
+        {
+          "enunciado": "¿Qué es un decorador en Python?",
+          "opciones": ["Una función que modifica el comportamiento de otra función", "Un tipo de comentario", "Una estructura de control", "Un tipo de dato"],
+          "respuestaCorrecta": 0,
+          "tipo": "SELECCION_MULTIPLE"
+        }
+      ]
+    },
+    {
+      "id": null,
+      "titulo": "Programación Orientada a Objetos",
+      "descripcion": "Conceptos de POO aplicados a Python",
+      "preguntas": [
+        {
+          "enunciado": "¿Qué método especial se ejecuta al crear una instancia de una clase?",
+          "opciones": ["__init__", "__new__", "__create__", "__start__"],
+          "respuestaCorrecta": 0,
+          "tipo": "SELECCION_MULTIPLE"
+        },
+        {
+          "enunciado": "La palabra clave 'self' en Python",
+          "opciones": ["Hace referencia a la instancia actual del objeto"],
+          "respuestaCorrecta": 0,
+          "tipo": "FLASHCARD"
+        },
+        {
+          "enunciado": "Python permite la herencia ______, a diferencia de Java.",
+          "opciones": ["múltiple"],
+          "respuestaCorrecta": -1,
+          "tipo": "COMPLETAR"
+        }
+      ]
+    }
+  ]
+}

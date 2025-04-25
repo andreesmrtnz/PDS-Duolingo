@@ -1,0 +1,134 @@
+{
+    "id": null,
+    "titulo": "HTML y CSS",
+    "dominio": "Desarrollo Web",
+    "idCreador": null,
+    "posicionActual": 0,
+    "bloques": [
+      {
+        "id": null,
+        "titulo": "Fundamentos de HTML",
+        "descripcion": "Estructura básica y elementos HTML",
+        "preguntas": [
+          {
+            "enunciado": "¿Qué significa HTML?",
+            "opciones": ["HyperText Markup Language", "High Technology Modern Language", "Hyperlink Text Management Language", "Home Tool Markup Language"],
+            "respuestaCorrecta": 0,
+            "tipo": "SELECCION_MULTIPLE"
+          },
+          {
+            "enunciado": "La etiqueta que define el título de la página web es ______.",
+            "opciones": ["title"],
+            "respuestaCorrecta": -1,
+            "tipo": "COMPLETAR"
+          },
+          {
+            "enunciado": "¿Qué etiqueta se utiliza para crear un párrafo?",
+            "opciones": ["<p>", "<paragraph>", "<text>", "<para>"],
+            "respuestaCorrecta": 0,
+            "tipo": "SELECCION_MULTIPLE"
+          }
+        ]
+      },
+      {
+        "id": null,
+        "titulo": "Listas y Enlaces",
+        "descripcion": "Creación de listas y enlaces en HTML",
+        "preguntas": [
+          {
+            "enunciado": "¿Qué etiqueta se utiliza para crear un enlace?",
+            "opciones": ["<a>", "<link>", "<href>", "<url>"],
+            "respuestaCorrecta": 0,
+            "tipo": "SELECCION_MULTIPLE"
+          },
+          {
+            "enunciado": "Para crear una lista no ordenada se utiliza la etiqueta ______.",
+            "opciones": ["ul"],
+            "respuestaCorrecta": -1,
+            "tipo": "COMPLETAR"
+          },
+          {
+            "enunciado": "El atributo 'href'",
+            "opciones": ["Define la URL de destino de un enlace"],
+            "respuestaCorrecta": 0,
+            "tipo": "FLASHCARD"
+          }
+        ]
+      },
+      {
+        "id": null,
+        "titulo": "Fundamentos de CSS",
+        "descripcion": "Sintaxis y aplicación de estilos CSS",
+        "preguntas": [
+          {
+            "enunciado": "¿Qué significa CSS?",
+            "opciones": ["Cascading Style Sheets", "Creative Style Sheets", "Computer Style Sheets", "Colorful Style Sheets"],
+            "respuestaCorrecta": 0,
+            "tipo": "SELECCION_MULTIPLE"
+          },
+          {
+            "enunciado": "Para seleccionar un elemento por su ID en CSS se utiliza el símbolo ______.",
+            "opciones": ["#"],
+            "respuestaCorrecta": -1,
+            "tipo": "COMPLETAR"
+          },
+          {
+            "enunciado": "¿Cuáles son las 3 formas de incluir CSS en HTML?",
+            "opciones": ["Inline, Internal, External", "Import, Include, Link", "Style, Script, Link", "CSS, SASS, LESS"],
+            "respuestaCorrecta": 0,
+            "tipo": "SELECCION_MULTIPLE"
+          }
+        ]
+      },
+      {
+        "id": null,
+        "titulo": "Modelo de Caja y Posicionamiento",
+        "descripcion": "Modelo de caja CSS y tipos de posicionamiento",
+        "preguntas": [
+          {
+            "enunciado": "¿Qué propiedades componen el modelo de caja en CSS?",
+            "opciones": ["Margin, Border, Padding, Content", "Width, Height, Position, Display", "Top, Right, Bottom, Left", "Float, Clear, Z-index, Overflow"],
+            "respuestaCorrecta": 0,
+            "tipo": "SELECCION_MULTIPLE"
+          },
+          {
+            "enunciado": "La propiedad 'display: flex' define un contenedor ______.",
+            "opciones": ["flexible"],
+            "respuestaCorrecta": -1,
+            "tipo": "COMPLETAR"
+          },
+          {
+            "enunciado": "El posicionamiento 'relative'",
+            "opciones": ["Posiciona un elemento relativo a su posición normal en el flujo del documento"],
+            "respuestaCorrecta": 0,
+            "tipo": "FLASHCARD"
+          }
+        ]
+      },
+      {
+        "id": null,
+        "titulo": "Diseño Responsivo",
+        "descripcion": "Técnicas para crear sitios web adaptables",
+        "preguntas": [
+          {
+            "enunciado": "¿Qué son los Media Queries?",
+            "opciones": ["Técnicas para adaptar el diseño según características del dispositivo", "Consultas a bases de datos multimedia", "Integraciones con redes sociales", "Tipos de contenido multimedia"],
+            "respuestaCorrecta": 0,
+            "tipo": "SELECCION_MULTIPLE"
+          },
+          {
+            "enunciado": "Para hacer un sitio responsive, la etiqueta meta viewport es ______.",
+            "opciones": ["esencial"],
+            "respuestaCorrecta": -1,
+            "tipo": "COMPLETAR"
+          },
+          {
+            "enunciado": "El enfoque 'Mobile First'",
+            "opciones": ["Diseñar primero para dispositivos móviles y luego adaptar para pantallas más grandes"],
+            "respuestaCorrecta": 0,
+            "tipo": "FLASHCARD"
+          }
+        ]
+      }
+    ]
+  }
