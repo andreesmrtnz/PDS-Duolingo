@@ -4,7 +4,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -13,6 +15,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MapKeyColumn;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
@@ -72,8 +75,15 @@ public class CursoEnProgreso {
     
     // Mapa para registrar el estado de cada pregunta (contestada correctamente, incorrectamente, o no contestada)
     // Esta información se guardará en una tabla separada o se serializará
-    @Transient
+    @ElementCollection
+    @CollectionTable(
+        name = "estado_preguntas",
+        joinColumns = @JoinColumn(name = "curso_progreso_id")
+    )
+    @MapKeyColumn(name = "clave_pregunta")
+    @Column(name = "estado")
     private Map<String, Integer> estadoPreguntas = new HashMap<>();
+    
     
     // Variables para recordar la posición antes de hacer una repetición
     @Transient

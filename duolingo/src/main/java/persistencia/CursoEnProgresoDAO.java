@@ -58,7 +58,9 @@ public class CursoEnProgresoDAO {
         EntityManager em = getEntityManager();
         try {
             TypedQuery<CursoEnProgreso> query = em.createQuery(
-                "SELECT cep FROM CursoEnProgreso cep WHERE cep.usuario = :usuario AND cep.curso = :curso", 
+                "SELECT cp FROM CursoEnProgreso cp " +
+                "LEFT JOIN FETCH cp.estadoPreguntas " +
+                "WHERE cp.usuario = :usuario AND cp.curso = :curso", 
                 CursoEnProgreso.class);
             query.setParameter("usuario", usuario);
             query.setParameter("curso", curso);
