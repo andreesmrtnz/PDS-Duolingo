@@ -1,14 +1,29 @@
-package modelo;
+package controlador;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 
 
 import jakarta.persistence.EntityManager;
+import modelo.Bloque;
+import modelo.Creador;
+import modelo.Curso;
+import modelo.CursoEnProgreso;
+import modelo.CursoParser;
+import modelo.Estadistica;
+import modelo.Estrategia;
+import modelo.Estudiante;
+import modelo.Pregunta;
+import modelo.RepositorioCursos;
+import modelo.RepositorioUsuarios;
+import modelo.Usuario;
 import persistencia.UsuarioDAO;
 import persistencia.CursoDAO;
 import persistencia.CursoEnProgresoDAO;
+import persistencia.EstadisticaDAO;
 
 
 public class Controlador {
@@ -183,11 +198,16 @@ public class Controlador {
         // Buscar si ya existe un progreso para este usuario y curso
         CursoEnProgreso progreso = cursoEnProgresoDAO.buscarPorUsuarioYCurso(usuarioActual, curso);
         
-        // Si no existe, crear uno nuevo con la estrategia seleccionada
+        // Si no existe, pedir al estudiante que lo cree
         if (progreso == null) {
-            progreso = new CursoEnProgreso(usuarioActual, curso);
-            progreso.setEstrategia(estrategia);
-            cursoEnProgresoDAO.guardar(progreso);
+            // Asegurarse de que el usuario es un estudiante
+            if (usuarioActual instanceof Estudiante) {
+                Estudiante estudiante = (Estudiante) usuarioActual;
+                progreso = estudiante.iniciarCurso(curso, estrategia);
+                cursoEnProgresoDAO.guardar(progreso);
+            } else {
+                return false;
+            }
         } else {
             // Si ya existe un progreso, actualizamos la estrategia si es diferente
             if (progreso.getEstrategia() != estrategia) {
@@ -406,6 +426,32 @@ public class Controlador {
         return progresoActual != null ? progresoActual.getPreguntaActual() : 0;
     }
     
+    /**
+     * Calcula el porcentaje completado para un curso específico
+     * @param progreso El objeto CursoEnProgreso
+     * @param curso El curso asociado
+     * @return Porcentaje de completado (0-100)
+     */
+    public double getPorcentajeCompletado(CursoEnProgreso progreso, Curso curso) {
+        if (progreso == null || curso == null) {
+            return 0.0;
+        }
+        
+        int totalPreguntas = 0;
+        for (Bloque bloque : curso.getBloques()) {
+            totalPreguntas += bloque.getPreguntas().size();
+        }
+        
+        if (totalPreguntas == 0) {
+            return 0.0;
+        }
+        
+        // Total de preguntas respondidas (correctas + incorrectas)
+        int preguntasRespondidas = progreso.getPreguntasCorrectas() + progreso.getPreguntasIncorrectas();
+        
+        return (preguntasRespondidas * 100.0) / totalPreguntas;
+    }
+    
     public void setBloqueActual(int bloqueActual) {
         if (progresoActual != null) {
             progresoActual.setBloqueActual(bloqueActual);
@@ -509,4 +555,111 @@ public class Controlador {
         }
         return cursoEnProgresoDAO.buscarPorUsuarioYCurso(usuarioActual, curso);
     }
+    
+    public void finalizarSesion(long tiempoSesion) {
+        if (usuarioActual == null) return;
+        
+        EstadisticaDAO estadisticaDAO = new EstadisticaDAO();
+        
+        // Update total usage time
+        estadisticaDAO.actualizarTiempoUso(usuarioActual, tiempoSesion);
+        
+        // Update consecutive days logic
+        Estadistica estadistica = estadisticaDAO.buscarPorUsuario(usuarioActual);
+        if (estadistica != null) {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+            String fechaUltima = sdf.format(estadistica.getUltimaConexion());
+            String fechaActual = sdf.format(new Date());
+            if (!fechaUltima.equals(fechaActual)) {
+                estadisticaDAO.incrementarDiasConsecutivos(usuarioActual);
+            }
+        }
+    }
+    
+    /**
+     * Inscribe al usuario actual en un curso
+     * @param curso El curso en el que inscribirse
+     * @return true si la inscripción fue exitosa, false en caso contrario
+     */
+    public boolean inscribirEnCurso(Curso curso) {
+        if (usuarioActual == null || curso == null || !(usuarioActual instanceof Estudiante)) {
+            return false;
+        }
+        
+        try {
+            // Check if the user is already enrolled
+            CursoEnProgreso existente = cursoEnProgresoDAO.buscarPorUsuarioYCurso(usuarioActual, curso);
+            if (existente != null) {
+                // Already enrolled
+                return false;
+            }
+            
+            // Delegar la creación de la inscripción al estudiante
+            Estudiante estudiante = (Estudiante) usuarioActual;
+            CursoEnProgreso nuevaInscripcion = estudiante.inscribirEnCurso(curso);
+            
+            // Save the enrollment to the database
+            cursoEnProgresoDAO.guardar(nuevaInscripcion);
+            
+            return true;
+        } catch (Exception e) {
+            System.err.println("Error en Controlador.inscribirEnCurso: " + e.getMessage());
+            e.printStackTrace();
+            throw e; // Re-throw the exception to be handled by the view
+        }
+    }
+    
+    /**
+     * Reanuda un curso previamente iniciado
+     * @param curso El curso a reanudar
+     * @param progreso El progreso existente del curso
+     * @return true si se reanudó correctamente, false en caso contrario
+     */
+    public boolean reanudarCurso(Curso curso, CursoEnProgreso progreso) {
+        if (curso == null || progreso == null) {
+            return false;
+        }
+        
+        try {
+            // Set the current course and progress
+            this.cursoActual = curso;
+            this.progresoActual = progreso;
+            
+            // Update the last activity date
+            progreso.setFechaUltimaActividad(new java.util.Date());
+            cursoEnProgresoDAO.actualizar(progreso);
+            
+            return true;
+        } catch (Exception e) {
+            System.err.println("Error en Controlador.resumirCurso: " + e.getMessage());
+            e.printStackTrace();
+            throw e; // Re-throw to be handled by the view
+        }
+    }
+    
+    /**
+     * Obtiene las estadísticas del usuario actual
+     * @return Objeto Estadistica con los datos del usuario
+     */
+    public Estadistica getEstadisticasUsuario() {
+        if (usuarioActual == null) {
+            return null;
+        }
+        
+        EstadisticaDAO estadisticaDAO = new EstadisticaDAO();
+        Estadistica estadistica = estadisticaDAO.buscarPorUsuario(usuarioActual);
+        
+        // Si no hay estadísticas, pedirle al usuario que las cree
+        if (estadistica == null) {
+            estadistica = usuarioActual.crearEstadistica();
+            estadisticaDAO.guardar(estadistica);
+        }
+        
+        // Actualizar la fecha de última conexión
+        estadistica.setUltimaConexion(new Date());
+        estadisticaDAO.actualizar(estadistica);
+        
+        return estadistica;
+    }
+    
 }

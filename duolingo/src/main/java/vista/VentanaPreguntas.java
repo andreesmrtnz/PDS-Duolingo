@@ -7,6 +7,7 @@ import javafx.scene.control.ScrollPane;
 import java.util.List;
 import java.util.Optional;
 
+import controlador.Controlador;
 import javafx.application.Application;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.geometry.Insets;
@@ -39,7 +40,6 @@ import javafx.animation.FadeTransition;
 import javafx.animation.RotateTransition;
 
 import modelo.Bloque;
-import modelo.Controlador;
 import modelo.Curso;
 import modelo.Estrategia;
 import modelo.Pregunta;

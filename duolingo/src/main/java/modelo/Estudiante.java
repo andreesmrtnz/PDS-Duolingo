@@ -1,5 +1,7 @@
 package modelo;
 
+import java.util.Date;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -28,5 +30,25 @@ public class Estudiante extends Usuario {
     
     public void incrementarCursosCompletados() {
         this.cursosCompletados++;
+    }
+    
+    public CursoEnProgreso iniciarCurso(Curso curso, Estrategia estrategia) {
+        CursoEnProgreso progreso = new CursoEnProgreso(this, curso);
+        progreso.setEstrategia(estrategia);
+        return progreso;
+    }
+
+    public CursoEnProgreso inscribirEnCurso(Curso curso) {
+        CursoEnProgreso nuevaInscripcion = new CursoEnProgreso();
+        nuevaInscripcion.setUsuario(this);
+        nuevaInscripcion.setCurso(curso);
+        nuevaInscripcion.setFechaInicio(new Date());
+        nuevaInscripcion.setFechaUltimaActividad(new Date());
+        nuevaInscripcion.setPreguntasCorrectas(0);
+        nuevaInscripcion.setPreguntasIncorrectas(0);
+        nuevaInscripcion.setBloqueActual(0);
+        nuevaInscripcion.setPreguntaActual(0);
+        nuevaInscripcion.setCompletado(false);
+        return nuevaInscripcion;
     }
 }

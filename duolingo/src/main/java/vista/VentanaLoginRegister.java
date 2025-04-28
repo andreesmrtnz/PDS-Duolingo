@@ -1,5 +1,6 @@
 package vista;
 
+import controlador.Controlador;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import javafx.animation.ParallelTransition;
@@ -25,7 +26,6 @@ import javafx.scene.text.TextAlignment;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import modelo.Controlador;
 import modelo.Creador;
 import modelo.Estudiante;
 import modelo.Usuario;

@@ -75,4 +75,11 @@ public class Usuario {
     public boolean esEstudiante() {
         return this instanceof Estudiante;
     }
+    
+    public Estadistica crearEstadistica() {
+        Estadistica estadistica = new Estadistica(null, 0, 0, 0);
+        estadistica.setUsuario(this);
+        return estadistica;
+    }
+    
 }

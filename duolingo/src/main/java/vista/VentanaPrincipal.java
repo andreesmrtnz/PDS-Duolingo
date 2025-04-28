@@ -2,7 +2,6 @@ package vista;
 
 import javafx.animation.FadeTransition;
 import javafx.scene.layout.FlowPane;
-import javafx.stage.Screen;
 import java.text.SimpleDateFormat;
 import javafx.animation.ParallelTransition;
 import javafx.animation.ScaleTransition;
@@ -22,23 +21,19 @@ import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import modelo.Bloque;
-import modelo.Controlador;
 import modelo.Curso;
 import modelo.CursoEnProgreso;
 import modelo.Estadistica;
 import modelo.Estrategia;
-import modelo.Usuario;
-import persistencia.CursoEnProgresoDAO;
-import persistencia.EstadisticaDAO;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+
+import controlador.Controlador;
 
 public class VentanaPrincipal {
 
@@ -52,47 +47,29 @@ public class VentanaPrincipal {
     private ScrollPane coursesScrollPane;
     private VBox profilePane;
     private VBox statsPane;
-    private CursoEnProgresoDAO cursoEnProgresoDAO;
     private long sessionStartTime;
     
     public VentanaPrincipal() {
         this.controlador = Controlador.getInstancia();
-        this.cursoEnProgresoDAO = new CursoEnProgresoDAO();
     }
     
     public void start(Stage primaryStage) {
         setupMainUI(primaryStage);
         
-        // Registrar el inicio de la sesión
+        // Register session start time
         sessionStartTime = System.currentTimeMillis();
         
-        // Agregar evento al cerrar la ventana para actualizar estadísticas
+        // Add window close event handler
         primaryStage.setOnCloseRequest(e -> {
+            // Calculate session duration
             long sessionEndTime = System.currentTimeMillis();
             long tiempoSesion = sessionEndTime - sessionStartTime;
             
-            // Actualizar tiempo total de uso
-            Usuario usuarioActual = controlador.getUsuarioActual();
-            EstadisticaDAO estadisticaDAO = new EstadisticaDAO();
+            // Let the controller handle all the model interactions
             try {
-                estadisticaDAO.actualizarTiempoUso(usuarioActual, tiempoSesion);
+                controlador.finalizarSesion(tiempoSesion);
             } catch (Exception ex) {
-                System.err.println("Error al actualizar el tiempo de uso: " + ex.getMessage());
-            }
-            
-            // Actualizar días consecutivos si la última conexión fue en un día distinto
-            Estadistica estadistica = estadisticaDAO.buscarPorUsuario(usuarioActual);
-            if (estadistica != null) {
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-                String fechaUltima = sdf.format(estadistica.getUltimaConexion());
-                String fechaActual = sdf.format(new Date());
-                if (!fechaUltima.equals(fechaActual)) {
-                    try {
-                        estadisticaDAO.incrementarDiasConsecutivos(usuarioActual);
-                    } catch (Exception ex) {
-                        System.err.println("Error al incrementar días consecutivos: " + ex.getMessage());
-                    }
-                }
+                mostrarAlerta("Error", "Error al finalizar sesión", Alert.AlertType.ERROR);
             }
         });
         
@@ -428,7 +405,6 @@ public class VentanaPrincipal {
     }
     
     // Se crea una tarjeta para cada curso cargado
- // Reemplaza el método createCourseCard existente con esta nueva implementación
     private Pane createCourseCard(Curso curso) {
         VBox card = new VBox(12);
         card.setPadding(new Insets(15));
@@ -449,18 +425,18 @@ public class VentanaPrincipal {
         Region spacer = new Region();
         VBox.setVgrow(spacer, Priority.ALWAYS);
         
-        // Comprobar si existe un progreso para este curso
-        CursoEnProgreso progreso = cursoEnProgresoDAO.buscarPorUsuarioYCurso(controlador.getUsuarioActual(), curso);
+        // Use the controller to get the course progress
+        CursoEnProgreso progreso = controlador.getProgresoDeCurso(curso);
         
         VBox progressInfo = new VBox(5);
         progressInfo.setAlignment(Pos.CENTER_LEFT);
         
-        // Verificar si el usuario es creador de cursos
+        // Check if the user is a course creator through the controller
         boolean esCreador = controlador.puedeCrearCursos();
         
         if (progreso != null) {
-            // Mostrar información de progreso
-            double porcentajeCompletado = calcularPorcentajeCompletado(progreso, curso);
+            // Use the controller to calculate the completion percentage
+            double porcentajeCompletado = controlador.getPorcentajeCompletado(progreso, curso);
             
             Text progressText = new Text(String.format("Progreso: %.1f%%", porcentajeCompletado));
             progressText.setFont(Font.font("System", FontWeight.NORMAL, 14));
@@ -476,7 +452,7 @@ public class VentanaPrincipal {
             
             progressInfo.getChildren().addAll(progressText, progressBar, statsText);
             
-            // Solo mostrar botones si no es creador
+            // Only show buttons if not a creator
             if (!esCreador) {
                 HBox buttonsBox = new HBox(10);
                 buttonsBox.setAlignment(Pos.CENTER);
@@ -565,43 +541,36 @@ public class VentanaPrincipal {
  // Método para inscribir al usuario en un curso
     private void inscribirEnCurso(Curso curso) {
         try {
-            // Crear nuevo registro de progreso pero sin iniciar el curso aún
-            CursoEnProgreso nuevaInscripcion = new CursoEnProgreso();
-            nuevaInscripcion.setUsuario(controlador.getUsuarioActual());
-            nuevaInscripcion.setCurso(curso);
-            nuevaInscripcion.setFechaInicio(new Date());
-            nuevaInscripcion.setFechaUltimaActividad(new Date());
-            nuevaInscripcion.setPreguntasCorrectas(0);
-            nuevaInscripcion.setPreguntasIncorrectas(0);
-            nuevaInscripcion.setBloqueActual(0);
-            nuevaInscripcion.setPreguntaActual(0);
-            nuevaInscripcion.setCompletado(false);
+            // Use the controller to handle enrollment logic
+            boolean inscripcionExitosa = controlador.inscribirEnCurso(curso);
             
-            // Guardar la inscripción en la base de datos
-            cursoEnProgresoDAO.guardar(nuevaInscripcion);
-            
-            // Mostrar mensaje de éxito
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Inscripción Exitosa");
-            alert.setHeaderText(null);
-            alert.setContentText("Te has inscrito al curso \"" + curso.getTitulo() + "\". Ahora puedes iniciarlo cuando quieras.");
-            alert.showAndWait();
-            
-            // Refrescar la vista de cursos
-            showCoursesPage();
+            if (inscripcionExitosa) {
+                // Show success message
+                mostrarAlerta("Inscripción Exitosa", 
+                             "Te has inscrito al curso \"" + curso.getTitulo() + 
+                             "\". Ahora puedes iniciarlo cuando quieras.", 
+                             Alert.AlertType.INFORMATION);
+                
+                // Refresh the courses view
+                showCoursesPage();
+            } else {
+                // Show error message for logical failure (not exception)
+                mostrarAlerta("Error", 
+                             "No se pudo completar la inscripción al curso.", 
+                             Alert.AlertType.ERROR);
+            }
         } catch (Exception e) {
             System.err.println("Error al inscribirse en el curso: " + e.getMessage());
             e.printStackTrace();
             
-            // Mostrar mensaje de error
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText("Error al inscribirse");
-            alert.setContentText("No se pudo completar la inscripción al curso. " + e.getMessage());
-            alert.showAndWait();
+            // Show error message
+            mostrarAlerta("Error", 
+                         "No se pudo completar la inscripción al curso: " + e.getMessage(), 
+                         Alert.AlertType.ERROR);
         }
     }
 
+    /*
     // Método auxiliar para calcular el porcentaje completado
     private double calcularPorcentajeCompletado(CursoEnProgreso progreso, Curso curso) {
         // Si ya está completado, retornar 100%
@@ -623,46 +592,46 @@ public class VentanaPrincipal {
         int preguntasContestadas = progreso.getPreguntasCorrectas() + progreso.getPreguntasIncorrectas();
         
         return (preguntasContestadas * 100.0) / totalPreguntas;
-    }
+    }*/
 
-    // Método para reanudar un curso
+ // Method to resume a course
     private void resumeCourse(Curso curso, CursoEnProgreso progreso) {
         try {
-            // Establecer el curso y progreso actual en el controlador
-            controlador.setCursoActual(curso);
-            controlador.setProgresoActual(progreso);
+            // Use controller to handle resuming a course
+            boolean resumed = controlador.reanudarCurso(curso, progreso);
             
-            // Actualizar la fecha de última actividad
-            progreso.setFechaUltimaActividad(new java.util.Date());
-            cursoEnProgresoDAO.actualizar(progreso);
-            
-            // Crear una nueva instancia de VentanaPreguntas
-            VentanaPreguntas ventanaPreguntas = new VentanaPreguntas();
-            
-            // Obtener el Stage actual
-            Stage currentStage = (Stage) mainLayout.getScene().getWindow();
-            
-            // Crear un nuevo Stage para la ventana de preguntas
-            Stage questionStage = new Stage();
-            
-            // Iniciar la ventana de preguntas
-            ventanaPreguntas.start(questionStage);
-            
-            // Manejar el cierre de la ventana de preguntas para volver a la pantalla de cursos
-            questionStage.setOnCloseRequest(e -> {
-                showCoursesPage();
-                currentStage.show();
-            });
+            if (resumed) {
+                // Create a new instance of VentanaPreguntas
+                VentanaPreguntas ventanaPreguntas = new VentanaPreguntas();
+                
+                // Get the current Stage
+                Stage currentStage = (Stage) mainLayout.getScene().getWindow();
+                
+                // Create a new Stage for the questions window
+                Stage questionStage = new Stage();
+                
+                // Start the questions window
+                ventanaPreguntas.start(questionStage);
+                
+                // Handle the closing of the questions window to return to the courses screen
+                questionStage.setOnCloseRequest(e -> {
+                    showCoursesPage();
+                    currentStage.show();
+                });
+            } else {
+                // Show error if resuming failed
+                mostrarAlerta("Error", 
+                             "No se pudo reanudar el curso.", 
+                             Alert.AlertType.ERROR);
+            }
         } catch (Exception e) {
             System.err.println("Error al reanudar el curso: " + e.getMessage());
             e.printStackTrace();
             
-            // Mostrar una alerta al usuario
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText("Error al reanudar el curso");
-            alert.setContentText("No se pudo reanudar el curso. " + e.getMessage());
-            alert.showAndWait();
+            // Show alert to the user
+            mostrarAlerta("Error", 
+                         "Error al reanudar el curso: " + e.getMessage(), 
+                         Alert.AlertType.ERROR);
         }
     }
 
@@ -679,45 +648,40 @@ public class VentanaPrincipal {
         }
     }
 
-    // Método para reiniciar un curso
+ // Método para reiniciar un curso
     private void restartCourse(Curso curso) {
         try {
-            // Eliminar el progreso anterior
-            CursoEnProgreso progreso = cursoEnProgresoDAO.buscarPorUsuarioYCurso(controlador.getUsuarioActual(), curso);
-            if (progreso != null) {
-                cursoEnProgresoDAO.eliminar(progreso);
+            // Utilizar el controlador para reiniciar el curso
+            boolean reiniciado = controlador.reiniciarCurso(curso);
+            
+            if (reiniciado) {
+                // Crear una nueva instancia de VentanaPreguntas
+                VentanaPreguntas ventanaPreguntas = new VentanaPreguntas();
+                
+                // Obtener el Stage actual
+                Stage currentStage = (Stage) mainLayout.getScene().getWindow();
+                
+                // Crear un nuevo Stage para la ventana de preguntas
+                Stage questionStage = new Stage();
+                
+                // Iniciar la ventana de preguntas
+                ventanaPreguntas.start(questionStage);
+                
+                // Manejar el cierre de la ventana de preguntas para volver a la pantalla de cursos
+                questionStage.setOnCloseRequest(e -> {
+                    showCoursesPage();
+                    currentStage.show();
+                });
+            } else {
+                // Mostrar una alerta al usuario si no se pudo reiniciar
+            	mostrarAlerta("Error","No se pudo reiniciar el curso." , Alert.AlertType.ERROR);
             }
-            
-            // Iniciar el curso desde el principio
-            controlador.iniciarCurso(curso);
-            
-            // Crear una nueva instancia de VentanaPreguntas
-            VentanaPreguntas ventanaPreguntas = new VentanaPreguntas();
-            
-            // Obtener el Stage actual
-            Stage currentStage = (Stage) mainLayout.getScene().getWindow();
-            
-            // Crear un nuevo Stage para la ventana de preguntas
-            Stage questionStage = new Stage();
-            
-            // Iniciar la ventana de preguntas
-            ventanaPreguntas.start(questionStage);
-            
-            // Manejar el cierre de la ventana de preguntas para volver a la pantalla de cursos
-            questionStage.setOnCloseRequest(e -> {
-                showCoursesPage();
-                currentStage.show();
-            });
         } catch (Exception e) {
             System.err.println("Error al reiniciar el curso: " + e.getMessage());
             e.printStackTrace();
             
             // Mostrar una alerta al usuario
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText("Error al reiniciar el curso");
-            alert.setContentText("No se pudo reiniciar el curso. " + e.getMessage());
-            alert.showAndWait();
+            mostrarAlerta("Error","No se pudo reiniciar el curso." , Alert.AlertType.ERROR);
         }
     }
     
@@ -743,7 +707,6 @@ public class VentanaPrincipal {
     
     private void configurarInterfazSegunTipoUsuario() {
         // Obtener el usuario actual del controlador
-        Usuario usuarioActual = controlador.getUsuarioActual();
         boolean esCreador = controlador.puedeCrearCursos();
         boolean esEstudiante = controlador.puedeRealizarCursos();
         
@@ -818,11 +781,7 @@ public class VentanaPrincipal {
             e.printStackTrace();
             
             // Mostrar una alerta al usuario
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText("Error al iniciar el curso");
-            alert.setContentText("No se pudo iniciar el curso. " + e.getMessage());
-            alert.showAndWait();
+            mostrarAlerta("Error", "Error al iniciar el curso", Alert.AlertType.ERROR);
         }
     }
 
@@ -955,25 +914,11 @@ public class VentanaPrincipal {
         resetSidebarButtonStyles();
         ((Button) sidebar.getChildren().get(4)).getStyleClass().add("sidebar-button-active");
         
-        // Obtener las estadísticas reales del usuario
-        Usuario usuarioActual = controlador.getUsuarioActual();
-        EstadisticaDAO estadisticaDAO = new EstadisticaDAO();
-        Estadistica estadistica = estadisticaDAO.buscarPorUsuario(usuarioActual);
+        // Obtener las estadísticas del usuario a través del controlador
+        Estadistica estadistica = controlador.getEstadisticasUsuario();
         
-        // Si no hay estadísticas, crear unas por defecto
-        if (estadistica == null) {
-            estadistica = new Estadistica(null, 0, 0, 0);
-            estadistica.setUsuario(usuarioActual);
-            estadisticaDAO.guardar(estadistica);
-        }
-        
-        // Actualizar la fecha de última conexión
-        estadistica.setUltimaConexion(new Date());
-        estadisticaDAO.actualizar(estadistica);
-        
-        // Obtener datos de progreso global de cursos
-        CursoEnProgresoDAO cursoEnProgresoDAO = new CursoEnProgresoDAO();
-        List<CursoEnProgreso> cursosEnProgreso = cursoEnProgresoDAO.buscarPorUsuario(usuarioActual);
+        // Obtener datos de progreso global de cursos a través del controlador
+        List<CursoEnProgreso> cursosEnProgreso = controlador.getCursosEnProgreso();
         
         int totalPreguntasCorrectas = 0;
         int totalPreguntasIncorrectas = 0;
@@ -1114,8 +1059,8 @@ public class VentanaPrincipal {
                 Curso curso = progreso.getCurso();
                 
                 if (curso != null) {
-                    // Calcular progreso real para este curso
-                    double porcentaje = calcularPorcentajeCompletado(progreso, curso);
+                    // Calcular progreso real para este curso usando el controlador
+                    double porcentaje = controlador.getPorcentajeCompletado(progreso, curso);
                     
                     HBox courseProgressBox = new HBox(15);
                     courseProgressBox.setAlignment(Pos.CENTER_LEFT);
@@ -1168,8 +1113,7 @@ public class VentanaPrincipal {
         List<String> actividades = new ArrayList<>();
         List<String> tiempos = new ArrayList<>();
         
-        // Aquí podrías obtener las actividades reales del usuario desde una tabla de actividades
-        // Por ahora usaremos actividades genéricas basadas en los cursos en progreso
+        // Usando los datos de cursos en progreso para generar actividades
         for (CursoEnProgreso progreso : cursosEnProgreso) {
             Curso curso = progreso.getCurso();
             if (curso != null) {

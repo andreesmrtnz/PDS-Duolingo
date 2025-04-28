@@ -10,6 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import controlador.Controlador;
 import persistencia.CursoDAO;
 import persistencia.UsuarioDAO;
 
