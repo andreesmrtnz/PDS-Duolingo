@@ -19,13 +19,20 @@ public class Usuario {
     private String email;
     private String password;
     
+    // Nuevo campo para idioma preferido
+    private String idiomaPreferido;
+    
+    // Nuevos campos para preferencias de notificación
+    private boolean recordatorioDiario;
+    private boolean actualizacionesProgreso;
+    private boolean notificacionesNuevosCursos;
+
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Curso> cursos = new LinkedList<>();
 
     @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Estadistica estadistica;
 
-    // Nueva relación muchos a muchos para creadores seguidos
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "seguidores",
@@ -34,7 +41,6 @@ public class Usuario {
     )
     private List<Usuario> creadoresSeguidos = new LinkedList<>();
 
-    // Nueva relación inversa para los seguidores de un creador
     @ManyToMany(mappedBy = "creadoresSeguidos", fetch = FetchType.EAGER)
     private List<Usuario> seguidores = new LinkedList<>();
 
@@ -44,6 +50,10 @@ public class Usuario {
         this.nombre = nombre;
         this.email = email;
         this.password = password;
+        this.idiomaPreferido = "Español"; // Valor por defecto
+        this.recordatorioDiario = true; // Valor por defecto
+        this.actualizacionesProgreso = true; // Valor por defecto
+        this.notificacionesNuevosCursos = false; // Valor por defecto
         this.estadistica = new Estadistica(null, 0, 0, 0);
         this.estadistica.setUsuario(this);
     }
@@ -70,7 +80,20 @@ public class Usuario {
         }
     }
 
-    // Nuevos getters y setters para creadores seguidos y seguidores
+    // Nuevos getters y setters para idioma y notificaciones
+    public String getIdiomaPreferido() { return idiomaPreferido; }
+    public void setIdiomaPreferido(String idiomaPreferido) { this.idiomaPreferido = idiomaPreferido; }
+
+    public boolean isRecordatorioDiario() { return recordatorioDiario; }
+    public void setRecordatorioDiario(boolean recordatorioDiario) { this.recordatorioDiario = recordatorioDiario; }
+
+    public boolean isActualizacionesProgreso() { return actualizacionesProgreso; }
+    public void setActualizacionesProgreso(boolean actualizacionesProgreso) { this.actualizacionesProgreso = actualizacionesProgreso; }
+
+    public boolean isNotificacionesNuevosCursos() { return notificacionesNuevosCursos; }
+    public void setNotificacionesNuevosCursos(boolean notificacionesNuevosCursos) { this.notificacionesNuevosCursos = notificacionesNuevosCursos; }
+
+    // Métodos existentes para creadores y seguidores (sin cambios)
     public List<Usuario> getCreadoresSeguidos() {
         return new LinkedList<>(this.creadoresSeguidos);
     }
@@ -111,7 +134,6 @@ public class Usuario {
         this.seguidores.remove(seguidor);
     }
 
-    // Métodos existentes
     public void inicializarEstadistica() {
         if (this.estadistica == null) {
             this.estadistica = new Estadistica(null, 0, 0, 0);

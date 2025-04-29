@@ -1092,7 +1092,7 @@ public class VentanaPrincipal {
         formGrid.add(languageCombo, 1, 3);
 
         Button saveButton = new Button("Guardar Cambios");
-        saveButton.getStyleClass().add("action-button");
+        
 
         Text notificationsTitle = new Text("Preferencias de Notificación");
         notificationsTitle.setFont(Font.font("System", FontWeight.BOLD, 18));
@@ -1106,6 +1106,9 @@ public class VentanaPrincipal {
         progressUpdates.setSelected(true);
         CheckBox newCoursesNotif = new CheckBox("Notificación de nuevos cursos");
         newCoursesNotif.setSelected(false);
+        dailyReminder.setSelected(controlador.getUsuarioActual().isRecordatorioDiario());
+        progressUpdates.setSelected(controlador.getUsuarioActual().isActualizacionesProgreso());
+        newCoursesNotif.setSelected(controlador.getUsuarioActual().isNotificacionesNuevosCursos());
         notificationsBox.getChildren().addAll(dailyReminder, progressUpdates, newCoursesNotif);
 
         // Sección para creadores seguidos (solo para estudiantes)
@@ -1207,6 +1210,29 @@ public class VentanaPrincipal {
             notificationsBox,
             followedCreatorsSection
         );
+        saveButton.getStyleClass().add("action-button");
+        saveButton.setOnAction(e -> {
+            String nuevoNombre = nameField.getText();
+            String nuevoEmail = emailField.getText();
+            String nuevaPassword = passwordField.getText();
+            String nuevoIdioma = languageCombo.getValue();
+            boolean recordatorio = dailyReminder.isSelected();
+            boolean progreso = progressUpdates.isSelected();
+            boolean nuevosCursos = newCoursesNotif.isSelected();
+
+            boolean exito = controlador.actualizarPerfil(
+                nuevoNombre, nuevoEmail, nuevaPassword, nuevoIdioma,
+                recordatorio, progreso, nuevosCursos
+            );
+
+            if (exito) {
+                mostrarAlerta("Éxito", "Perfil actualizado correctamente.", Alert.AlertType.INFORMATION);
+                // Refrescar la página para reflejar los cambios
+                showProfilePage();
+            } else {
+                mostrarAlerta("Error", "No se pudo actualizar el perfil. Verifica los datos ingresados.", Alert.AlertType.ERROR);
+            }
+        });
 
         ScrollPane scrollPane = new ScrollPane(profilePane);
         scrollPane.setFitToWidth(true);

@@ -168,6 +168,82 @@ public class Controlador {
         return 0.0;
     }
     
+ // Dentro de Controlador.java, agregar el siguiente método después de los métodos existentes
+
+    /**
+     * Actualiza los datos del perfil del usuario actual
+     * @param nombre Nuevo nombre del usuario
+     * @param email Nuevo email del usuario
+     * @param password Nueva contraseña (puede ser null si no se cambia)
+     * @param idiomaPreferido Idioma preferido
+     * @param recordatorioDiario Preferencia de recordatorio diario
+     * @param actualizacionesProgreso Preferencia de actualizaciones de progreso
+     * @param notificacionesNuevosCursos Preferencia de notificaciones de nuevos cursos
+     * @return true si la actualización fue exitosa, false si los datos son inválidos o hay un error
+     */
+    public boolean actualizarPerfil(String nombre, String email, String password, String idiomaPreferido,
+                                    boolean recordatorioDiario, boolean actualizacionesProgreso, 
+                                    boolean notificacionesNuevosCursos) {
+        if (usuarioActual == null) {
+            System.err.println("Error: No hay usuario autenticado");
+            return false;
+        }
+
+        EntityManager em = usuarioDAO.getEntityManager();
+        try {
+            em.getTransaction().begin();
+
+            // Validaciones
+            if (nombre == null || nombre.trim().isEmpty()) {
+                System.err.println("Error: El nombre no puede estar vacío");
+                return false;
+            }
+
+            if (email == null) {
+                System.err.println("Error: El email no es válido");
+                return false;
+            }
+
+            // Verificar si el email ya está en uso por otro usuario
+            Usuario usuarioExistente = repoUsuarios.buscarPorEmail(email);
+            if (usuarioExistente != null && !usuarioExistente.getId().equals(usuarioActual.getId())) {
+                System.err.println("Error: El email ya está en uso");
+                return false;
+            }
+
+            if (password != null && !password.isEmpty() && password.length() < 6) {
+                System.err.println("Error: La contraseña debe tener al menos 6 caracteres");
+                return false;
+            }
+
+            // Actualizar datos del usuario
+            usuarioActual.setNombre(nombre.trim());
+            usuarioActual.setEmail(email.trim());
+            if (password != null && !password.isEmpty()) {
+                usuarioActual.setPassword(password);
+            }
+            usuarioActual.setIdiomaPreferido(idiomaPreferido);
+            usuarioActual.setRecordatorioDiario(recordatorioDiario);
+            usuarioActual.setActualizacionesProgreso(actualizacionesProgreso);
+            usuarioActual.setNotificacionesNuevosCursos(notificacionesNuevosCursos);
+
+            // Persistir los cambios
+            usuarioDAO.actualizar(usuarioActual);
+
+            em.getTransaction().commit();
+            return true;
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            System.err.println("Error al actualizar perfil: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        } finally {
+            em.close();
+        }
+    }
+    
  // Método modificado para registrar diferentes tipos de usuarios
     public boolean registrar(Usuario usuario) {
         if (repoUsuarios.buscarPorEmail(usuario.getEmail()) != null) {
