@@ -985,17 +985,23 @@ public class VentanaPreguntas extends Application {
             Alert resumen = new Alert(AlertType.INFORMATION);
             resumen.setTitle("Curso finalizado");
             resumen.setHeaderText("¡Has completado el curso!");
+            
+            // Obtener estadísticas
+            int correctas = controlador.getPreguntasCorrectas();
+            int incorrectas = controlador.getPreguntasIncorrectas();
+            double porcentaje = controlador.getPorcentajeAciertosCurso();
+            
             resumen.setContentText(
                 "Resumen:\n" +
-                "Preguntas correctas: " + controlador.getPreguntasCorrectas() + "\n" +
-                "Preguntas incorrectas: " + controlador.getPreguntasIncorrectas() + "\n" +
-                "Porcentaje de acierto: " + 
-                String.format("%.1f%%", 
-                    (double)controlador.getPreguntasCorrectas() * 100 / 
-                    (controlador.getPreguntasCorrectas() + controlador.getPreguntasIncorrectas()))
+                "Preguntas correctas: " + correctas + "\n" +
+                "Preguntas incorrectas: " + incorrectas + "\n" +
+                "Porcentaje de acierto: " + String.format("%.1f%%", porcentaje)
             );
             
             resumen.showAndWait();
+            
+            // Limpiar referencias después de mostrar estadísticas
+            controlador.limpiarCursoActual();
             
             // Cerrar la ventana actual
             Stage stage = (Stage) panelPrincipal.getScene().getWindow();

@@ -25,13 +25,16 @@ import modelo.Curso;
 import modelo.CursoEnProgreso;
 import modelo.Estadistica;
 import modelo.Estrategia;
+import modelo.Usuario;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import controlador.Controlador;
 
@@ -256,16 +259,17 @@ public class VentanaPrincipal {
         contentArea.getChildren().clear();
         resetSidebarButtonStyles();
         ((Button) sidebar.getChildren().get(1)).getStyleClass().add("sidebar-button-active");
-        
+
         VBox landingLayout = new VBox(20);
         landingLayout.setAlignment(Pos.TOP_CENTER);
-        
+
+        // Banner de bienvenida
         VBox welcomeBox = new VBox(15);
         welcomeBox.getStyleClass().add("welcome-banner");
         welcomeBox.setPrefHeight(200);
         welcomeBox.setAlignment(Pos.CENTER_LEFT);
         welcomeBox.setPadding(new Insets(25));
-        
+
         Text welcomeTitle = new Text("¡Bienvenido a LinguaLearn, " + controlador.getNombreUsuario() + "!");
         welcomeTitle.setStyle("-fx-fill: white; -fx-font-size: 28px; -fx-font-weight: bold;");
         Text welcomeSubtitle = new Text("Continúa aprendiendo a tu ritmo. ¡Hoy es un gran día para aprender algo nuevo!");
@@ -273,18 +277,223 @@ public class VentanaPrincipal {
         Button continueButton = new Button("Continuar Aprendiendo");
         continueButton.getStyleClass().add("action-button");
         continueButton.setOnAction(e -> showCoursesPage());
-        
+
         welcomeBox.getChildren().addAll(welcomeTitle, welcomeSubtitle, continueButton);
-        
-        landingLayout.getChildren().add(welcomeBox);
-        
+
+        // Sección de creadores (solo para estudiantes)
+        if (controlador.puedeRealizarCursos()) {
+            // Sección de creadores seguidos
+            VBox followedCreatorsSection = new VBox(15);
+            followedCreatorsSection.setPadding(new Insets(20));
+
+            Text followedCreatorsTitle = new Text("Creadores Seguidos");
+            followedCreatorsTitle.setFont(Font.font("System", FontWeight.BOLD, 24));
+
+            FlowPane followedCreatorsFlow = new FlowPane();
+            followedCreatorsFlow.setHgap(20);
+            followedCreatorsFlow.setVgap(20);
+            followedCreatorsFlow.setPrefWrapLength(600);
+
+            List<Usuario> creadoresSeguidos = controlador.getCreadoresSeguidos();
+            if (creadoresSeguidos.isEmpty()) {
+                Text noCreators = new Text("No sigues a ningún creador todavía.");
+                noCreators.setStyle("-fx-fill: #666;");
+                followedCreatorsFlow.getChildren().add(noCreators);
+            } else {
+                for (Usuario creador : creadoresSeguidos) {
+                    // Crear tarjeta personalizada para creadores seguidos
+                    VBox card = new VBox(12);
+                    card.setPadding(new Insets(15));
+                    card.setPrefWidth(220);
+                    card.setPrefHeight(220); // Aumentar altura para el botón
+                    card.getStyleClass().add("course-card");
+
+                    FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.USER);
+                    icon.setSize("32");
+                    icon.setFill(Color.valueOf("#4a69bd"));
+
+                    Text name = new Text(creador.getNombre());
+                    name.setFont(Font.font("System", FontWeight.BOLD, 16));
+
+                    Text email = new Text(creador.getEmail());
+                    email.setWrappingWidth(190);
+                    email.setFill(Color.GRAY);
+
+                    Text followers = new Text("Seguidores: " + creador.getSeguidores().size());
+                    followers.setFill(Color.GRAY);
+
+                    Text cursosCreados = new Text("Cursos creados: " + controlador.getNumeroCursosCreados(creador));
+                    cursosCreados.setFill(Color.GRAY);
+
+                    Region spacer = new Region();
+                    VBox.setVgrow(spacer, Priority.ALWAYS);
+
+                    // Indicador de "Siguiendo"
+                    HBox followingBox = new HBox(8);
+                    FontAwesomeIconView checkIcon = new FontAwesomeIconView(FontAwesomeIcon.CHECK_CIRCLE);
+                    checkIcon.setSize("16");
+                    checkIcon.setFill(Color.valueOf("#06d6a0"));
+                    Text followingText = new Text("Siguiendo");
+                    followingText.setFont(Font.font("System", FontWeight.BOLD, 14));
+                    followingText.setFill(Color.valueOf("#06d6a0"));
+                    followingBox.getChildren().addAll(checkIcon, followingText);
+
+                    // Botón para dejar de seguir
+                    Button unfollowButton = new Button("Dejar de seguir");
+                    FontAwesomeIconView unfollowIcon = new FontAwesomeIconView(FontAwesomeIcon.MINUS_CIRCLE);
+                    unfollowIcon.setSize("16");
+                    unfollowIcon.setFill(Color.WHITE);
+                    unfollowButton.setGraphic(unfollowIcon);
+                    unfollowButton.setGraphicTextGap(8);
+                    unfollowButton.getStyleClass().add("secondary-button");
+                    unfollowButton.setPrefWidth(190);
+
+                    unfollowButton.setOnAction(e -> {
+                        boolean exito = controlador.dejarDeSeguirCreador(creador);
+                        if (exito) {
+                            mostrarAlerta("Éxito", "Has dejado de seguir a " + creador.getNombre() + ".", Alert.AlertType.INFORMATION);
+                            showLandingPage(); // Refrescar la página principal
+                        } else {
+                            mostrarAlerta("Error", "No se pudo dejar de seguir al creador.", Alert.AlertType.ERROR);
+                        }
+                    });
+
+                    card.getChildren().addAll(icon, name, email, followers, cursosCreados, spacer, followingBox, unfollowButton);
+
+                    Tooltip tooltip = new Tooltip("Creador: " + creador.getNombre());
+                    Tooltip.install(card, tooltip);
+
+                    followedCreatorsFlow.getChildren().add(card);
+                }
+            }
+
+            followedCreatorsSection.getChildren().addAll(followedCreatorsTitle, followedCreatorsFlow);
+
+            // Sección de creadores disponibles (no seguidos)
+            VBox availableCreatorsSection = new VBox(15);
+            availableCreatorsSection.setPadding(new Insets(20));
+
+            Text availableCreatorsTitle = new Text("Creadores Disponibles");
+            availableCreatorsTitle.setFont(Font.font("System", FontWeight.BOLD, 24));
+
+            FlowPane availableCreatorsFlow = new FlowPane();
+            availableCreatorsFlow.setHgap(20);
+            availableCreatorsFlow.setVgap(20);
+            availableCreatorsFlow.setPrefWrapLength(600);
+
+            // Obtener creadores no seguidos directamente desde getCreadoresDisponibles()
+            List<Usuario> creadoresNoSeguidos = controlador.getCreadoresDisponibles();
+
+            // Verificación adicional para evitar duplicaciones
+            Set<Long> idsCreadoresSeguidos = creadoresSeguidos.stream()
+                .map(Usuario::getId)
+                .collect(Collectors.toSet());
+
+            creadoresNoSeguidos = creadoresNoSeguidos.stream()
+                .filter(creador -> !idsCreadoresSeguidos.contains(creador.getId()))
+                .collect(Collectors.toList());
+
+            // Mostrar mensaje si no hay creadores disponibles
+            if (creadoresNoSeguidos.isEmpty()) {
+                Text noCreators = new Text("No hay creadores disponibles para seguir.");
+                noCreators.setStyle("-fx-fill: #666;");
+                availableCreatorsFlow.getChildren().add(noCreators);
+            } else {
+                for (Usuario creador : creadoresNoSeguidos) {
+                    Pane creatorCard = createCreatorCard(creador);
+                    availableCreatorsFlow.getChildren().add(creatorCard);
+                }
+            }
+
+            availableCreatorsSection.getChildren().addAll(availableCreatorsTitle, availableCreatorsFlow);
+
+            // Añadir ambas secciones al layout
+            landingLayout.getChildren().addAll(welcomeBox, followedCreatorsSection, availableCreatorsSection);
+        } else {
+            // Para creadores, solo mostrar el banner
+            landingLayout.getChildren().add(welcomeBox);
+        }
+
         ScrollPane scrollPane = new ScrollPane(landingLayout);
         scrollPane.setFitToWidth(true);
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scrollPane.setStyle("-fx-background-color: transparent; -fx-background: transparent;");
-        
+
         contentArea.getChildren().add(scrollPane);
         animateContentEntry(scrollPane);
+    }
+    
+    private Pane createCreatorCard(Usuario creador) {
+        VBox card = new VBox(12);
+        card.setPadding(new Insets(15));
+        card.setPrefWidth(220);
+        card.setPrefHeight(200);
+        card.getStyleClass().add("course-card");
+
+        FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.USER);
+        icon.setSize("32");
+        icon.setFill(Color.valueOf("#4a69bd"));
+
+        Text name = new Text(creador.getNombre());
+        name.setFont(Font.font("System", FontWeight.BOLD, 16));
+
+        Text email = new Text(creador.getEmail());
+        email.setWrappingWidth(190);
+        email.setFill(Color.GRAY);
+
+        Text followers = new Text("Seguidores: " + creador.getSeguidores().size());
+        followers.setFill(Color.GRAY);
+
+        Text cursosCreados = new Text("Cursos creados: " + controlador.getNumeroCursosCreados(creador));
+        cursosCreados.setFill(Color.GRAY);
+
+        Region spacer = new Region();
+        VBox.setVgrow(spacer, Priority.ALWAYS);
+
+        // Verificar si el usuario actual sigue al creador
+        boolean isFollowing = controlador.estaSiguiendoCreador(creador);
+        Node actionNode;
+        if (isFollowing) {
+            // Mostrar indicador de "Siguiendo" en lugar de un botón
+            HBox followingBox = new HBox(8);
+            FontAwesomeIconView checkIcon = new FontAwesomeIconView(FontAwesomeIcon.CHECK_CIRCLE);
+            checkIcon.setSize("16");
+            checkIcon.setFill(Color.valueOf("#06d6a0"));
+            Text followingText = new Text("Siguiendo");
+            followingText.setFont(Font.font("System", FontWeight.BOLD, 14));
+            followingText.setFill(Color.valueOf("#06d6a0"));
+            followingBox.getChildren().addAll(checkIcon, followingText);
+            actionNode = followingBox;
+        } else {
+            // Mostrar botón "Seguir"
+            Button followButton = new Button("Seguir");
+            FontAwesomeIconView buttonIcon = new FontAwesomeIconView(FontAwesomeIcon.PLUS_CIRCLE);
+            buttonIcon.setSize("16");
+            buttonIcon.setFill(Color.WHITE);
+            followButton.setGraphic(buttonIcon);
+            followButton.setGraphicTextGap(8);
+            followButton.getStyleClass().add("action-button");
+            followButton.setPrefWidth(190);
+
+            followButton.setOnAction(e -> {
+                boolean exito = controlador.seguirCreador(creador);
+                if (exito) {
+                    mostrarAlerta("Éxito", "Ahora sigues a " + creador.getNombre() + ". Te has inscrito en sus cursos.", Alert.AlertType.INFORMATION);
+                    showLandingPage(); // Refrescar la página principal
+                } else {
+                    mostrarAlerta("Error", "No se pudo seguir al creador", Alert.AlertType.ERROR);
+                }
+            });
+
+            actionNode = followButton;
+        }
+
+        card.getChildren().addAll(icon, name, email, followers, cursosCreados, spacer, actionNode);
+
+        Tooltip tooltip = new Tooltip("Creador: " + creador.getNombre());
+        Tooltip.install(card, tooltip);
+
+        return card;
     }
     
     // Se obtiene la lista de cursos desde el controlador (en vez de usar cursos predefinidos)
@@ -835,16 +1044,16 @@ public class VentanaPrincipal {
         contentArea.getChildren().clear();
         resetSidebarButtonStyles();
         ((Button) sidebar.getChildren().get(3)).getStyleClass().add("sidebar-button-active");
-        
+
         profilePane = new VBox(25);
         profilePane.setPadding(new Insets(30));
-        
+
         HBox profileHeader = new HBox(20);
         profileHeader.setAlignment(Pos.CENTER_LEFT);
-        
+
         Circle avatar = new Circle(50);
         avatar.setFill(Color.valueOf("#4a69bd"));
-        
+
         VBox profileInfo = new VBox(5);
         Text userName = new Text(controlador.getNombreUsuario());
         userName.setFont(Font.font("System", FontWeight.BOLD, 24));
@@ -852,15 +1061,15 @@ public class VentanaPrincipal {
         Text memberSince = new Text("Miembro desde: Marzo 2025");
         profileInfo.getChildren().addAll(userName, userEmail, memberSince);
         profileHeader.getChildren().addAll(avatar, profileInfo);
-        
+
         Separator separator = new Separator();
         Text editProfileTitle = new Text("Editar Perfil");
         editProfileTitle.setFont(Font.font("System", FontWeight.BOLD, 18));
-        
+
         GridPane formGrid = new GridPane();
         formGrid.setHgap(15);
         formGrid.setVgap(15);
-        
+
         Label nameLabel = new Label("Nombre:");
         TextField nameField = new TextField(controlador.getNombreUsuario());
         Label emailLabel = new Label("Email:");
@@ -872,7 +1081,7 @@ public class VentanaPrincipal {
         ComboBox<String> languageCombo = new ComboBox<>();
         languageCombo.setItems(javafx.collections.FXCollections.observableArrayList("Español", "English", "Français", "Deutsch"));
         languageCombo.setValue("Español");
-        
+
         formGrid.add(nameLabel, 0, 0);
         formGrid.add(nameField, 1, 0);
         formGrid.add(emailLabel, 0, 1);
@@ -881,13 +1090,13 @@ public class VentanaPrincipal {
         formGrid.add(passwordField, 1, 2);
         formGrid.add(languageLabel, 0, 3);
         formGrid.add(languageCombo, 1, 3);
-        
+
         Button saveButton = new Button("Guardar Cambios");
         saveButton.getStyleClass().add("action-button");
-        
+
         Text notificationsTitle = new Text("Preferencias de Notificación");
         notificationsTitle.setFont(Font.font("System", FontWeight.BOLD, 18));
-        
+
         VBox notificationsBox = new VBox(10);
         notificationsBox.setPadding(new Insets(15));
         notificationsBox.setStyle("-fx-background-color: white; -fx-background-radius: 8;");
@@ -898,13 +1107,111 @@ public class VentanaPrincipal {
         CheckBox newCoursesNotif = new CheckBox("Notificación de nuevos cursos");
         newCoursesNotif.setSelected(false);
         notificationsBox.getChildren().addAll(dailyReminder, progressUpdates, newCoursesNotif);
-        
-        profilePane.getChildren().addAll(profileHeader, separator, editProfileTitle, formGrid, saveButton, notificationsTitle, notificationsBox);
-        
+
+        // Sección para creadores seguidos (solo para estudiantes)
+        VBox followedCreatorsSection = new VBox(15);
+        followedCreatorsSection.setPadding(new Insets(20));
+        if (controlador.puedeRealizarCursos()) {
+            Text followedCreatorsTitle = new Text("Creadores Seguidos");
+            followedCreatorsTitle.setFont(Font.font("System", FontWeight.BOLD, 18));
+
+            FlowPane followedCreatorsFlow = new FlowPane();
+            followedCreatorsFlow.setHgap(20);
+            followedCreatorsFlow.setVgap(20);
+            followedCreatorsFlow.setPrefWrapLength(600);
+
+            List<Usuario> creadoresSeguidos = controlador.getUsuarioActual().getCreadoresSeguidos();
+            if (creadoresSeguidos.isEmpty()) {
+                Text noCreators = new Text("No sigues a ningún creador todavía.");
+                noCreators.setStyle("-fx-fill: #666;");
+                followedCreatorsFlow.getChildren().add(noCreators);
+            } else {
+                for (Usuario creador : creadoresSeguidos) {
+                    // Crear tarjeta personalizada para creadores seguidos
+                    VBox card = new VBox(12);
+                    card.setPadding(new Insets(15));
+                    card.setPrefWidth(220);
+                    card.setPrefHeight(220); // Aumentar altura para el botón
+                    card.getStyleClass().add("course-card");
+
+                    FontAwesomeIconView icon = new FontAwesomeIconView(FontAwesomeIcon.USER);
+                    icon.setSize("32");
+                    icon.setFill(Color.valueOf("#4a69bd"));
+
+                    Text name = new Text(creador.getNombre());
+                    name.setFont(Font.font("System", FontWeight.BOLD, 16));
+
+                    Text email = new Text(creador.getEmail());
+                    email.setWrappingWidth(190);
+                    email.setFill(Color.GRAY);
+
+                    Text followers = new Text("Seguidores: " + creador.getSeguidores().size());
+                    followers.setFill(Color.GRAY);
+
+                    Text cursosCreados = new Text("Cursos creados: " + controlador.getNumeroCursosCreados(creador));
+                    cursosCreados.setFill(Color.GRAY);
+
+                    Region spacer = new Region();
+                    VBox.setVgrow(spacer, Priority.ALWAYS);
+
+                    // Indicador de "Siguiendo"
+                    HBox followingBox = new HBox(8);
+                    FontAwesomeIconView checkIcon = new FontAwesomeIconView(FontAwesomeIcon.CHECK_CIRCLE);
+                    checkIcon.setSize("16");
+                    checkIcon.setFill(Color.valueOf("#06d6a0"));
+                    Text followingText = new Text("Siguiendo");
+                    followingText.setFont(Font.font("System", FontWeight.BOLD, 14));
+                    followingText.setFill(Color.valueOf("#06d6a0"));
+                    followingBox.getChildren().addAll(checkIcon, followingText);
+
+                    // Botón para dejar de seguir
+                    Button unfollowButton = new Button("Dejar de seguir");
+                    FontAwesomeIconView unfollowIcon = new FontAwesomeIconView(FontAwesomeIcon.MINUS_CIRCLE);
+                    unfollowIcon.setSize("16");
+                    unfollowIcon.setFill(Color.WHITE);
+                    unfollowButton.setGraphic(unfollowIcon);
+                    unfollowButton.setGraphicTextGap(8);
+                    unfollowButton.getStyleClass().add("secondary-button");
+                    unfollowButton.setPrefWidth(190);
+
+                    unfollowButton.setOnAction(e -> {
+                        boolean exito = controlador.dejarDeSeguirCreador(creador);
+                        if (exito) {
+                            mostrarAlerta("Éxito", "Has dejado de seguir a " + creador.getNombre() + ".", Alert.AlertType.INFORMATION);
+                            showProfilePage(); // Refrescar la página de perfil
+                            showLandingPage(); // Refrescar la página principal para mostrar el creador nuevamente
+                        } else {
+                            mostrarAlerta("Error", "No se pudo dejar de seguir al creador.", Alert.AlertType.ERROR);
+                        }
+                    });
+
+                    card.getChildren().addAll(icon, name, email, followers, cursosCreados, spacer, followingBox, unfollowButton);
+
+                    Tooltip tooltip = new Tooltip("Creador: " + creador.getNombre());
+                    Tooltip.install(card, tooltip);
+
+                    followedCreatorsFlow.getChildren().add(card);
+                }
+            }
+
+            followedCreatorsSection.getChildren().addAll(followedCreatorsTitle, followedCreatorsFlow);
+        }
+
+        profilePane.getChildren().addAll(
+            profileHeader,
+            separator,
+            editProfileTitle,
+            formGrid,
+            saveButton,
+            notificationsTitle,
+            notificationsBox,
+            followedCreatorsSection
+        );
+
         ScrollPane scrollPane = new ScrollPane(profilePane);
         scrollPane.setFitToWidth(true);
         scrollPane.setStyle("-fx-background-color: transparent; -fx-background: transparent;");
-        
+
         contentArea.getChildren().add(scrollPane);
         animateContentEntry(scrollPane);
     }

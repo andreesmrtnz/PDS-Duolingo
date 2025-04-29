@@ -138,4 +138,20 @@ public class Estadistica {
         }
         return (double) preguntasCorrectas / (preguntasCorrectas + preguntasIncorrectas) * 100;
     }
+    
+    public double getPrecision(CursoEnProgreso progreso) {
+        if (progreso != null) {
+            int total = progreso.getPreguntasCorrectas() + progreso.getPreguntasIncorrectas();
+            if (total == 0) {
+                return 0.0;
+            }
+            return (double) progreso.getPreguntasCorrectas() / total * 100;
+        } else {
+            // Cálculo global (para estadísticas generales del usuario)
+            if (preguntasCorrectas + preguntasIncorrectas == 0) {
+                return 0.0;
+            }
+            return (double) preguntasCorrectas / (preguntasCorrectas + preguntasIncorrectas) * 100;
+        }
+    }
 }

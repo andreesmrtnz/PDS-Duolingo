@@ -471,4 +471,8 @@ public class CursoEnProgreso {
     public void setEnModoRepeticion(boolean enModoRepeticion) {
         this.enModoRepeticion = enModoRepeticion;
     }
+    
+    public int getTotalPreguntasRespondidas() {
+        return preguntasCorrectas + preguntasIncorrectas;
+    }
 }

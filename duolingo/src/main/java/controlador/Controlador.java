@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-
+import java.util.stream.Collectors;
 
 import jakarta.persistence.EntityManager;
 import modelo.Bloque;
@@ -92,24 +92,21 @@ public class Controlador {
                 System.err.println("Error: El usuario actual no existe en la base de datos");
                 return false;
             }
-           
+            
             Curso curso = CursoParser.cargarCurso(rutaArchivo, creador);
-            
-            // Las relaciones bidireccionales ya se establecen en CursoParser.cargarCurso
-            // Pero podemos hacerlo también aquí si fuera necesario
-            
-            // Eliminar duplicados en la lista de bloques del curso antes de guardarlo
             curso.setBloques(new ArrayList<>(new HashSet<>(curso.getBloques())));
             repoCursos.agregarCurso(curso);
             this.usuarioActual.addCurso(curso);
             
-            // Utilizar el DAO para persistir los cambios
+            
             cursoDAO.guardar(curso);
             usuarioDAO.actualizar(usuarioActual);
             
+            // Inscribir automáticamente a los seguidores
+            inscribirSeguidoresEnCurso(curso);
+            
             em.getTransaction().commit();
             
-            // Log de verificación de tipos
             for (Bloque bloque : curso.getBloques()) {
                 for (Pregunta pregunta : bloque.getPreguntas()) {
                     System.out.println("Pregunta cargada: " + pregunta.getEnunciado() + 
@@ -130,6 +127,13 @@ public class Controlador {
         }
     }
     
+    public int getNumeroCursosCreados(Usuario creador) {
+        if (creador == null || !creador.esCreador()) {
+            return 0;
+        }
+        return cursoDAO.buscarPorCreador(creador).size();
+    }
+    
     public void finalizarCurso() {
         if (cursoActual != null && progresoActual != null) {
             // Marcar el curso como completado
@@ -139,14 +143,29 @@ public class Controlador {
             // Guardar el progreso en la base de datos
             cursoEnProgresoDAO.actualizar(progresoActual);
             
+            // Actualizar estadísticas globales del usuario
+            Estadistica estadistica = getEstadisticasUsuario();
+            if (estadistica != null) {
+                estadistica.setCursosCompletados(estadistica.getCursosCompletados() + 1);
+                EstadisticaDAO estadisticaDAO = new EstadisticaDAO();
+                estadisticaDAO.actualizar(estadistica);
+            }
+            
             System.out.println("Curso finalizado: " + cursoActual.getTitulo());
             System.out.println("Preguntas correctas: " + progresoActual.getPreguntasCorrectas());
             System.out.println("Preguntas incorrectas: " + progresoActual.getPreguntasIncorrectas());
-            
-            // Limpiar las referencias actuales
-            cursoActual = null;
-            progresoActual = null;
         }
+    }
+    
+    public double getPorcentajeAciertosCurso() {
+        if (progresoActual == null) {
+            return 0.0;
+        }
+        Estadistica estadistica = getEstadisticasUsuario();
+        if (estadistica != null) {
+            return estadistica.getPrecision(progresoActual);
+        }
+        return 0.0;
     }
     
  // Método modificado para registrar diferentes tipos de usuarios
@@ -220,45 +239,7 @@ public class Controlador {
         return true;
     }
     
-    // Método modificado para crear cursos (solo para creadores)
-    public Curso crearCurso(String titulo, String dominio, List<Bloque> bloques, String rutaArchivo) {
-        if (!puedeCrearCursos()) {
-            System.err.println("Error: Solo los creadores pueden crear cursos");
-            return null;
-        }
-        
-        try {
-            // Usar el usuario actual como creador
-            Usuario creador = this.usuarioActual;
-            
-            // Incrementar contador de cursos creados si es un Creador
-            if (creador instanceof Creador) {
-                ((Creador) creador).incrementarCursosCreados();
-            }
-            
-            // Crear objeto curso con estrategia básica
-            Curso curso = new Curso(null, titulo, dominio, creador, bloques, 0);
-            
-            // Guardar en repositorio y base de datos
-            repoCursos.agregarCurso(curso);
-            creador.addCurso(curso);
-            
-            // Persistir el curso y actualizar el usuario
-            cursoDAO.guardar(curso);
-            usuarioDAO.actualizar(creador);
-            
-            // Si se proporcionó una ruta, guardamos el curso en archivo
-            if (rutaArchivo != null && !rutaArchivo.isEmpty()) {
-                CursoParser.guardarCurso(curso, rutaArchivo);
-            }
-            
-            return curso;
-        } catch (Exception e) {
-            System.err.println("Error al crear curso: " + e.getMessage());
-            e.printStackTrace();
-            return null;
-        }
-    }
+    
     
     /**
      * Obtiene todos los cursos creados por el usuario actual
@@ -356,7 +337,10 @@ public class Controlador {
         return cursoDAO.listarTodos();
     }
     
-    
+    public void limpiarCursoActual() {
+        cursoActual = null;
+        progresoActual = null;
+    }
     
     /**
      * Comparte un curso exportándolo a un archivo
@@ -499,6 +483,11 @@ public class Controlador {
      * @return true si se reinició correctamente, false en caso contrario
      */
     public boolean reiniciarCurso(Curso curso) {
+        if (usuarioActual == null || !(usuarioActual instanceof Estudiante) || curso == null) {
+            System.err.println("Error: Usuario no válido o curso nulo");
+            return false;
+        }
+
         EntityManager em = cursoEnProgresoDAO.getEntityManager();
         try {
             em.getTransaction().begin();
@@ -511,8 +500,9 @@ public class Controlador {
                 cursoEnProgresoDAO.eliminar(progresoExistente);
             }
             
-            // Crear nuevo progreso
-            CursoEnProgreso nuevoProgreso = new CursoEnProgreso(usuarioActual, curso);
+            // Crear nuevo progreso usando el método de Estudiante
+            Estudiante estudiante = (Estudiante) usuarioActual;
+            CursoEnProgreso nuevoProgreso = estudiante.inscribirEnCurso(curso);
             cursoEnProgresoDAO.guardar(nuevoProgreso);
             
             // Establecer el curso y progreso actual
@@ -661,5 +651,161 @@ public class Controlador {
         
         return estadistica;
     }
+    
+    
+    /**
+     * Obtiene la lista de todos los creadores disponibles
+     * @return Lista de usuarios que son creadores
+     */
+    public List<Usuario> getCreadoresDisponibles() {
+        // Obtener todos los creadores
+        List<Usuario> todosLosCreadores = usuarioDAO.listarCreadoresConSeguidores();
+        
+        // Si no hay usuario actual, devolver todos los creadores (caso defensivo)
+        if (usuarioActual == null) {
+            return todosLosCreadores;
+        }
+        
+        // Obtener los IDs de los creadores seguidos por el usuario actual
+        List<Long> idsCreadoresSeguidos = usuarioActual.getCreadoresSeguidos()
+            .stream()
+            .map(Usuario::getId)
+            .collect(Collectors.toList());
+        
+        // Filtrar los creadores no seguidos
+        List<Usuario> creadoresNoSeguidos = todosLosCreadores.stream()
+            .filter(creador -> !idsCreadoresSeguidos.contains(creador.getId()))
+            .collect(Collectors.toList());
+        
+        return creadoresNoSeguidos;
+    }
+
+    /**
+     * Permite a un estudiante seguir a un creador
+     * @param creador El creador a seguir
+     * @return true si se siguió correctamente, false en caso contrario
+     */
+    public boolean seguirCreador(Usuario creador) {
+        if (usuarioActual == null || !usuarioActual.esEstudiante() || !creador.esCreador()) {
+            return false;
+        }
+
+        EntityManager em = usuarioDAO.getEntityManager();
+        try {
+            em.getTransaction().begin();
+
+            // Añadir el creador a la lista de creadores seguidos
+            usuarioActual.addCreadorSeguido(creador);
+            usuarioDAO.actualizar(usuarioActual);
+
+            // Inscribir automáticamente en todos los cursos del creador
+            List<Curso> cursosCreador = cursoDAO.buscarPorCreador(creador);
+            for (Curso curso : cursosCreador) {
+                inscribirEnCurso(curso);
+            }
+
+            em.getTransaction().commit();
+            return true;
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            System.err.println("Error al seguir creador: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Permite a un estudiante dejar de seguir a un creador
+     * @param creador El creador a dejar de seguir
+     * @return true si se dejó de seguir correctamente, false en caso contrario
+     */
+    public boolean dejarDeSeguirCreador(Usuario creador) {
+        if (usuarioActual == null || !usuarioActual.esEstudiante() || !creador.esCreador()) {
+            return false;
+        }
+
+        EntityManager em = usuarioDAO.getEntityManager();
+        try {
+            em.getTransaction().begin();
+
+            // Eliminar el creador de la lista de creadores seguidos
+            usuarioActual.removeCreadorSeguido(creador);
+            usuarioDAO.actualizar(usuarioActual);
+
+            em.getTransaction().commit();
+            return true;
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            System.err.println("Error al dejar de seguir creador: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Verifica si el usuario actual sigue a un creador específico
+     * @param creador El creador a verificar
+     * @return true si el usuario lo sigue, false en caso contrario
+     */
+    public boolean estaSiguiendoCreador(Usuario creador) {
+        if (usuarioActual == null || creador == null || !creador.esCreador()) {
+            return false;
+        }
+        List<Usuario> creadoresSeguidos = usuarioActual.getCreadoresSeguidos();
+        return creadoresSeguidos != null && creadoresSeguidos.contains(creador);
+    }
+    
+    public List<Usuario> getCreadoresSeguidos(){
+    	return this.usuarioActual.getCreadoresSeguidos();
+    } 
+
+    /**
+     * Inscribe automáticamente a los seguidores de un creador en un nuevo curso
+     * @param curso El nuevo curso creado
+     */
+    private void inscribirSeguidoresEnCurso(Curso curso) {
+        if (curso == null || curso.getCreador() == null) {
+            return;
+        }
+
+        EntityManager em = cursoEnProgresoDAO.getEntityManager();
+        try {
+            em.getTransaction().begin();
+
+            // Obtener los seguidores del creador
+            List<Usuario> seguidores = curso.getCreador().getSeguidores();
+            for (Usuario seguidor : seguidores) {
+                if (seguidor.esEstudiante()) {
+                    // Verificar si el seguidor ya está inscrito
+                    CursoEnProgreso existente = cursoEnProgresoDAO.buscarPorUsuarioYCurso(seguidor, curso);
+                    if (existente == null) {
+                        // Inscribir al seguidor
+                        Estudiante estudiante = (Estudiante) seguidor;
+                        CursoEnProgreso nuevaInscripcion = estudiante.inscribirEnCurso(curso);
+                        cursoEnProgresoDAO.guardar(nuevaInscripcion);
+                    }
+                }
+            }
+
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            System.err.println("Error al inscribir seguidores en curso: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            em.close();
+        }
+    }
+    
     
 }
