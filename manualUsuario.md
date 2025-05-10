@@ -66,6 +66,7 @@ Al elegir un curso, podrás seleccionar la **estrategia de aprendizaje**:
 
 Cada curso presentará las preguntas de acuerdo con la estrategia elegida.
 
+![Pantalla Cursos](imagenes/cursos2.png)
 ---
 
 ## ❓ Tipos de Preguntas
@@ -77,8 +78,6 @@ Actualmente la aplicación incluye al menos **3 tipos de preguntas**:
 
 Es posible añadir nuevos tipos de preguntas de forma modular.
 
-![Preguntas 1](imagenes/pregunta1.png)  
-![Preguntas 2](imagenes/pregunta2.png)
 
 ---
 
@@ -98,6 +97,10 @@ La aplicación lleva un seguimiento de tu rendimiento, incluyendo:
 - Número de preguntas correctas/incorrectas por curso.
 
 Puedes visualizar estas estadísticas desde la pantalla principal.
+
+![Pantalla Estadisticas](imagenes/estadisticas.png)
+![Pantalla Estadisticas2](imagenes/estadisticas2.png)
+![Pantalla Estadisticas3](imagenes/estadisticas3.png)
 
 ---
 
