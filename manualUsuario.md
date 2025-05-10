@@ -104,6 +104,21 @@ Puedes visualizar estas estadísticas desde la pantalla principal.
 
 ---
 
+## ✏️ Editar Perfil
+
+Puedes acceder a la opción de **editar tu perfil** desde la pantalla principal haciendo clic en el icono o botón de perfil.  
+Allí podrás:  
+- Cambiar tu **nombre de usuario**.  
+- Actualizar tu **correo electrónico**.  
+- Modificar tu **contraseña**.  
+- Subir una **foto de perfil** (opcional).
+
+Cuando termines de editar, haz clic en **Guardar cambios** para actualizar tu información.
+
+![Editar Perfil](imagenes/perfil.png)
+
+---
+
 ## 📂 Gestión de Cursos
 
 La plataforma permite:  
