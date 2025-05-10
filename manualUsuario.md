@@ -1,6 +1,7 @@
+
 # 📘 Manual de Usuario – Aplicación tipo Duolingo
 
-> Aplicación desarrollada para la asignatura de Programación de Sistemas. Este manual está dirigido a usuarios que deseen utilizar la app para aprender idiomas de manera interactiva.
+> Proyecto académico desarrollado para fomentar el aprendizaje de idiomas mediante ejercicios interactivos y estrategias pedagógicas efectivas.
 
 ---
 
@@ -14,17 +15,18 @@
    - [Inicio de sesión](#inicio-de-sesión)
 5. [Interfaz principal](#interfaz-principal)
 6. [Realización de ejercicios](#realización-de-ejercicios)
-   - [Tipos de preguntas](#tipos-de-preguntas)
-   - [Progreso](#progreso)
-7. [Configuración y perfil](#configuración-y-perfil)
-8. [Errores comunes y solución](#errores-comunes-y-solución)
-9. [Créditos y contacto](#créditos-y-contacto)
+   - [Tipos de ejercicios](#tipos-de-ejercicios)
+   - [Estrategias de aprendizaje](#estrategias-de-aprendizaje)
+7. [Progreso y retroalimentación](#progreso-y-retroalimentación)
+8. [Configuración y perfil](#configuración-y-perfil)
+9. [Errores comunes y solución](#errores-comunes-y-solución)
+10. [Créditos y contacto](#créditos-y-contacto)
 
 ---
 
 ## 📌 Introducción
 
-Esta aplicación imita la funcionalidad de Duolingo, ofreciendo un entorno gamificado para el aprendizaje de idiomas. Permite a los usuarios avanzar a través de lecciones prácticas y recibir retroalimentación inmediata.
+Esta aplicación permite al usuario aprender idiomas de forma lúdica, inspirándose en Duolingo. Está diseñada para reforzar vocabulario, asociación visual y memoria a largo plazo mediante ejercicios interactivos y un sistema de progreso motivador.
 
 ---
 
@@ -41,17 +43,11 @@ Esta aplicación imita la funcionalidad de Duolingo, ofreciendo un entorno gamif
 
 ## 🛠 Instalación
 
-### 🔧 Opción 1: Aplicación Web
+### 🔧 Aplicación Web
 
 1. Abre tu navegador.
 2. Dirígete a la URL del proyecto (por ejemplo `https://duolingo-clon.vercel.app`).
-3. Crea una cuenta o inicia sesión.
-
-### 🖥 Opción 2: Aplicación de escritorio
-
-1. Descarga el ejecutable desde la sección "Releases" del repositorio de GitHub.
-2. Ejecuta el archivo `.exe` o `.AppImage` dependiendo del sistema operativo.
-3. Sigue las instrucciones del instalador.
+3. Regístrate o inicia sesión.
 
 ---
 
@@ -59,12 +55,12 @@ Esta aplicación imita la funcionalidad de Duolingo, ofreciendo un entorno gamif
 
 ### 📝 Registro
 
-1. Haz clic en el botón **Register**.
-2. Completa los campos:
-   - Nombre de usuario
-   - Correo electrónico
-   - Contraseña
-3. Pulsa **Registrarse**.
+- Desde la pantalla inicial, pulsa **Register**.
+- Completa los campos:
+  - Nombre de usuario
+  - Correo electrónico
+  - Contraseña
+- Pulsa **Registrarse**.
 
 ![Registro](assets_duolingo/screen_1.png)
 
@@ -72,9 +68,8 @@ Esta aplicación imita la funcionalidad de Duolingo, ofreciendo un entorno gamif
 
 ### 🔐 Inicio de sesión
 
-1. Desde la pantalla inicial, selecciona **Login**.
-2. Introduce tus credenciales.
-3. Pulsa **Iniciar sesión**.
+- Introduce tus credenciales en la pantalla de **Login**.
+- Pulsa **Iniciar sesión** para acceder a tu perfil.
 
 ![Login](assets_duolingo/screen_2.png)
 
@@ -82,62 +77,79 @@ Esta aplicación imita la funcionalidad de Duolingo, ofreciendo un entorno gamif
 
 ## 🏠 Interfaz principal
 
-La pantalla principal muestra:
+La ventana principal presenta:
 
-- Lecciones disponibles.
-- Estado de progreso.
-- Menú lateral o superior para navegar.
-- Botones para acceder al perfil o cerrar sesión.
+- Lecciones activas.
+- Indicadores de progreso.
+- Menú para acceder al perfil, configuración y cierre de sesión.
 
 ![Pantalla principal](assets_duolingo/screen_3.png)
-
-Cada bloque de lección se activa cuando se completa el anterior, siguiendo un sistema de progresión.
 
 ---
 
 ## 🧠 Realización de ejercicios
 
-### Tipos de preguntas
+### Tipos de ejercicios
 
-Al entrar a una lección se te mostrarán distintos tipos de ejercicios. Algunos ejemplos:
+#### 1. **Selección de palabra traducida**
+Selecciona la traducción correcta de una palabra mostrada.
 
-#### 1. Traducción directa
-- El usuario debe traducir una frase al idioma de destino.
-![Pregunta 1](assets_duolingo/screen_4.png)
+📷
+![Ejercicio - Selección de palabra traducida](assets_duolingo/screen_4.png)
 
-#### 2. Selección múltiple
-- El usuario debe elegir la opción correcta entre varias posibles.
-![Pregunta 2](assets_duolingo/screen_5.png)
+#### 2. **Selección de imagen**
+Selecciona la imagen que representa la palabra indicada.
 
-#### 3. Completar la oración
-- Se muestra una oración incompleta y el usuario debe seleccionar o escribir la palabra correcta.
-![Pregunta 3](assets_duolingo/screen_6.png)
+📷
+![Ejercicio - Imagen correcta](assets_duolingo/screen_5.png)
 
-Al finalizar la pregunta, se muestra si la respuesta fue correcta o incorrecta:
+#### 3. **Unir parejas de palabras**
+Empareja palabras en dos idiomas para reforzar vocabulario.
 
-![Resultado](assets_duolingo/screen_7.png)
+📷
+![Ejercicio - Unir palabras](assets_duolingo/screen_6.png)
+
+#### 4. **Retroalimentación inmediata**
+Muestra resultado correcto/incorrecto tras responder.
+
+📷
+![Resultado de la pregunta](assets_duolingo/screen_7.png)
 
 ---
 
-### 📈 Progreso
+### 🎯 Estrategias de aprendizaje
 
-El progreso se guarda automáticamente al completar cada lección. Las lecciones completadas cambian de color o estado.
+La app implementa tres modos de aprendizaje adaptativos:
 
-También puedes ver:
+#### 🔁 1. Repetición espaciada
+Las preguntas mal respondidas se repiten en intervalos distribuidos para reforzar la memoria a largo plazo.
 
-- Estadísticas personales.
-- Porcentaje de lecciones completas.
-- Posibilidad de repetir ejercicios.
+#### 🔄 2. Modo aleatorio
+Las preguntas aparecen en orden aleatorio para evitar la memorización por posición.
+
+#### ➡️ 3. Modo secuencial
+Las preguntas se presentan en orden fijo, ideal para principiantes que siguen una progresión guiada.
+
+Estas estrategias pueden combinarse o configurarse desde el perfil del usuario.
+
+---
+
+## 📈 Progreso y retroalimentación
+
+- Cada lección completada se marca visualmente.
+- El sistema guarda el avance automáticamente.
+- Se ofrece retroalimentación tras cada respuesta.
+- Algunas respuestas incorrectas se reprograman para reforzar el aprendizaje (repetición espaciada).
 
 ---
 
 ## ⚙️ Configuración y perfil
 
-Desde el menú de usuario puedes:
+Desde la sección de perfil puedes:
 
-- Cambiar contraseña.
-- Editar nombre de usuario o correo.
-- Ver estadísticas detalladas.
+- Cambiar datos personales.
+- Consultar estadísticas.
+- Cambiar entre modos de aprendizaje.
 - Cerrar sesión.
 
 ![Perfil](assets_duolingo/screen_8.png)
@@ -148,22 +160,21 @@ Desde el menú de usuario puedes:
 
 | Problema | Posible solución |
 |---------|------------------|
-| No puedo iniciar sesión | Verifica tus datos o usa "Recuperar contraseña". |
-| El contenido no carga | Revisa tu conexión o recarga la página. |
-| No se guarda el progreso | Asegúrate de haber iniciado sesión correctamente. |
-| Problemas visuales | Usa un navegador actualizado o cambia de dispositivo. |
+| No inicia sesión | Verifica tus credenciales o usa "Recuperar contraseña". |
+| Contenido no carga | Revisa la conexión a Internet y recarga la app. |
+| El progreso no se guarda | Asegúrate de estar registrado e iniciar sesión correctamente. |
 
 ---
 
 ## 👥 Créditos y contacto
 
-Desarrollado por estudiantes de 3º de Ingeniería Informática - Universidad de Murcia.
+Desarrollado por estudiantes de Ingeniería Informática – Universidad de Murcia.
 
-Para contacto o incidencias:
+Para incidencias:
 
-- Correo: `soporte@duolingo-clon.com`
-- GitHub: [Repositorio oficial](https://github.com/tuusuario/duolingo-clon)
+- ✉️ soporte@duolingo-clon.com
+- 💻 [Repositorio oficial](https://github.com/tuusuario/duolingo-clon)
 
 ---
 
-*Versión del manual: 1.0 – Mayo 2025*
+*Versión del manual: 1.1 – Mayo 2025*
