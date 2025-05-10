@@ -1,4 +1,4 @@
-# 📚 Manual de Usuario - Aplicación de Aprendizaje (inspirada en Duolingo)
+# 📚 Manual de Usuario - Duolingo
 
 ## 📝 Índice
 1. [Introducción](#introducción)  
