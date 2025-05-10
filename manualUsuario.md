@@ -99,8 +99,8 @@ La aplicación lleva un seguimiento de tu rendimiento, incluyendo:
 Puedes visualizar estas estadísticas desde la pantalla principal.
 
 ![Pantalla Estadisticas](imagenes/estadisticas.png)
-![Pantalla Estadisticas2](imagenes/estadisticas2.png)
-![Pantalla Estadisticas3](imagenes/estadisticas3.png)
+![Pantalla Estadisticas1](imagenes/estadisticas1.png)
+![Pantalla Estadisticas1](imagenes/estadisticas2.png)
 
 ---
 
