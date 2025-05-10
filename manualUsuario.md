@@ -8,9 +8,10 @@
 5. [Realización de un Curso](#realización-de-un-curso)  
 6. [Tipos de Preguntas](#tipos-de-preguntas)  
 7. [Guardado y Reanudación](#guardado-y-reanudación)  
-8. [Estadísticas](#estadísticas)  
-9. [Gestión de Cursos](#gestión-de-cursos)  
-10. [Funcionalidad Adicional](#funcionalidad-adicional)  
+8. [Estadísticas](#estadísticas)
+9. [Editar perfil](#editar-perfil) 
+10. [Gestión de Cursos](#gestión-de-cursos)  
+11. [Funcionalidad Adicional](#funcionalidad-adicional)  
 
 ---
 
