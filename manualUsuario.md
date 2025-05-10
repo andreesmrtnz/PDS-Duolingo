@@ -1,180 +1,120 @@
+# 📚 Manual de Usuario - Aplicación de Aprendizaje (inspirada en Duolingo)
 
-# 📘 Manual de Usuario – Aplicación tipo Duolingo
-
-> Proyecto académico desarrollado para fomentar el aprendizaje de idiomas mediante ejercicios interactivos y estrategias pedagógicas efectivas.
-
----
-
-## 📑 Índice
-
-1. [Introducción](#introducción)
-2. [Requisitos del sistema](#requisitos-del-sistema)
-3. [Instalación](#instalación)
-4. [Primeros pasos](#primeros-pasos)
-   - [Registro](#registro)
-   - [Inicio de sesión](#inicio-de-sesión)
-5. [Interfaz principal](#interfaz-principal)
-6. [Realización de ejercicios](#realización-de-ejercicios)
-   - [Tipos de ejercicios](#tipos-de-ejercicios)
-   - [Estrategias de aprendizaje](#estrategias-de-aprendizaje)
-7. [Progreso y retroalimentación](#progreso-y-retroalimentación)
-8. [Configuración y perfil](#configuración-y-perfil)
-9. [Errores comunes y solución](#errores-comunes-y-solución)
-10. [Créditos y contacto](#créditos-y-contacto)
+## 📝 Índice
+1. [Introducción](#introducción)  
+2. [Registro de Usuario](#registro-de-usuario)  
+3. [Inicio de Sesión](#inicio-de-sesión)  
+4. [Pantalla Principal](#pantalla-principal)  
+5. [Realización de un Curso](#realización-de-un-curso)  
+6. [Tipos de Preguntas](#tipos-de-preguntas)  
+7. [Guardado y Reanudación](#guardado-y-reanudación)  
+8. [Estadísticas](#estadísticas)  
+9. [Gestión de Cursos](#gestión-de-cursos)  
+10. [Funcionalidad Adicional](#funcionalidad-adicional)  
 
 ---
 
-## 📌 Introducción
+## ✨ Introducción
 
-Esta aplicación permite al usuario aprender idiomas de forma lúdica, inspirándose en Duolingo. Está diseñada para reforzar vocabulario, asociación visual y memoria a largo plazo mediante ejercicios interactivos y un sistema de progreso motivador.
+Esta aplicación permite a los usuarios **aprender y repasar conceptos** en distintos dominios (idiomas, programación, teoría musical, etc.) mediante cursos interactivos que combinan preguntas y tarjetas de aprendizaje.
 
----
-
-## 💻 Requisitos del sistema
-
-| Elemento | Requisito mínimo |
-|---------|------------------|
-| Sistema operativo | Windows 10, Linux o macOS |
-| Resolución de pantalla | 1280x720 |
-| Conexión a Internet | Requerida para uso completo |
-| Navegador recomendado | Chrome, Firefox, Edge |
+Inspirada en **Duolingo** y **Mochi**, la plataforma busca ser **flexible y extensible**, permitiendo la incorporación de nuevos tipos de preguntas y contenidos creados por la comunidad.
 
 ---
 
-## 🛠 Instalación
+## 👤 Registro de Usuario
 
-### 🔧 Aplicación Web
+Al iniciar la aplicación, encontrarás la opción de **crear una cuenta nueva**.  
+1. Completa tu **nombre de usuario**, **correo electrónico** y **contraseña**.  
+2. Haz clic en **Registrar**.  
+3. Si los datos son válidos, se creará tu cuenta y podrás acceder a la aplicación.
 
-1. Abre tu navegador.
-2. Dirígete a la URL del proyecto (por ejemplo `https://duolingo-clon.vercel.app`).
-3. Regístrate o inicia sesión.
-
----
-
-## 🚀 Primeros pasos
-
-### 📝 Registro
-
-- Desde la pantalla inicial, pulsa **Register**.
-- Completa los campos:
-  - Nombre de usuario
-  - Correo electrónico
-  - Contraseña
-- Pulsa **Registrarse**.
-
-![Registro](assets_duolingo/screen_1.png)
+![Registro](imagenes/registro.png)
 
 ---
 
-### 🔐 Inicio de sesión
+## 🔑 Inicio de Sesión
 
-- Introduce tus credenciales en la pantalla de **Login**.
-- Pulsa **Iniciar sesión** para acceder a tu perfil.
+Si ya tienes una cuenta:  
+1. Introduce tu **usuario o correo electrónico** y tu **contraseña**.  
+2. Haz clic en **Iniciar Sesión**.
 
-![Login](assets_duolingo/screen_2.png)
+En caso de error, verifica tus credenciales o usa la opción de recuperación de contraseña.
 
----
-
-## 🏠 Interfaz principal
-
-La ventana principal presenta:
-
-- Lecciones activas.
-- Indicadores de progreso.
-- Menú para acceder al perfil, configuración y cierre de sesión.
-
-![Pantalla principal](assets_duolingo/screen_3.png)
+![Login](imagenes/login.png)
 
 ---
 
-## 🧠 Realización de ejercicios
+## 🏠 Pantalla Principal
 
-### Tipos de ejercicios
+Tras iniciar sesión, accederás a la **pantalla principal** donde podrás:  
+- Seleccionar un curso existente.  
+- Crear un curso nuevo (mediante carga de archivo JSON/YAML).  
+- Consultar tus estadísticas.  
+- Ver tu progreso y racha.
 
-#### 1. **Selección de palabra traducida**
-Selecciona la traducción correcta de una palabra mostrada.
-
-📷
-![Ejercicio - Selección de palabra traducida](assets_duolingo/screen_4.png)
-
-#### 2. **Selección de imagen**
-Selecciona la imagen que representa la palabra indicada.
-
-📷
-![Ejercicio - Imagen correcta](assets_duolingo/screen_5.png)
-
-#### 3. **Unir parejas de palabras**
-Empareja palabras en dos idiomas para reforzar vocabulario.
-
-📷
-![Ejercicio - Unir palabras](assets_duolingo/screen_6.png)
-
-#### 4. **Retroalimentación inmediata**
-Muestra resultado correcto/incorrecto tras responder.
-
-📷
-![Resultado de la pregunta](assets_duolingo/screen_7.png)
+![Pantalla Principal](imagenes/principal.png)
 
 ---
 
-### 🎯 Estrategias de aprendizaje
+## 🎓 Realización de un Curso
 
-La app implementa tres modos de aprendizaje adaptativos:
+Al elegir un curso, podrás seleccionar la **estrategia de aprendizaje**:  
+- Secuencial.  
+- Aleatoria.  
+- Repetición espaciada.
 
-#### 🔁 1. Repetición espaciada
-Las preguntas mal respondidas se repiten en intervalos distribuidos para reforzar la memoria a largo plazo.
-
-#### 🔄 2. Modo aleatorio
-Las preguntas aparecen en orden aleatorio para evitar la memorización por posición.
-
-#### ➡️ 3. Modo secuencial
-Las preguntas se presentan en orden fijo, ideal para principiantes que siguen una progresión guiada.
-
-Estas estrategias pueden combinarse o configurarse desde el perfil del usuario.
+Cada curso presentará las preguntas de acuerdo con la estrategia elegida.
 
 ---
 
-## 📈 Progreso y retroalimentación
+## ❓ Tipos de Preguntas
 
-- Cada lección completada se marca visualmente.
-- El sistema guarda el avance automáticamente.
-- Se ofrece retroalimentación tras cada respuesta.
-- Algunas respuestas incorrectas se reprograman para reforzar el aprendizaje (repetición espaciada).
+Actualmente la aplicación incluye al menos **3 tipos de preguntas**:  
+1. **Test de opción múltiple**: Selecciona la respuesta correcta.  
+2. **Completar huecos**: Escribe la palabra o frase faltante.  
+3. **Traducción**: Traduce una frase al idioma objetivo.
 
----
+Es posible añadir nuevos tipos de preguntas de forma modular.
 
-## ⚙️ Configuración y perfil
-
-Desde la sección de perfil puedes:
-
-- Cambiar datos personales.
-- Consultar estadísticas.
-- Cambiar entre modos de aprendizaje.
-- Cerrar sesión.
-
-![Perfil](assets_duolingo/screen_8.png)
+![Preguntas 1](imagenes/pregunta1.png)  
+![Preguntas 2](imagenes/pregunta2.png)
 
 ---
 
-## ❗ Errores comunes y solución
+## 💾 Guardado y Reanudación
 
-| Problema | Posible solución |
-|---------|------------------|
-| No inicia sesión | Verifica tus credenciales o usa "Recuperar contraseña". |
-| Contenido no carga | Revisa la conexión a Internet y recarga la app. |
-| El progreso no se guarda | Asegúrate de estar registrado e iniciar sesión correctamente. |
+Puedes **guardar tu progreso** en cualquier momento y reanudarlo posteriormente:  
+- La aplicación registra tu última pregunta respondida.  
+- Al volver al curso, puedes continuar desde donde lo dejaste.
 
 ---
 
-## 👥 Créditos y contacto
+## 📊 Estadísticas
 
-Desarrollado por estudiantes de Ingeniería Informática – Universidad de Murcia.
+La aplicación lleva un seguimiento de tu rendimiento, incluyendo:  
+- Tiempo total de uso.  
+- Mejor racha (días consecutivos de uso).  
+- Número de preguntas correctas/incorrectas por curso.
 
-Para incidencias:
-
-- ✉️ soporte@duolingo-clon.com
-- 💻 [Repositorio oficial](https://github.com/tuusuario/duolingo-clon)
+Puedes visualizar estas estadísticas desde la pantalla principal.
 
 ---
 
-*Versión del manual: 1.1 – Mayo 2025*
+## 📂 Gestión de Cursos
+
+La plataforma permite:  
+- **Crear cursos personalizados** mediante archivos **JSON o YAML**.  
+- **Importar cursos** a tu biblioteca interna.  
+- Compartir tus cursos exportando el archivo y enviándolo a otros usuarios.
+
+Ejemplo de archivo de curso:
+
+```json
+{
+  "nombre": "Curso de Italiano Básico",
+  "preguntas": [
+    {"tipo": "test", "pregunta": "¿Cómo se dice 'hola'?", "opciones": ["Ciao", "Hola", "Hello"], "respuesta": "Ciao"},
+    {"tipo": "traduccion", "pregunta": "Traduce: Good morning", "respuesta": "Buongiorno"}
+  ]
+}
