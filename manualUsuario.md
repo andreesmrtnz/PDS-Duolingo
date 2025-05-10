@@ -79,7 +79,11 @@ Actualmente la aplicación incluye al menos **3 tipos de preguntas**:
 
 Es posible añadir nuevos tipos de preguntas de forma modular.
 
-
+![Pantalla Preguntas](imagenes/preguntas.png)
+![Pantalla Preguntas1](imagenes/preguntas1.png)
+![Pantalla Preguntas2](imagenes/preguntas2.png)
+![Pantalla Preguntas3](imagenes/preguntas3.png)
+![Pantalla Preguntas4](imagenes/preguntas4.png)
 ---
 
 ## 💾 Guardado y Reanudación
