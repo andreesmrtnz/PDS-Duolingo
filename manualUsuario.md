@@ -1,112 +1,169 @@
 # 📘 Manual de Usuario – Aplicación tipo Duolingo
 
-## 🧩 Índice
+> Aplicación desarrollada para la asignatura de Programación de Sistemas. Este manual está dirigido a usuarios que deseen utilizar la app para aprender idiomas de manera interactiva.
+
+---
+
+## 📑 Índice
+
 1. [Introducción](#introducción)
 2. [Requisitos del sistema](#requisitos-del-sistema)
 3. [Instalación](#instalación)
-4. [Inicio de sesión y registro](#inicio-de-sesión-y-registro)
+4. [Primeros pasos](#primeros-pasos)
+   - [Registro](#registro)
+   - [Inicio de sesión](#inicio-de-sesión)
 5. [Interfaz principal](#interfaz-principal)
 6. [Realización de ejercicios](#realización-de-ejercicios)
-7. [Solución de problemas comunes](#solución-de-problemas-comunes)
-8. [Contacto y soporte](#contacto-y-soporte)
+   - [Tipos de preguntas](#tipos-de-preguntas)
+   - [Progreso](#progreso)
+7. [Configuración y perfil](#configuración-y-perfil)
+8. [Errores comunes y solución](#errores-comunes-y-solución)
+9. [Créditos y contacto](#créditos-y-contacto)
 
 ---
 
 ## 📌 Introducción
-Esta aplicación está inspirada en Duolingo y permite al usuario aprender idiomas a través de ejercicios interactivos. El objetivo de este manual es guiar al usuario en el uso de la app, desde el inicio de sesión hasta la realización de ejercicios.
+
+Esta aplicación imita la funcionalidad de Duolingo, ofreciendo un entorno gamificado para el aprendizaje de idiomas. Permite a los usuarios avanzar a través de lecciones prácticas y recibir retroalimentación inmediata.
 
 ---
 
 ## 💻 Requisitos del sistema
 
-- **Sistema operativo:** Windows, Linux o macOS (si es aplicación de escritorio) o navegador moderno actualizado (si es web).
-- **Conexión a Internet:** Requerida para uso completo.
-- **Resolución mínima recomendada:** 1280x720.
+| Elemento | Requisito mínimo |
+|---------|------------------|
+| Sistema operativo | Windows 10, Linux o macOS |
+| Resolución de pantalla | 1280x720 |
+| Conexión a Internet | Requerida para uso completo |
+| Navegador recomendado | Chrome, Firefox, Edge |
 
 ---
 
 ## 🛠 Instalación
 
-### Si es una aplicación de escritorio:
-1. Descarga el instalador desde el repositorio.
-2. Ejecuta el archivo `.exe` o `.deb` según tu sistema operativo.
-3. Sigue las instrucciones del asistente de instalación.
+### 🔧 Opción 1: Aplicación Web
 
-### Si es aplicación web:
-1. Accede desde tu navegador a la URL del proyecto (por ejemplo: `https://duolingo-clon.example.com`).
+1. Abre tu navegador.
+2. Dirígete a la URL del proyecto (por ejemplo `https://duolingo-clon.vercel.app`).
+3. Crea una cuenta o inicia sesión.
+
+### 🖥 Opción 2: Aplicación de escritorio
+
+1. Descarga el ejecutable desde la sección "Releases" del repositorio de GitHub.
+2. Ejecuta el archivo `.exe` o `.AppImage` dependiendo del sistema operativo.
+3. Sigue las instrucciones del instalador.
 
 ---
 
-## 🔐 Inicio de sesión y registro
+## 🚀 Primeros pasos
 
-### Registro
-- Al abrir la app por primera vez, verás dos opciones: **Login** y **Register**.
-- Haz clic en **Register**.
-- Introduce:
-  - Nombre de usuario
-  - Correo electrónico
-  - Contraseña
-- Presiona el botón **Registrarse** para crear una cuenta.
+### 📝 Registro
 
-![Registro](assets/register.png)
+1. Haz clic en el botón **Register**.
+2. Completa los campos:
+   - Nombre de usuario
+   - Correo electrónico
+   - Contraseña
+3. Pulsa **Registrarse**.
 
-### Inicio de sesión
-- Introduce tu usuario y contraseña.
-- Pulsa el botón **Login**.
-- Serás redirigido a la ventana principal.
+![Registro](assets_duolingo/screen_1.png)
 
-![Login](assets/login.png)
+---
+
+### 🔐 Inicio de sesión
+
+1. Desde la pantalla inicial, selecciona **Login**.
+2. Introduce tus credenciales.
+3. Pulsa **Iniciar sesión**.
+
+![Login](assets_duolingo/screen_2.png)
 
 ---
 
 ## 🏠 Interfaz principal
 
-Una vez dentro, verás la ventana principal de la aplicación:
+La pantalla principal muestra:
 
-- Secciones disponibles:
-  - Lecciones disponibles
-  - Progreso del usuario
-  - Acceso a perfil y configuración
-- Cada lección está representada con un botón o icono.
+- Lecciones disponibles.
+- Estado de progreso.
+- Menú lateral o superior para navegar.
+- Botones para acceder al perfil o cerrar sesión.
 
-![Ventana principal](assets/main_screen.png)
+![Pantalla principal](assets_duolingo/screen_3.png)
+
+Cada bloque de lección se activa cuando se completa el anterior, siguiendo un sistema de progresión.
 
 ---
 
 ## 🧠 Realización de ejercicios
 
-Al seleccionar una lección, se inicia una serie de preguntas:
+### Tipos de preguntas
 
-- **Tipos de ejercicios**:
-  - Preguntas de traducción.
-  - Selección múltiple.
-  - Completar frases.
+Al entrar a una lección se te mostrarán distintos tipos de ejercicios. Algunos ejemplos:
 
-- Para cada pregunta:
-  1. Lee el enunciado.
-  2. Selecciona o escribe la respuesta.
-  3. Presiona **Validar** o **Siguiente**.
+#### 1. Traducción directa
+- El usuario debe traducir una frase al idioma de destino.
+![Pregunta 1](assets_duolingo/screen_4.png)
 
-![Ejercicio](assets/question_screen.png)
+#### 2. Selección múltiple
+- El usuario debe elegir la opción correcta entre varias posibles.
+![Pregunta 2](assets_duolingo/screen_5.png)
 
----
+#### 3. Completar la oración
+- Se muestra una oración incompleta y el usuario debe seleccionar o escribir la palabra correcta.
+![Pregunta 3](assets_duolingo/screen_6.png)
 
-## 🧩 Solución de problemas comunes
+Al finalizar la pregunta, se muestra si la respuesta fue correcta o incorrecta:
 
-| Problema | Solución |
-|---------|----------|
-| No puedo iniciar sesión | Verifica que tu usuario y contraseña sean correctos. Usa "¿Olvidaste tu contraseña?" si es necesario. |
-| La app no responde | Cierra y vuelve a abrir. Revisa tu conexión a Internet. |
-| El progreso no se guarda | Asegúrate de estar conectado y haber iniciado sesión correctamente. |
+![Resultado](assets_duolingo/screen_7.png)
 
 ---
 
-## 📬 Contacto y soporte
+### 📈 Progreso
 
-Para dudas o errores, contacta al equipo de desarrollo a través de:
-- Correo: soporte@duolingo-clon.com
-- GitHub: [Repositorio del proyecto](https://github.com/tuusuario/duolingo-clon)
+El progreso se guarda automáticamente al completar cada lección. Las lecciones completadas cambian de color o estado.
+
+También puedes ver:
+
+- Estadísticas personales.
+- Porcentaje de lecciones completas.
+- Posibilidad de repetir ejercicios.
 
 ---
 
-*Este manual fue desarrollado como parte de un proyecto académico en Ingeniería Informática.*
+## ⚙️ Configuración y perfil
+
+Desde el menú de usuario puedes:
+
+- Cambiar contraseña.
+- Editar nombre de usuario o correo.
+- Ver estadísticas detalladas.
+- Cerrar sesión.
+
+![Perfil](assets_duolingo/screen_8.png)
+
+---
+
+## ❗ Errores comunes y solución
+
+| Problema | Posible solución |
+|---------|------------------|
+| No puedo iniciar sesión | Verifica tus datos o usa "Recuperar contraseña". |
+| El contenido no carga | Revisa tu conexión o recarga la página. |
+| No se guarda el progreso | Asegúrate de haber iniciado sesión correctamente. |
+| Problemas visuales | Usa un navegador actualizado o cambia de dispositivo. |
+
+---
+
+## 👥 Créditos y contacto
+
+Desarrollado por estudiantes de 3º de Ingeniería Informática - Universidad de Murcia.
+
+Para contacto o incidencias:
+
+- Correo: `soporte@duolingo-clon.com`
+- GitHub: [Repositorio oficial](https://github.com/tuusuario/duolingo-clon)
+
+---
+
+*Versión del manual: 1.0 – Mayo 2025*
