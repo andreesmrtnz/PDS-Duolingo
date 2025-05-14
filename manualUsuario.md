@@ -135,9 +135,49 @@ Ejemplo de archivo de curso:
 
 ```json
 {
-  "nombre": "Curso de Italiano Básico",
-  "preguntas": [
-    {"tipo": "test", "pregunta": "¿Cómo se dice 'hola'?", "opciones": ["Ciao", "Hola", "Hello"], "respuesta": "Ciao"},
-    {"tipo": "traduccion", "pregunta": "Traduce: Good morning", "respuesta": "Buongiorno"}
-  ]
+    "id": null,
+    "titulo": "HTML y CSS",
+    "dominio": "Desarrollo Web",
+    "idCreador": null,
+    "posicionActual": 0,
+    "bloques": [
+      {
+        "id": null,
+        "titulo": "Fundamentos de HTML",
+        "descripcion": "Estructura básica y elementos HTML",
+        "preguntas": [
+          {
+            "enunciado": "¿Qué significa HTML?",
+            "opciones": ["HyperText Markup Language", "High Technology Modern Language", "Hyperlink Text Management Language"],
+            "respuestaCorrecta": 0,
+            "tipo": "SELECCION_MULTIPLE"
+          },
+          {
+            "enunciado": "La etiqueta que define el título de la página web es ______.",
+            "opciones": ["title"],
+            "respuestaCorrecta": -1,
+            "tipo": "COMPLETAR"
+          }
+        ]
+      },
+      {
+        "id": null,
+        "titulo": "Fundamentos de CSS",
+        "descripcion": "Sintaxis y aplicación de estilos CSS",
+        "preguntas": [
+          {
+            "enunciado": "¿Qué significa CSS?",
+            "opciones": ["Cascading Style Sheets", "Creative Style Sheets", "Computer Style Sheets"],
+            "respuestaCorrecta": 0,
+            "tipo": "SELECCION_MULTIPLE"
+          },
+          {
+            "enunciado": "El posicionamiento 'relative'",
+            "opciones": ["Posiciona un elemento relativo a su posición normal en el flujo del documento"],
+            "respuestaCorrecta": 0,
+            "tipo": "FLASHCARD"
+          }
+        ]
+      }
+    ]
 }
