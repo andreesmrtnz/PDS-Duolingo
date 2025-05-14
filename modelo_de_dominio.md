@@ -1,91 +1,98 @@
 # Modelo de Dominio
 
-El modelo de dominio elegido representa los elementos clave de la aplicación de aprendizaje de manera **modular** y **extensible**, asegurando que se diferencien correctamente los conceptos de *curso* como entidad y *curso* como experiencia de usuario.
+El modelo de dominio representa los elementos clave de una aplicación de aprendizaje, diseñada para ser **modular**, **extensible** y centrada en la experiencia del usuario. Se distingue claramente entre un *curso* como entidad conceptual y un *curso* como experiencia activa del estudiante, garantizando una estructura flexible para futuras ampliaciones.
 
 ---
 
-## Usuario y Estadísticas
+## Entidades Principales
 
+### Usuario y sus Roles
 - **Usuario**  
-  Representa a la persona que usa la aplicación.  
-  Puede ser:
-  - **Creador:** Diseña y genera cursos.
-  - **Estudiante:** Realiza y consume cursos.
+  Representa a una persona que interactúa con la aplicación. Atributos clave:  
+  - `id`, `nombre`, `email`, `password`.  
+  - Preferencias: `idiomaPreferido`, `recordatorioDiario`, `actualizacionesProgreso`, `notificacionesNuevosCursos`.  
+  Un usuario puede especializarse en dos roles:  
+  - **Estudiante**: Consume cursos y realiza ejercicios. Atributo específico: `cursosCompletados`.  
+  - **Creador**: Diseña y publica cursos. Atributo específico: `cursosCreados`.  
 
-- **Estadísticas**  
-  Cada usuario tiene asociadas estadísticas donde se almacenan datos de uso, tales como:
-  - Tiempo total de estudio.
-  - Racha de días consecutivos.
-  - Porcentaje de aciertos.
-
-Estas estadísticas permiten evaluar y motivar el rendimiento del estudiante.
-
----
-
-## Curso y CursoEnProgreso
-
-- **Curso:**  
-  Es la especificación general de un conjunto de contenidos y ejercicios, creado por un usuario con rol de **Creador**.  
-  Características:
-  - Contiene *Bloques* de contenido.
-  - Incluye diferentes tipos de *Preguntas*.
-
-- **CursoEnProgreso:**  
-  Se genera cuando un **Estudiante** inicia un curso.  
-  Características:
-  - Almacena información sobre el progreso del estudiante.
-  - Registra la estrategia de aprendizaje elegida.
-  - Guarda estadísticas de desempeño específicas para la experiencia en curso.
+- **Estadistica**  
+  Cada usuario tiene asociada una estadística (opcional) que registra su actividad:  
+  - `tiempoTotalUso`, `mejorRacha`, `diasConsecutivos`.  
+  - Desempeño: `preguntasCorrectas`, `preguntasIncorrectas`.  
+  - Progreso: `cursosTotales`, `cursosCompletados`, `ultimaConexion`.  
+  Esto permite evaluar el rendimiento y motivar al estudiante.
 
 ---
 
-## Bloque y Pregunta
+### Curso y Progreso del Estudiante
+- **Curso**  
+  Entidad que encapsula el contenido educativo creado por un **Creador**. Características:  
+  - Atributos: `id`, `titulo`, `dominio`.  
+  - Contiene múltiples **Bloques** que organizan el contenido.  
+  - Un curso puede ser consumido por varios **Estudiantes**.  
 
-- **Bloque:**  
-  Un curso está compuesto por múltiples bloques, que organizan el contenido en secciones.
-
-- **Pregunta:**  
-  Cada bloque contiene una o más preguntas, que pueden ser de distintos tipos, por ejemplo:
-  - Opción múltiple.
-  - Completar huecos.
-  - Flashcards.
-
-La **clase abstracta Pregunta** facilita la incorporación de nuevos formatos sin afectar la estructura base del sistema.
-
----
-## Estrategia de Aprendizaje
-
-La aplicación permite configurar diferentes estrategias de aprendizaje mediante una enumeración llamada **EstrategiaAprendizaje**, que incluye opciones como:
-- **Secuencial:** Los ejercicios se presentan en orden predefinido.
-- **Aleatoria:** Los ejercicios se muestran en orden aleatorio.
-- **Repetición Espaciada:** Se priorizan los ejercicios más difíciles, repitiéndolos con mayor frecuencia.
-
-Esto permite a los estudiantes adaptar su experiencia de aprendizaje según sus preferencias.
+- **CursoEnProgreso**  
+  Representa la experiencia activa de un **Estudiante** en un curso específico. Atributos:  
+  - `id`, `fechaInicio`, `fechaUltimaActividad`, `completado`.  
+  - Progreso: `bloqueActual`, `preguntaActual`, `contadorRepeticion`.  
+  - Desempeño: `preguntasCorrectas`, `preguntasIncorrectas`.  
+  Está vinculado a una estrategia de aprendizaje definida por el usuario.
 
 ---
 
-## Compartición y Ampliación de Cursos
+### Contenido y Ejercicios
+- **Bloque**  
+  Unidad de organización dentro de un **Curso**, con atributos:  
+  - `id`, `titulo`, `descripcion`.  
+  Cada bloque incluye una o más **Preguntas**, formando la estructura del contenido educativo.
 
-- **Compartición:**  
-  La relación entre **Usuario** y **Curso** permite que los usuarios no solo consuman contenido, sino que también lo generen y compartan con otros.
-
-- **Ampliación:**  
-  La arquitectura basada en clases abstractas y modularidad garantiza que el sistema pueda ampliarse con nuevos tipos de ejercicios y funcionalidades sin afectar la estructura existente.
+- **Pregunta**  
+  Clase abstracta que representa un ejercicio dentro de un **Bloque**. Atributos:  
+  - `id`, `enunciado`.  
+  Tipos específicos:  
+  - **PreguntaMultipleChoice**: `opciones`, `respuestaCorrecta`.  
+  - **PreguntaFillInBlank**: `respuestaCorrectaTexto`.  
+  - **PreguntaFlashCard**: `respuestaFlashCard`.  
+  La abstracción permite incorporar nuevos formatos de preguntas sin modificar la estructura base.
 
 ---
 
+### Estrategia de Aprendizaje
+- **Estrategia**  
+  Enumeración que define el enfoque de aprendizaje en un **CursoEnProgreso**:  
+  - **Secuencial**: Preguntas en orden predefinido.  
+  - **Aleatorio**: Preguntas en orden aleatorio.  
+  - **Repeticion_Espaciada**: Prioriza preguntas difíciles con repeticiones frecuentes.  
+  Esto permite personalizar la experiencia de aprendizaje según las necesidades del estudiante.
+
+---
+
+## Relaciones y Funcionalidades
+
+- **Creación y Consumo de Contenido**  
+  - Un **Creador** puede crear múltiples **Cursos**, mientras que un **Curso** tiene un único creador.  
+  - Un **Estudiante** se inscribe en uno o más **Cursos**, y un **Curso** puede tener varios estudiantes inscritos.  
+  - Los **Estudiantes** pueden seguir a **Creadores** para descubrir nuevos cursos.
+
+- **Progreso y Evaluación**  
+  - Cada **Usuario** puede tener varios **CursosEnProgreso**, que registran su avance en un **Curso** específico.  
+  - Las **Estadisticas** proporcionan una visión general del desempeño del usuario en la aplicación.
+
+- **Extensibilidad**  
+  La arquitectura basada en clases abstractas (e.g., **Pregunta**) y relaciones bien definidas asegura que el sistema pueda incorporar nuevos tipos de ejercicios y funcionalidades sin afectar la estructura existente.
+
+---
 
 ## Resumen
 
-Este modelo aborda:
-- La diferenciación entre la **definición** y la **ejecución** de un curso.
-- La gestión del progreso y las estadísticas del usuario.
-- La configuración flexible de estrategias de aprendizaje.
+Este modelo de dominio:  
+- Diferencia claramente entre la definición estática de un **Curso** y su ejecución dinámica en **CursoEnProgreso**.  
+- Gestiona el progreso, estadísticas y preferencias del usuario de forma estructurada.  
+- Ofrece flexibilidad para personalizar estrategias de aprendizaje y ampliar el sistema.  
 
-Todo ello se alinea con los requisitos descritos en el enunciado, ofreciendo una base sólida para el desarrollo y evolución futura de la aplicación.
+La estructura presentada se alinea con los requisitos del enunciado, proporcionando una base sólida para el desarrollo y evolución futura de la aplicación.
 
 ---
 
-# Modelo de dominio UML
-![modelo-v2](https://github.com/user-attachments/assets/2f668b27-db30-49cf-92b6-c54244cf7f3f)
-
+## Modelo de Dominio UML
+![modelo1](https://github.com/user-attachments/assets/3f558a4d-cccd-40f0-9d87-2fe527df73b7)
