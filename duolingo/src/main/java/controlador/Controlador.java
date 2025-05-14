@@ -54,7 +54,9 @@ public class Controlador {
         }
         return instancia;
     }
-    
+    //--------------------------------------
+    // CDU 1: INICIAR SESIÓN (USUARIO)
+    //--------------------------------------
     // Modificación en login para asignar el usuario actual
     public Usuario login(String email, String password) {
         Usuario usuario = repoUsuarios.buscarPorEmail(email);
@@ -82,6 +84,9 @@ public class Controlador {
         return usuarioActual;
     }
     
+    //------------------------------------
+    // CDU 5: IMPORTAR CURSO (CREADOR)
+    //------------------------------------
     public boolean cargarCursoDesdeArchivo(String rutaArchivo) {
         EntityManager em = usuarioDAO.getEntityManager();
         try {
@@ -181,6 +186,9 @@ public class Controlador {
      * @param notificacionesNuevosCursos Preferencia de notificaciones de nuevos cursos
      * @return true si la actualización fue exitosa, false si los datos son inválidos o hay un error
      */
+    //-------------------------------------------------
+    // CDU 9: GESTIONAR PERFIL DE USUARIO (USUARIO)
+    //-------------------------------------------------
     public boolean actualizarPerfil(String nombre, String email, String password, String idiomaPreferido,
                                     boolean recordatorioDiario, boolean actualizacionesProgreso, 
                                     boolean notificacionesNuevosCursos) {
@@ -253,7 +261,9 @@ public class Controlador {
         usuarioDAO.registrar(usuario);
         return true;
     }
-    
+    //-----------------------------------
+    // CDU 2: REGISTRAR USUARIO ESTUDIANTE (ESTUDIANTE)
+    //-----------------------------------
     // Método nuevo para crear estudiantes
     public Estudiante crearEstudiante(String nombre, String email, String password) {
         Estudiante estudiante = new Estudiante(nombre, email, password);
@@ -263,6 +273,9 @@ public class Controlador {
         return null;
     }
     
+    //---------------------------------------------
+    // CDU 3: REGISTRAR USUARIO CREADOR (CREADOR)
+    //---------------------------------------------
     // Método nuevo para crear creadores
     public Creador crearCreador(String nombre, String email, String password) {
         Creador creador = new Creador(nombre, email, password);
@@ -282,6 +295,10 @@ public class Controlador {
     }
     
     // Método modificado para iniciar un curso (solo para estudiantes)
+    // ---------------------------------
+    // CDU 7: EMPEZAR CURSO (ESTUDIANTE)
+    // CDU 8: CONFIGURAR ESTRATEGIA DE APRENDIZAJE (ESTUDIANTE)
+    // ---------------------------------
     public boolean iniciarCurso(Curso curso, Estrategia estrategia) {
         if (!puedeRealizarCursos()) {
             System.err.println("Error: Solo los estudiantes pueden realizar cursos");
@@ -647,6 +664,9 @@ public class Controlador {
      * @param curso El curso en el que inscribirse
      * @return true si la inscripción fue exitosa, false en caso contrario
      */
+    //-------------------------------------------
+    // CDU 6: INSCRIBIRSE A UN CURSO (ESTUDIANTE)
+    //-------------------------------------------
     public boolean inscribirEnCurso(Curso curso) {
         if (usuarioActual == null || curso == null || !(usuarioActual instanceof Estudiante)) {
             return false;
@@ -681,6 +701,7 @@ public class Controlador {
      * @param progreso El progreso existente del curso
      * @return true si se reanudó correctamente, false en caso contrario
      */
+    
     public boolean reanudarCurso(Curso curso, CursoEnProgreso progreso) {
         if (curso == null || progreso == null) {
             return false;
@@ -761,6 +782,9 @@ public class Controlador {
      * @param creador El creador a seguir
      * @return true si se siguió correctamente, false en caso contrario
      */
+    //--------------------------------
+    // CDU 4: SEGUIR A UN CREADOR (ESTUDIANTE) (AÑADIDA POR NOSOTROS) 
+    //---------------------------------
     public boolean seguirCreador(Usuario creador) {
         if (usuarioActual == null || !usuarioActual.esEstudiante() || !creador.esCreador()) {
             return false;
