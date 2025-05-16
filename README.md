@@ -35,7 +35,7 @@ El objetivo principal es proporcionar una plataforma flexible y extensible que f
 ---
 
 ## 🗂️ Estructura del Repositorio
-
+* [`java`](java) → Proyecto Maven del proyecto.
 * [`casos_de_uso.md`](requisitos/casos_de_uso.md) → Descripción detallada de los casos de uso.
 * [`modelo_de_dominio.md`](diseño/modelo_de_dominio.md) → Estructura y componentes del modelo de dominio.
 * [`manualUsuario.md`](documentacion/manualUsuario.md) → Memoria del proyecto, manual de usuario y descripción de las ventanas.
