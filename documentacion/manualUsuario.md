@@ -30,7 +30,7 @@ Al iniciar la aplicación, encontrarás la opción de **crear una cuenta nueva**
 2. Haz clic en **Registrar**.  
 3. Si los datos son válidos, se creará tu cuenta y podrás acceder a la aplicación.
 
-![Registro](imagenes/registro.png)
+![Registro](../imagenes/registro.png)
 
 ---
 
@@ -42,7 +42,7 @@ Si ya tienes una cuenta:
 
 En caso de error, verifica tus credenciales o usa la opción de recuperación de contraseña.
 
-![Login](imagenes/login.png)
+![Login](../imagenes/login.png)
 
 ---
 
@@ -54,7 +54,7 @@ Tras iniciar sesión, accederás a la **pantalla principal** donde podrás:
 - Consultar tus estadísticas.  
 - Ver tu progreso y racha.
 
-![Pantalla Principal](imagenes/principal.png)
+![Pantalla Principal](../imagenes/principal.png)
 
 ---
 
@@ -67,7 +67,7 @@ Al elegir un curso, podrás seleccionar la **estrategia de aprendizaje**:
 
 Cada curso presentará las preguntas de acuerdo con la estrategia elegida.
 
-![Pantalla Cursos](imagenes/cursos2.png)
+![Pantalla Cursos](../imagenes/cursos2.png)
 ---
 
 ## ❓ Tipos de Preguntas
@@ -79,11 +79,11 @@ Actualmente la aplicación incluye al menos **3 tipos de preguntas**:
 
 Es posible añadir nuevos tipos de preguntas de forma modular.
 
-![Pantalla Preguntas](imagenes/preguntas.png)
-![Pantalla Preguntas1](imagenes/preguntas1.png)
-![Pantalla Preguntas2](imagenes/preguntas2.png)
-![Pantalla Preguntas3](imagenes/preguntas3.png)
-![Pantalla Preguntas4](imagenes/preguntas4.png)
+![Pantalla Preguntas](../imagenes/preguntas.png)
+![Pantalla Preguntas1](../imagenes/preguntas1.png)
+![Pantalla Preguntas2](../imagenes/preguntas2.png)
+![Pantalla Preguntas3](../imagenes/preguntas3.png)
+![Pantalla Preguntas4](../imagenes/preguntas4.png)
 ---
 
 ## 💾 Guardado y Reanudación
@@ -103,9 +103,9 @@ La aplicación lleva un seguimiento de tu rendimiento, incluyendo:
 
 Puedes visualizar estas estadísticas desde la pantalla principal.
 
-![Pantalla Estadisticas](imagenes/estadisticas.png)
-![Pantalla Estadisticas1](imagenes/estadisticas1.png)
-![Pantalla Estadisticas1](imagenes/estadisticas2.png)
+![Pantalla Estadisticas](../imagenes/estadisticas.png)
+![Pantalla Estadisticas1](../imagenes/estadisticas1.png)
+![Pantalla Estadisticas1](../imagenes/estadisticas2.png)
 
 ---
 
@@ -120,7 +120,7 @@ Allí podrás:
 
 Cuando termines de editar, haz clic en **Guardar cambios** para actualizar tu información.
 
-![Editar Perfil](imagenes/perfil.png)
+![Editar Perfil](../imagenes/perfil.png)
 
 ---
 
