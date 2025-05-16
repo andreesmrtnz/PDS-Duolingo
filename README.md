@@ -21,9 +21,10 @@ El sistema está diseñado para ser flexible y extensible, permitiendo la incorp
 
 ## 🗂️ Estructura del Repositorio
 
-- [`casos_de_uso.md`](casos_de_uso.md) → Descripción detallada de los casos de uso.
-- [`modelo_de_dominio.md`](modelo_de_dominio.md) → Estructura y componentes del modelo de dominio.
-- [`README.md`](README.md) → Este archivo, con la explicación general del proyecto y su estructura.
+- [`casos_de_uso.md`](casos_de_uso.md) → Descripción detallada de los casos de uso.  
+- [`modelo_de_dominio.md`](modelo_de_dominio.md) → Estructura y componentes del modelo de dominio.  
+- [`manualUsuario.md`](manualUsuario.md) → Memoria del proyecto, manual de usuario y descripción de las ventanas.  
+- [`README.md`](README.md) → Explicación general del proyecto y su estructura.
 
 ---
 
